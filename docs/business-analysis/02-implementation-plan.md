@@ -362,9 +362,14 @@ dealstoker/
 ## 10. Acceptance Criteria by Phase (Testable)
 
 ### Phase 1
-- Given published product, When crawler fetches `/p/{slug}`, Then HTML contains unique title, h1, product name, CTA  
-- Given click on CTA, When `/go/{slug}` called, Then 302 to Amazon URL containing partner tag AND click_event row created  
-- Sitemap contains only PUBLISHED entities  
+- Given published product, When crawler fetches `/p/{slug}`, Then HTML contains unique title, h1, product name, CTA, brand DealStoker signals  
+- Given click on CTA, When `/go/{slug}` called, Then 302 to Amazon.com product URL AND click_event row created (partner tag included **when configured**)  
+- Sitemap contains only PUBLISHED entities with `https://dealstoker.com` absolute URLs  
+- Disclosure/Privacy/Contact pages are publicly reachable  
+
+### Phase 1.5
+- Partner tag configured → outbound URLs include Associates tag  
+- Existing products updated without manual URL rewrite per item  
 
 ### Phase 2
 - Given category ingest config, When job runs, Then ≤ maxItems products upserted without duplicate ASIN  
