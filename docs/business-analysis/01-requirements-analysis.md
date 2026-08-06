@@ -4,16 +4,42 @@
 | Item | Value |
 |------|-------|
 | Project | DealStoker |
+| Brand / Site Name | DealStoker |
+| Primary Domain | [dealstoker.com](https://dealstoker.com) |
+| Target Market | United States (en-US) |
+| Primary Marketplace | Amazon.com |
 | Document Type | Business Requirements Analysis |
 | Stack Target | Spring Boot (API/Jobs) + React (Web) |
-| Version | 1.0 |
-| Status | Draft for Review |
+| Version | 1.1 |
+| Status | Draft — market/brand decisions locked |
+
+---
+
+## 0. Confirmed Business Decisions
+
+| Decision | Value | Notes |
+|----------|-------|-------|
+| Brand name | **DealStoker** | 공개 UI, title 템플릿, OG site_name에 사용 |
+| Domain | **dealstoker.com** | canonical base URL: `https://dealstoker.com` |
+| Target market | **United States** | 언어 `en-US`, 통화 `USD` |
+| Amazon marketplace | **Amazon.com** | PA-API host/region/marketplace 모두 US 기준 |
+| Amazon Associates | **재신청 예정** | 과거 승인 이력 있음, 현재 자격 상실. 사이트 재구축 후 재신청 |
+| PA-API | Associates 재승인 이후 | 자격 회복 전엔 자동 수집 Job은 비활성/스텁 |
+
+**Associates 재승인 전략 (비즈니스)**  
+1. Phase 1으로 실제 콘텐츠가 있는 미국향 사이트를 `dealstoker.com`에 공개  
+2. Disclosure / Privacy / Contact 등 정책 페이지 완비  
+3. Amazon Associates(US) 재신청 — 사이트 URL로 DealStoker 제출  
+4. 승인·트래킹 태그 확보 후 어필리에이트 링크 활성화  
+5. PA-API 자격/키 발급 후 Phase 2 자동 수집 가동  
+
+자격 회복 전까지는 **수동 ASIN 등록 + (태그 없는) Amazon 상품 URL 또는 태그 플레이스홀더**로 콘텐츠/SEO를 먼저 쌓는다. 수익 링크는 태그 발급 후 일괄 치환 가능해야 한다.
 
 ---
 
 ## 1. Executive Summary
 
-DealStoker는 **카테고리 기반 어필리에이트 상품 큐레이션 사이트**이다. Amazon 등에서 “핫한” 상품을 어필리에이트 링크로 등록하고, SEO를 통해 검색 유입을 확보한 뒤 클릭/전환으로 수익을 창출한다. 초기에는 수동 등록과 자동 수집(Job)을 병행하고, 점진적으로 자동화·콘텐츠·다채널 어필리에이트로 확장한다.
+DealStoker(`dealstoker.com`)는 **미국(Amazon.com) 대상 카테고리 기반 어필리에이트 상품 큐레이션 사이트**이다. Amazon에서 “핫한” 상품을 어필리에이트 링크로 등록하고, SEO를 통해 검색 유입을 확보한 뒤 클릭/전환으로 수익을 창출한다. Associates 자격이 현재 없으므로, **사이트 재구축 → Associates 재승인 → PA-API 자동 수집** 순으로 진행한다.
 
 ### 1.1 Business Goals
 
@@ -267,20 +293,24 @@ ContentPage (optional)
 
 ## 8. External Integrations
 
-### 8.1 Amazon
+### 8.1 Amazon (US)
 
-| Item | Decision Needed |
-|------|-----------------|
-| Program | Amazon Associates |
-| Data API | Product Advertising API 5.0 (권장) |
-| Auth | Access Key / Secret / Partner Tag |
+| Item | Decision |
+|------|----------|
+| Program | Amazon Associates **US** (재신청) |
+| Store | Amazon.com |
+| Locale / Currency | en-US / USD |
+| Data API | Product Advertising API 5.0 (Associates 승인 후) |
+| Auth | Access Key / Secret / Partner Tag (발급 후 설정) |
+| Site registration URL | `https://dealstoker.com` |
 | Operations | SearchItems, GetItems, GetBrowseNodes 등 |
 | Constraints | Throttle, 캐시 정책, 어트리뷰션, 크리에이티브 가이드 |
 
-**대안/보완 (약관·자격 이슈 시)**  
-- 수동 ASIN 등록 + 딥링크 생성  
-- 허용된 피드/파트너 프로그램  
-- “링크만 등록 + 운영자 작성 콘텐츠” 모드
+**자격 공백 기간 운영 모드 (현재 적용)**  
+- 수동 ASIN 등록 + Amazon.com 상품 URL 저장  
+- `partnerTag`는 설정 가능하되, 미설정 시 비태그 링크 또는 CTA 비활성 정책 중 택1 (권장: 링크는 유지, 수익 태그 없이 출시 후 일괄 업데이트)  
+- 자동 수집 Job은 어댑터 스켈레톤만 두고 **실호출 비활성**  
+- Associates 승인 체크리스트용 최소 콘텐츠 볼륨(카테고리·상품·정책 페이지)을 Phase 1 exit criteria에 포함
 
 ### 8.2 Optional Later
 
@@ -329,23 +359,32 @@ ContentPage (optional)
 
 ## 11. Assumptions & Open Questions
 
-### 11.1 Assumptions
+### 11.1 Assumptions (updated)
 
-- 초기 타깃 마켓플레이스 1개 (예: Amazon.com 또는 Amazon.co.kr 등)  
+- 타깃은 **미국 단일 마켓** (Amazon.com, en-US, USD)  
+- 브랜드/도메인: **DealStoker / dealstoker.com**  
 - MVP는 Amazon 단일 파트너  
-- 자동 발행은 카테고리별로 on/off  
+- Associates는 재신청으로 회복 가능하다고 가정; 승인 전에도 사이트·SEO 구축은 진행  
+- 자동 발행은 카테고리별로 on/off (기본 Draft 권장)  
 - 법무/세무는 사업자 책임 영역(시스템 고지 문구만 제공)
 
-### 11.2 Open Questions (결정 필요)
+### 11.2 Resolved Questions
 
-1. 타깃 국가/마켓플레이스와 언어는?  
-2. PA-API 자격(Associates 승인, 최근 매출 요건) 확보 여부?  
-3. 자동 발행 vs Draft 검수 기본값?  
-4. 이미지 핫링크 허용 vs 자체 캐시?  
-5. SSR 방식: Next.js(React) vs Spring Thymeleaf+React hydration vs Remix 등?  
-6. Admin을 같은 React 앱에 둘지, 별도 앱으로 분리할지?  
-7. 사용자 계정(위시리스트 등) 필요 여부?  
-8. “핫”의 정의: 베스트셀러 순위, 할인율, 리뷰 급증, 수동 큐레이션?
+| # | Question | Decision |
+|---|----------|----------|
+| 1 | 타깃 국가/마켓/언어 | **US / Amazon.com / en-US** |
+| 2 | Associates / PA-API 자격 | **현재 상실 → 사이트 재구축 후 재신청**. PA-API는 승인 후 |
+| — | 사이트명 / 도메인 | **DealStoker / dealstoker.com** |
+
+### 11.3 Still Open
+
+3. 자동 발행 vs Draft 검수 기본값? (권장: Draft)  
+4. 이미지 핫링크 허용 vs 자체 캐시? (권장: MVP 핫링크)  
+5. SSR 방식: Next.js vs Spring SSR? (권장: Next.js)  
+6. Admin을 같은 웹 앱에 둘지, 별도 분리할지?  
+7. 사용자 계정(위시리스트 등) 필요 여부? (권장 MVP: 불필요)  
+8. “핫”의 정의: 베스트셀러 / 할인율 / 클릭 / 수동 핀?  
+9. Associates 승인 전 CTA 정책: 비태그 Amazon 링크 허용 vs 승인 전 CTA 숨김?
 
 ---
 
@@ -353,7 +392,8 @@ ContentPage (optional)
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| PA-API 자격/제한 | 자동수집 불가 | 수동 등록 MVP 먼저, 자격 확보 병행 |
+| Associates 재승인 지연/거절 | 수익·PA-API 지연 | Phase 1을 승인용 완성도로 구축; 태그 설정 분리; 거절 사유 대응 체크리스트 |
+| PA-API 자격/제한 | 자동수집 불가 | 수동 등록 MVP 먼저, 승인 후 Phase 2 |
 | 약관 위반(금지 클레임, 가격 오표기) | 계정 정지 | 고지, 캐시 TTL, 과장 표현 금지, 검수 게이트 |
 | Thin/Duplicate SEO | 트래픽 실패 | 카테고리 카피, 가이드 콘텐츠, canonical |
 | API Throttle | Job 실패 | 큐잉, 백오프, 우선순위 갱신 |
@@ -366,14 +406,20 @@ ContentPage (optional)
 
 ### In MVP
 
+- `dealstoker.com` 미국향 공개 사이트 (브랜드 DealStoker)  
 - 카테고리 CRUD + 공개 카테고리/상품 페이지  
-- 상품 수동 등록 + Amazon 어필리에이트 링크  
+- 상품 수동 등록 + Amazon.com URL / (승인 후) 어필리에이트 태그 주입  
 - 클릭 트래킹 리다이렉트  
 - SEO 기본(meta, sitemap, robots, JSON-LD)  
 - SSR/프리렌더 기반 공개 웹  
-- Amazon 수집 Job 1종(키워드 또는 BrowseNode) + Draft 적재  
+- Associates 재신청에 필요한 정책 페이지·콘텐츠 볼륨  
 - Admin 기본 화면  
-- Disclosure/Privacy 페이지  
+- Amazon 수집 Job은 **코드/설정 준비**, 실연동은 Associates·PA-API 승인 후  
+
+### MVP 직후 (자격 회복 시)
+
+- Partner tag 일괄 적용  
+- Amazon 수집 Job 1종(키워드 또는 BrowseNode) + Draft 적재 가동  
 
 ### Post-MVP
 

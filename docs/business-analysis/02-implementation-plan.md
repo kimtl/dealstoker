@@ -3,8 +3,10 @@
 | Item | Value |
 |------|-------|
 | Related Doc | `01-requirements-analysis.md` |
+| Brand / Domain | DealStoker / dealstoker.com |
+| Target Market | United States — Amazon.com (en-US, USD) |
 | Architecture | Spring Boot backend + React frontend |
-| Version | 1.0 |
+| Version | 1.1 |
 
 ---
 
@@ -187,28 +189,42 @@ Cron Trigger
 
 - 저장소 구조, CI, 로컬 docker-compose (Postgres)  
 - Spring Boot app skeleton + Flyway  
-- Next.js app skeleton + design tokens  
-- 환경 설정 템플릿 (`.env.example`)  
-- ADR: SSR 방식, 배포 단위, 마켓 선택  
+- Next.js app skeleton + DealStoker brand tokens  
+- 환경 설정 템플릿 (`.env.example`) — `APP_BASE_URL=https://dealstoker.com`, `AMAZON_MARKETPLACE=www.amazon.com`  
+- ADR: SSR 방식, 배포 단위 (마켓은 US로 확정)  
 
 **Exit criteria**: Hello API + Hello SSR page + DB up
 
-### Phase 1 — Catalog MVP (Manual)
-**Outcome**: 수동으로 카테고리/상품 올려 SEO 페이지 운영 가능
+### Phase 1 — Catalog MVP + Associates Re-application Ready
+**Outcome**: 수동 카탈로그로 미국향 SEO 사이트를 `dealstoker.com`에 공개하고 Associates 재신청 가능한 상태
 
-- Category/Product 스키마 + Admin API  
-- Public category/product pages (SSR)  
-- Affiliate redirect + click log  
-- robots/sitemap/basic JSON-LD  
-- Disclosure/Privacy  
+- Category/Product 스키마 + Admin API (marketplace 기본값 `amazon.com`)  
+- Public category/product pages (SSR), brand **DealStoker**  
+- Affiliate redirect + click log (`partnerTag` 설정 가능, 미설정 시에도 URL 동작)  
+- robots/sitemap/basic JSON-LD (`https://dealstoker.com` canonical)  
+- Disclosure / Privacy / Contact (US Associates 심사에 유리한 완성도)  
 - Admin UI: login, category/product CRUD, publish  
+- Partner tag를 상품 URL과 분리 저장 → 승인 후 일괄 주입  
 
-**Exit criteria**: 운영자가 상품 10개+ 카테고리 3개를 발행하고 구글 URL 검사에서 HTML 확인
+**Exit criteria**  
+- 카테고리 ≥ 3, 발행 상품 ≥ 10, 정책 페이지 공개  
+- Google URL Inspection에서 SSR HTML 확인  
+- Associates US 재신청 제출 가능 (사이트 라이브)
+
+### Phase 1.5 — Associates / PA-API Activation (gate)
+**Outcome**: 자격 회복 및 수익 링크 활성화
+
+- Amazon Associates US 재신청·승인  
+- Partner tag / PA-API 키 설정  
+- 기존 상품 URL에 태그 일괄 적용  
+- CTA/리다이렉트 검증  
+
+**Exit criteria**: 태그 포함 아웃링크 동작, Associates 리포트에서 클릭 확인 가능
 
 ### Phase 2 — Ingestion Job MVP
-**Outcome**: Amazon에서 주기 수집 → Draft/Publish
+**Outcome**: Amazon.com에서 주기 수집 → Draft/Publish (**Phase 1.5 이후**)
 
-- PA-API client + throttle  
+- PA-API client + throttle (US endpoint)  
 - Category ingest config  
 - Scheduled job + run history  
 - Quality gate + upsert  
@@ -362,28 +378,31 @@ dealstoker/
 
 ---
 
-## 11. Decision Log (to fill)
+## 11. Decision Log
 
-| ADR | Question | Options | Recommendation |
-|-----|----------|---------|----------------|
-| ADR-001 | Public rendering | Next SSR vs Spring SSR | Next SSR |
-| ADR-002 | Monorepo vs polyrepo | mono / poly | mono |
-| ADR-003 | Auto-publish default | on / off | off (Draft) |
-| ADR-004 | Image strategy | hotlink / cache | hotlink MVP → cache later |
-| ADR-005 | Marketplace | .com / .co.kr / ... | TBD by business |
-| ADR-006 | “Hot” definition | bestseller / discount / clicks | bestseller + manual pin |
+| ADR | Question | Decision | Status |
+|-----|----------|----------|--------|
+| ADR-001 | Public rendering | Next.js SSR (권장) | Proposed |
+| ADR-002 | Monorepo vs polyrepo | mono | Proposed |
+| ADR-003 | Auto-publish default | off (Draft) | Proposed |
+| ADR-004 | Image strategy | hotlink MVP → cache later | Proposed |
+| ADR-005 | Marketplace / locale | **Amazon.com / en-US / USD** | **Decided** |
+| ADR-006 | “Hot” definition | bestseller + manual pin | Proposed |
+| ADR-007 | Brand / domain | **DealStoker / dealstoker.com** | **Decided** |
+| ADR-008 | Associates status | 재신청 트랙; Phase 1 사이트 먼저, 승인 후 태그·PA-API | **Decided** |
 
 ---
 
 ## 12. Immediate Next Actions (BA → Build)
 
-1. 마켓플레이스/언어/Associates 자격 확정  
-2. ADR-001~006 결정  
-3. Phase 0 스캐폴딩 착수  
-4. 카테고리 택소노미 초안(10~30개) 작성  
-5. SEO 키워드 시드 리서치(카테고리당 primary keyword)  
-6. 브랜드 비주얼 방향(색/타이포/히어로 이미지 정책) 확정  
-7. PA-API 자격 신청/키 발급 트랙 시작  
+1. ~~마켓/브랜드/도메인 확정~~ → **US, DealStoker, dealstoker.com**  
+2. 남은 ADR(001–004, 006) 및 CTA 정책(승인 전 비태그 링크 허용 여부) 확정  
+3. Phase 0 스캐폴딩 착수 (`APP_BASE_URL=https://dealstoker.com`)  
+4. 미국향 카테고리 택소노미 초안(10~30개) 작성  
+5. en-US SEO 키워드 시드 리서치(카테고리당 primary keyword)  
+6. DealStoker 브랜드 비주얼 방향 확정  
+7. Phase 1 라이브 후 Amazon Associates US 재신청  
+8. 승인 시 partner tag + PA-API 키 설정 → Phase 2  
 
 ---
 
@@ -391,9 +410,11 @@ dealstoker/
 
 - [x] Business requirements analysis  
 - [x] Implementation plan & architecture  
-- [ ] ADR set (001+)  
-- [ ] Category taxonomy spreadsheet  
+- [x] Market/brand/Associates decisions captured  
+- [ ] ADR set (remaining)  
+- [ ] Category taxonomy spreadsheet (US)  
 - [ ] API OpenAPI draft  
 - [ ] UI wireframes (home/category/product/admin)  
-- [ ] Compliance copy (disclosure)  
+- [ ] Compliance copy (disclosure, US)  
 - [ ] Phase 0 project bootstrap  
+- [ ] Associates re-application checklist  
