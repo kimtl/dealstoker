@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { JsonLd } from "@/components/JsonLd";
-import { ProductCard } from "@/components/ProductCard";
+import { DealList } from "@/components/DealList";
 import { getProduct, getRelatedProducts } from "@/lib/api";
 import {
   formatMoney,
@@ -214,13 +214,9 @@ export default async function ProductPage({ params }: PageProps) {
         {related.length > 0 ? (
           <section className={styles.related} aria-labelledby="related-heading">
             <h2 id="related-heading" className={styles.relatedTitle}>
-              Related picks
+              Related deals
             </h2>
-            <div className={styles.relatedGrid}>
-              {related.map((item, index) => (
-                <ProductCard key={item.id} product={item} index={index} />
-              ))}
-            </div>
+            <DealList products={related} showNewBadge={false} />
           </section>
         ) : null}
       </div>

@@ -2,19 +2,19 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  backdrop-filter: blur(12px);
-  background: rgba(244, 250, 247, 0.82);
-  border-bottom: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
 }
 
 .compact {
-  border-bottom-color: var(--line);
+  box-shadow: 0 1px 0 rgba(15, 35, 55, 0.04);
 }
 
 .inner {
   max-width: var(--max);
   margin: 0 auto;
-  padding: 0.9rem 1.25rem;
+  padding: 0.7rem 1.15rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -24,22 +24,22 @@
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.55rem;
   min-width: 0;
 }
 
 .mark {
-  width: 0.85rem;
-  height: 0.85rem;
-  border-radius: 999px;
-  background: linear-gradient(140deg, var(--ember-hot), var(--ember-deep));
-  box-shadow: 0 0 0 4px rgba(232, 93, 59, 0.15);
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 3px;
+  background: linear-gradient(140deg, var(--ember-hot), var(--accent));
+  animation: pulse-dot 2.4s ease infinite;
 }
 
 .brandText {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   letter-spacing: -0.02em;
   color: var(--ink);
 }
@@ -48,19 +48,19 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 0.35rem 1rem;
+  gap: 0.2rem 0.85rem;
 }
 
 .navLink {
   color: var(--text-muted);
-  font-size: 0.92rem;
-  font-weight: 600;
-  transition: color 160ms ease;
+  font-size: 0.88rem;
+  font-weight: 700;
+  transition: color 140ms ease;
 }
 
 .navLink:hover,
 .navLink:focus-visible {
-  color: var(--ember-deep);
+  color: var(--link);
 }
 
 @media (max-width: 720px) {

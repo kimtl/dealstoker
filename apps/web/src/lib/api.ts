@@ -49,6 +49,28 @@ export async function getHome(): Promise<HomeResponse> {
   return apiFetch<HomeResponse>("/api/v1/home", { revalidate: 60 });
 }
 
+export async function getProducts(
+  params: {
+    category?: string;
+    q?: string;
+    sort?: string;
+    page?: number;
+    size?: number;
+  } = {},
+): Promise<PageResponse<ProductSummary>> {
+  const search = new URLSearchParams();
+  if (params.category) search.set("category", params.category);
+  if (params.q) search.set("q", params.q);
+  if (params.sort) search.set("sort", params.sort);
+  if (params.page !== undefined) search.set("page", String(params.page));
+  if (params.size !== undefined) search.set("size", String(params.size));
+  const qs = search.toString();
+  return apiFetch<PageResponse<ProductSummary>>(
+    `/api/v1/products${qs ? `?${qs}` : ""}`,
+    { revalidate: 60 },
+  );
+}
+
 export async function getCategories(): Promise<Category[]> {
   return apiFetch<Category[]>("/api/v1/categories", { revalidate: 120 });
 }

@@ -23,6 +23,7 @@ export type ProductSummary = {
   slug: string;
   imageUrl: string | null;
   priceAmount: number | string | null;
+  listPrice?: number | string | null;
   currency: string | null;
   rating: number | string | null;
   reviewCount: number | null;
