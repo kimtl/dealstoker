@@ -1,0 +1,27 @@
+# OS / IDE
+.DS_Store
+.idea/
+*.iml
+.vscode/
+
+# Env
+.env
+.env.local
+apps/web/.env.local
+
+# Node
+node_modules/
+apps/web/.next/
+apps/web/out/
+npm-debug.log*
+
+# Java / Gradle
+apps/api/.gradle/
+apps/api/build/
+apps/api/out/
+*.class
+*.jar
+!apps/api/gradle/wrapper/gradle-wrapper.jar
+
+# Logs
+*.log

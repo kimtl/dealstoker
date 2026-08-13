@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/dealstoker
+    username: dealstoker
+    password: dealstoker
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+dealstoker:
+  app-base-url: http://localhost:8080
+  amazon:
+    marketplace: www.amazon.com
+    partner-tag: ""
+  admin:
+    username: admin
+    password: testpass
+  cors:
+    allowed-origins: http://localhost:3000
