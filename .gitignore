@@ -13,6 +13,8 @@ apps/web/.env.local
 node_modules/
 apps/web/.next/
 apps/web/out/
+apps/web/AGENTS.md
+apps/web/CLAUDE.md
 npm-debug.log*
 
 # Java / Gradle

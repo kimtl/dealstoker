@@ -6,6 +6,9 @@ const apiBase = (process.env.API_BASE_URL || "http://localhost:8080").replace(
 );
 
 const nextConfig: NextConfig = {
+  // Prevent next dev from regenerating AGENTS.md / CLAUDE.md in the repo.
+  // @ts-expect-error agentRules is supported by Next.js 16 tooling
+  agentRules: false,
   async rewrites() {
     return [
       {
