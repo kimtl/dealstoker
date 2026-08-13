@@ -1,0 +1,102 @@
+.main {
+  padding: 1.5rem 0 3rem;
+  animation: fade-soft 420ms ease both;
+}
+
+.inner {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  margin-bottom: 1.25rem;
+}
+
+.crumbs a:hover {
+  color: var(--ember-deep);
+}
+
+.header {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 1.75rem;
+  max-width: 46rem;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  color: var(--ink);
+  letter-spacing: -0.03em;
+}
+
+.lead {
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-size: 1.05rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.count {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.sorts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.85rem;
+}
+
+.sortLink,
+.sortActive {
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.sortLink {
+  color: var(--text-muted);
+}
+
+.sortActive {
+  color: var(--ember-deep);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 1.5rem 1.1rem;
+}
+
+.empty {
+  color: var(--text-muted);
+  padding: 2rem 0;
+}
+
+.pager {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 650;
+}
+
+.pager a:hover {
+  color: var(--ember-deep);
+}

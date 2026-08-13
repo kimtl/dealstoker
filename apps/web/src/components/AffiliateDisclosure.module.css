@@ -1,0 +1,15 @@
+.text {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.text a {
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.text a:hover {
+  color: var(--ember-deep);
+}
