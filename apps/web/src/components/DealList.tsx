@@ -6,12 +6,14 @@ type Props = {
   products: ProductSummary[];
   emptyMessage?: string;
   showNewBadge?: boolean;
+  showBuyRank?: boolean;
 };
 
 export function DealList({
   products,
   emptyMessage = "No deals yet.",
   showNewBadge = true,
+  showBuyRank = false,
 }: Props) {
   if (products.length === 0) {
     return <p className={styles.empty}>{emptyMessage}</p>;
@@ -25,6 +27,7 @@ export function DealList({
             product={product}
             index={index}
             showNewBadge={showNewBadge}
+            buyRank={showBuyRank ? index + 1 : undefined}
           />
         </div>
       ))}

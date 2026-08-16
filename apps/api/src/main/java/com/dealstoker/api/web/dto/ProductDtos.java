@@ -31,9 +31,16 @@ public final class ProductDtos {
             String brand,
             String categorySlug,
             String categoryName,
-            ProductStatus status
+            ProductStatus status,
+            boolean featured,
+            int featuredRank,
+            Long buyClickCount
     ) {
         public static ProductSummary from(Product product) {
+            return from(product, null);
+        }
+
+        public static ProductSummary from(Product product, Long buyClickCount) {
             return new ProductSummary(
                     product.getId(),
                     product.getTitle(),
@@ -47,7 +54,10 @@ public final class ProductDtos {
                     product.getBrand(),
                     product.getPrimaryCategory() != null ? product.getPrimaryCategory().getSlug() : null,
                     product.getPrimaryCategory() != null ? product.getPrimaryCategory().getName() : null,
-                    product.getStatus()
+                    product.getStatus(),
+                    product.isFeatured(),
+                    product.getFeaturedRank(),
+                    buyClickCount
             );
         }
     }
@@ -77,7 +87,9 @@ public final class ProductDtos {
             String categorySlug,
             String categoryName,
             Instant publishedAt,
-            Instant lastSyncedAt
+            Instant lastSyncedAt,
+            boolean featured,
+            int featuredRank
     ) {
         public static ProductDetail from(Product product) {
             return new ProductDetail(
@@ -105,7 +117,9 @@ public final class ProductDtos {
                     product.getPrimaryCategory() != null ? product.getPrimaryCategory().getSlug() : null,
                     product.getPrimaryCategory() != null ? product.getPrimaryCategory().getName() : null,
                     product.getPublishedAt(),
-                    product.getLastSyncedAt()
+                    product.getLastSyncedAt(),
+                    product.isFeatured(),
+                    product.getFeaturedRank()
             );
         }
     }
@@ -130,7 +144,14 @@ public final class ProductDtos {
             ProductStatus status,
             @Size(max = 255) String seoTitle,
             @Size(max = 500) String seoDescription,
-            @NotNull Long primaryCategoryId
+            @NotNull Long primaryCategoryId,
+            Boolean featured,
+            Integer featuredRank
+    ) {}
+
+    public record FeatureRequest(
+            Boolean featured,
+            Integer featuredRank
     ) {}
 
     public record PageResponse<T>(

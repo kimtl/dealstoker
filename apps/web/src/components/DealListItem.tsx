@@ -8,12 +8,14 @@ type Props = {
   product: ProductSummary;
   index?: number;
   showNewBadge?: boolean;
+  buyRank?: number;
 };
 
 export function DealListItem({
   product,
   index = 0,
   showNewBadge = true,
+  buyRank,
 }: Props) {
   const price = formatMoney(product.priceAmount, product.currency);
   const listPrice = formatMoney(product.listPrice, product.currency);
@@ -32,6 +34,12 @@ export function DealListItem({
       style={{ animationDelay: `${delay}ms` }}
     >
       <Link href={`/p/${product.slug}`} className={styles.link}>
+        {buyRank ? (
+          <span className={styles.rank} aria-label={`Rank ${buyRank}`}>
+            #{buyRank}
+          </span>
+        ) : null}
+
         <div className={styles.thumb}>
           {product.imageUrl ? (
             <Image
@@ -49,6 +57,9 @@ export function DealListItem({
         <div className={styles.main}>
           <div className={styles.titleRow}>
             {showNewBadge ? <span className={styles.badge}>New</span> : null}
+            {product.featured ? (
+              <span className={styles.badgeFeatured}>Pick</span>
+            ) : null}
             <h3 className={styles.title}>{product.title}</h3>
           </div>
 
@@ -60,6 +71,12 @@ export function DealListItem({
             {rating ? (
               <span className={styles.rating}>
                 {rating}★{reviews ? ` · ${reviews}` : ""}
+              </span>
+            ) : null}
+            {product.buyClickCount != null ? (
+              <span className={styles.buys}>
+                {product.buyClickCount} buy
+                {product.buyClickCount === 1 ? "" : "s"}
               </span>
             ) : null}
           </div>

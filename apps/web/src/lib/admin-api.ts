@@ -148,6 +148,16 @@ export async function adminUnpublishProduct(
   });
 }
 
+export async function adminFeatureProduct(
+  id: number,
+  body: { featured: boolean; featuredRank?: number | null } = { featured: true },
+): Promise<ProductDetail> {
+  return adminFetch(`/api/v1/admin/products/${id}/feature`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
 export async function adminDeleteProduct(id: number): Promise<void> {
   await adminFetch(`/api/v1/admin/products/${id}`, { method: "DELETE" });
 }

@@ -31,6 +31,9 @@ export type ProductSummary = {
   categorySlug: string | null;
   categoryName: string | null;
   status: ProductStatus;
+  featured?: boolean;
+  featuredRank?: number;
+  buyClickCount?: number | null;
 };
 
 export type ProductDetail = {
@@ -59,6 +62,8 @@ export type ProductDetail = {
   categoryName: string | null;
   publishedAt: string | null;
   lastSyncedAt: string | null;
+  featured?: boolean;
+  featuredRank?: number;
 };
 
 export type PageResponse<T> = {
@@ -71,6 +76,9 @@ export type PageResponse<T> = {
 
 export type HomeResponse = {
   categories: Category[];
+  recommendedDeals?: ProductSummary[];
+  topBuyDeals?: ProductSummary[];
+  latestDeals?: ProductSummary[];
   featuredProducts: ProductSummary[];
 };
 
@@ -106,4 +114,6 @@ export type ProductRequest = {
   seoTitle?: string;
   seoDescription?: string;
   primaryCategoryId: number;
+  featured?: boolean;
+  featuredRank?: number;
 };

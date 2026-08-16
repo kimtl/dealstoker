@@ -3,11 +3,13 @@ package com.dealstoker.api.service;
 import com.dealstoker.api.domain.Category;
 import com.dealstoker.api.domain.Product;
 import com.dealstoker.api.domain.ProductStatus;
+import com.dealstoker.api.repository.ClickEventRepository;
 import com.dealstoker.api.repository.ProductRepository;
 import com.dealstoker.api.util.Slugify;
 import com.dealstoker.api.web.ApiExceptionHandler.ConflictException;
 import com.dealstoker.api.web.ApiExceptionHandler.NotFoundException;
 import com.dealstoker.api.web.dto.ProductDtos;
+import com.dealstoker.api.web.dto.ProductDtos.FeatureRequest;
 import com.dealstoker.api.web.dto.ProductDtos.PageResponse;
 import com.dealstoker.api.web.dto.ProductDtos.ProductDetail;
 import com.dealstoker.api.web.dto.ProductDtos.ProductRequest;
@@ -20,16 +22,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryService categoryService;
+    private final ClickEventRepository clickEventRepository;
 
-    public ProductService(ProductRepository productRepository, CategoryService categoryService) {
+    public ProductService(
+            ProductRepository productRepository,
+            CategoryService categoryService,
+            ClickEventRepository clickEventRepository
+    ) {
         this.productRepository = productRepository;
         this.categoryService = categoryService;
+        this.clickEventRepository = clickEventRepository;
     }
 
     @Transactional(readOnly = true)
@@ -104,6 +114,36 @@ public class ProductService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<ProductSummary> recommendedPublished(int limit) {
+        return productRepository
+                .findTop5ByStatusAndFeaturedTrueOrderByFeaturedRankAscPublishedAtDesc(ProductStatus.PUBLISHED)
+                .stream()
+                .limit(limit)
+                .map(ProductSummary::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductSummary> topBuyPublished(int limit) {
+        List<Product> products = productRepository.findTopByBuyClicks(
+                ProductStatus.PUBLISHED.name(),
+                Math.max(1, Math.min(limit, 20))
+        );
+        if (products.isEmpty()) {
+            return List.of();
+        }
+        List<Long> ids = products.stream().map(Product::getId).toList();
+        Map<Long, Long> counts = clickEventRepository.countByProductIds(ids).stream()
+                .collect(Collectors.toMap(
+                        row -> ((Number) row[0]).longValue(),
+                        row -> ((Number) row[1]).longValue()
+                ));
+        return products.stream()
+                .map(product -> ProductSummary.from(product, counts.getOrDefault(product.getId(), 0L)))
+                .toList();
+    }
+
     @Transactional
     public ProductDetail create(ProductRequest request) {
         Product product = new Product();
@@ -133,6 +173,21 @@ public class ProductService {
     public ProductDetail unpublish(Long id) {
         Product product = requireById(id);
         product.setStatus(ProductStatus.UNPUBLISHED);
+        return ProductDetail.from(productRepository.save(product));
+    }
+
+    @Transactional
+    public ProductDetail updateFeatured(Long id, FeatureRequest request) {
+        Product product = requireById(id);
+        if (request.featured() != null) {
+            product.setFeatured(request.featured());
+        }
+        if (request.featuredRank() != null) {
+            product.setFeaturedRank(Math.max(0, request.featuredRank()));
+        }
+        if (product.isFeatured() && product.getFeaturedRank() == 0) {
+            product.setFeaturedRank(100);
+        }
         return ProductDetail.from(productRepository.save(product));
     }
 
@@ -188,6 +243,11 @@ public class ProductService {
         product.setSeoDescription(request.seoDescription());
         product.setPrimaryCategory(category);
         product.setStatus(status);
+        product.setFeatured(Boolean.TRUE.equals(request.featured()));
+        product.setFeaturedRank(request.featuredRank() != null ? Math.max(0, request.featuredRank()) : 0);
+        if (product.isFeatured() && product.getFeaturedRank() == 0) {
+            product.setFeaturedRank(100);
+        }
         if (status == ProductStatus.PUBLISHED) {
             validatePublishable(product);
             if (product.getPublishedAt() == null) {

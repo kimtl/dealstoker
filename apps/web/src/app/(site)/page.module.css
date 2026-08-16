@@ -147,6 +147,12 @@
   animation: slide-feed 560ms ease both;
 }
 
+.feedStack {
+  display: grid;
+  gap: 1.35rem;
+  min-width: 0;
+}
+
 .feedHeader {
   display: flex;
   align-items: end;
@@ -185,6 +191,49 @@
   border-radius: 999px;
   background: var(--price);
   animation: pulse-dot 1.8s ease infinite;
+}
+
+.pill,
+.pillHot {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.6rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pill {
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+.pillHot {
+  background: rgba(232, 93, 59, 0.14);
+  color: var(--ember-deep);
+}
+
+.jumpNav {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0 0 1rem;
+}
+
+.jumpNav a {
+  display: block;
+  padding: 0.35rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.jumpNav a:hover {
+  background: var(--row-hover);
+  color: var(--link);
 }
 
 @media (max-width: 860px) {
