@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   adminDeleteProduct,
+  adminFeatureProduct,
   adminListProducts,
   adminPublishProduct,
   adminUnpublishProduct,
@@ -44,6 +45,18 @@ export default function AdminProductsPage() {
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Publish action failed");
+    }
+  }
+
+  async function toggleFeature(product: ProductSummary) {
+    try {
+      await adminFeatureProduct(product.id, {
+        featured: !product.featured,
+        featuredRank: product.featured ? 0 : product.featuredRank || 100,
+      });
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Feature action failed");
     }
   }
 
@@ -93,6 +106,7 @@ export default function AdminProductsPage() {
               <th>Title</th>
               <th>Category</th>
               <th>Status</th>
+              <th>Featured</th>
               <th>Price</th>
               <th />
             </tr>
@@ -108,6 +122,11 @@ export default function AdminProductsPage() {
                 <td>{product.categoryName || "—"}</td>
                 <td>{product.status}</td>
                 <td>
+                  {product.featured
+                    ? `Yes (#${product.featuredRank ?? "—"})`
+                    : "No"}
+                </td>
+                <td>
                   {product.priceAmount != null
                     ? `${product.currency || "USD"} ${product.priceAmount}`
                     : "—"}
@@ -120,6 +139,13 @@ export default function AdminProductsPage() {
                     >
                       Edit
                     </Link>
+                    <button
+                      type="button"
+                      className={styles.buttonSecondary}
+                      onClick={() => toggleFeature(product)}
+                    >
+                      {product.featured ? "Unfeature" : "Feature"}
+                    </button>
                     <button
                       type="button"
                       className={styles.button}

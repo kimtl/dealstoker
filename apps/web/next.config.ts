@@ -34,6 +34,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images-eu.ssl-images-amazon.com",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
     ],
   },
 };

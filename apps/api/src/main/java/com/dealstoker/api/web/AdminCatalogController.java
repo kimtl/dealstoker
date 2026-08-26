@@ -5,6 +5,7 @@ import com.dealstoker.api.service.CategoryService;
 import com.dealstoker.api.service.ProductService;
 import com.dealstoker.api.web.dto.CategoryDtos.CategoryRequest;
 import com.dealstoker.api.web.dto.CategoryDtos.CategoryResponse;
+import com.dealstoker.api.web.dto.ProductDtos.FeatureRequest;
 import com.dealstoker.api.web.dto.ProductDtos.PageResponse;
 import com.dealstoker.api.web.dto.ProductDtos.ProductDetail;
 import com.dealstoker.api.web.dto.ProductDtos.ProductRequest;
@@ -93,6 +94,15 @@ public class AdminCatalogController {
     @PostMapping("/products/{id}/unpublish")
     public ProductDetail unpublish(@PathVariable Long id) {
         return productService.unpublish(id);
+    }
+
+    @PostMapping("/products/{id}/feature")
+    public ProductDetail feature(@PathVariable Long id, @RequestBody(required = false) FeatureRequest request) {
+        FeatureRequest body = request != null ? request : new FeatureRequest(true, null);
+        if (body.featured() == null) {
+            body = new FeatureRequest(true, body.featuredRank());
+        }
+        return productService.updateFeatured(id, body);
     }
 
     @DeleteMapping("/products/{id}")

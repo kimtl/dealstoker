@@ -93,6 +93,12 @@ public class Product {
     @Column(name = "last_synced_at")
     private Instant lastSyncedAt;
 
+    @Column(name = "is_featured", nullable = false)
+    private boolean featured = false;
+
+    @Column(name = "featured_rank", nullable = false)
+    private int featuredRank = 0;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -289,6 +295,22 @@ public class Product {
 
     public void setLastSyncedAt(Instant lastSyncedAt) {
         this.lastSyncedAt = lastSyncedAt;
+    }
+
+    public boolean isFeatured() {
+        return featured;
+    }
+
+    public void setFeatured(boolean featured) {
+        this.featured = featured;
+    }
+
+    public int getFeaturedRank() {
+        return featuredRank;
+    }
+
+    public void setFeaturedRank(int featuredRank) {
+        this.featuredRank = featuredRank;
     }
 
     public Instant getCreatedAt() {

@@ -1,137 +1,182 @@
 import Link from "next/link";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
-import { ProductCard } from "@/components/ProductCard";
-import { getHome } from "@/lib/api";
+import { DealList } from "@/components/DealList";
+import { getHome, getProducts } from "@/lib/api";
 import { buildMetadata } from "@/lib/metadata";
 import { SITE_NAME } from "@/lib/site";
+import type { ProductSummary } from "@/lib/types";
 import styles from "./page.module.css";
 
 export const metadata = buildMetadata({
-  title: `${SITE_NAME} — Curated Amazon Deals for US Shoppers`,
+  title: `${SITE_NAME} — Frontpage Deals for US Shoppers`,
   description:
-    "Hand-picked Amazon.com deals for home, electronics, and outdoor living. Shop smarter with DealStoker.",
+    "A Slickdeals-style list of curated Amazon.com deals for home, electronics, and outdoor living.",
   path: "/",
 });
 
 export default async function HomePage() {
   let categories: Awaited<ReturnType<typeof getHome>>["categories"] = [];
-  let featuredProducts: Awaited<
-    ReturnType<typeof getHome>
-  >["featuredProducts"] = [];
+  let recommended: ProductSummary[] = [];
+  let topBuys: ProductSummary[] = [];
+  let deals: ProductSummary[] = [];
 
   try {
-    const home = await getHome();
+    const [home, products] = await Promise.all([
+      getHome(),
+      getProducts({ sort: "newest", page: 0, size: 40 }),
+    ]);
     categories = home.categories ?? [];
-    featuredProducts = home.featuredProducts ?? [];
+    recommended = home.recommendedDeals ?? [];
+    topBuys = home.topBuyDeals ?? [];
+    deals = home.latestDeals ?? products.items ?? home.featuredProducts ?? [];
   } catch {
-    // API may be offline during build/preview; page still renders.
+    try {
+      const home = await getHome();
+      categories = home.categories ?? [];
+      recommended = home.recommendedDeals ?? [];
+      topBuys = home.topBuyDeals ?? [];
+      deals = home.latestDeals ?? home.featuredProducts ?? [];
+    } catch {
+      // API may be offline during build/preview.
+    }
   }
 
   return (
-    <main>
-      <section className={styles.hero} aria-labelledby="hero-brand">
-        <div className={styles.heroAtmosphere} aria-hidden />
-        <div className={styles.heroInner}>
-          <p id="hero-brand" className={styles.brand}>
-            {SITE_NAME}
-          </p>
-          <h1 className={styles.headline}>
-            Amazon picks worth the click — curated for US shoppers.
-          </h1>
-          <p className={styles.support}>
-            Practical products across home, electronics, and outdoor gear.
-            Fewer tabs. Clearer choices.
-          </p>
-          <div className={styles.ctaGroup}>
-            <Link href="/c/home-kitchen" className={styles.ctaPrimary}>
-              Browse deals
-            </Link>
-            <Link href="/about" className={styles.ctaSecondary}>
-              How we curate
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className={styles.section} aria-labelledby="categories-heading">
-        <div className={styles.sectionInner}>
-          <h2 id="categories-heading" className={styles.sectionTitle}>
-            Shop by category
-          </h2>
-          <p className={styles.sectionLead}>
-            Start with a lane — then dig into the products we actually stand
-            behind.
-          </p>
-          <ul className={styles.categoryList}>
-            {categories.length > 0 ? (
-              categories.map((category, index) => (
-                <li
-                  key={category.id}
-                  className={styles.categoryItem}
-                  style={{ animationDelay: `${index * 60}ms` }}
-                >
-                  <Link href={`/c/${category.slug}`}>
-                    <span className={styles.categoryName}>{category.name}</span>
-                    <span className={styles.categoryDesc}>
-                      {category.description}
-                    </span>
-                  </Link>
-                </li>
-              ))
-            ) : (
-              <>
-                <li className={styles.categoryItem}>
-                  <Link href="/c/home-kitchen">
-                    <span className={styles.categoryName}>Home & Kitchen</span>
-                    <span className={styles.categoryDesc}>
-                      Everyday essentials that earn counter space.
-                    </span>
-                  </Link>
-                </li>
-                <li className={styles.categoryItem}>
-                  <Link href="/c/electronics">
-                    <span className={styles.categoryName}>Electronics</span>
-                    <span className={styles.categoryDesc}>
-                      Reliable tech with strong ratings and real value.
-                    </span>
-                  </Link>
-                </li>
-                <li className={styles.categoryItem}>
-                  <Link href="/c/outdoor-sports">
-                    <span className={styles.categoryName}>Outdoor & Sports</span>
-                    <span className={styles.categoryDesc}>
-                      Gear for weekends, workouts, and the trail.
-                    </span>
-                  </Link>
-                </li>
-              </>
-            )}
-          </ul>
-        </div>
-      </section>
-
-      {featuredProducts.length > 0 ? (
-        <section className={styles.section} aria-labelledby="featured-heading">
-          <div className={styles.sectionInner}>
-            <h2 id="featured-heading" className={styles.sectionTitle}>
-              Featured picks
-            </h2>
-            <p className={styles.sectionLead}>
-              Recent curated products live on Amazon.com.
+    <main className={styles.main}>
+      <section className={styles.masthead} aria-labelledby="hero-brand">
+        <div className={styles.mastheadInner}>
+          <div className={styles.brandBlock}>
+            <p id="hero-brand" className={styles.brand}>
+              {SITE_NAME}
             </p>
-            <AffiliateDisclosure className={styles.disclosure} />
-            <div className={styles.productGrid}>
-              {featuredProducts.map((product, index) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  index={index}
-                />
-              ))}
-            </div>
+            <h1 className={styles.headline}>Frontpage deals</h1>
+            <p className={styles.support}>
+              Curated Amazon.com picks in a clean deal list — price first, less
+              noise.
+            </p>
           </div>
-        </section>
-      ) : null}
+          <div className={styles.ctaGroup}>
+            <Link href="#recommended" className={styles.ctaPrimary}>
+              Staff picks
+            </Link>
+            <Link href="#deal-feed" className={styles.ctaSecondary}>
+              All deals
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <div className={styles.shell}>
+        <aside className={styles.sidebar} aria-label="Categories">
+          <h2 className={styles.sideTitle}>Categories</h2>
+          <ul className={styles.catList}>
+            {(categories.length > 0
+              ? categories
+              : [
+                  {
+                    id: 1,
+                    slug: "home-kitchen",
+                    name: "Home & Kitchen",
+                  },
+                  {
+                    id: 2,
+                    slug: "electronics",
+                    name: "Electronics",
+                  },
+                  {
+                    id: 3,
+                    slug: "outdoor-sports",
+                    name: "Outdoor & Sports",
+                  },
+                ]
+            ).map((category) => (
+              <li key={category.id}>
+                <Link href={`/c/${category.slug}`}>{category.name}</Link>
+              </li>
+            ))}
+          </ul>
+          <nav className={styles.jumpNav} aria-label="Frontpage sections">
+            <a href="#recommended">Recommended</a>
+            <a href="#top-buys">Top buys</a>
+            <a href="#deal-feed">Latest</a>
+          </nav>
+          <AffiliateDisclosure className={styles.sideDisclosure} />
+        </aside>
+
+        <div className={styles.feedStack}>
+          <section
+            id="recommended"
+            className={styles.feed}
+            aria-labelledby="recommended-heading"
+          >
+            <div className={styles.feedHeader}>
+              <div>
+                <h2 id="recommended-heading" className={styles.feedTitle}>
+                  Staff recommended
+                </h2>
+                <p className={styles.feedMeta}>
+                  Hand-picked by DealStoker · up to 5 deals
+                </p>
+              </div>
+              <span className={styles.pill}>Curated</span>
+            </div>
+            <DealList
+              products={recommended}
+              showNewBadge={false}
+              emptyMessage="No recommended deals yet. Mark products as featured in Admin."
+            />
+          </section>
+
+          <section
+            id="top-buys"
+            className={styles.feed}
+            aria-labelledby="top-buys-heading"
+          >
+            <div className={styles.feedHeader}>
+              <div>
+                <h2 id="top-buys-heading" className={styles.feedTitle}>
+                  Top buys
+                </h2>
+                <p className={styles.feedMeta}>
+                  Most /go click-throughs · top 5
+                </p>
+              </div>
+              <span className={styles.pillHot}>Trending</span>
+            </div>
+            <DealList
+              products={topBuys}
+              showNewBadge={false}
+              showBuyRank
+              emptyMessage="No buy clicks yet. Rankings appear after shoppers use View on Amazon."
+            />
+          </section>
+
+          <section
+            id="deal-feed"
+            className={styles.feed}
+            aria-labelledby="feed-heading"
+          >
+            <div className={styles.feedHeader}>
+              <div>
+                <h2 id="feed-heading" className={styles.feedTitle}>
+                  Latest deals
+                </h2>
+                <p className={styles.feedMeta}>
+                  {deals.length} live pick{deals.length === 1 ? "" : "s"} · Amazon
+                </p>
+              </div>
+              <span className={styles.live}>
+                <span className={styles.liveDot} aria-hidden />
+                Updated
+              </span>
+            </div>
+            <DealList
+              products={deals}
+              emptyMessage="No published deals yet. Check back soon."
+            />
+          </section>
+        </div>
+      </div>
     </main>
   );
 }

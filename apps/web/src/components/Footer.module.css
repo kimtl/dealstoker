@@ -1,7 +1,7 @@
 .footer {
-  margin-top: 4rem;
+  margin-top: 3rem;
   border-top: 1px solid var(--line);
-  background: linear-gradient(180deg, transparent, rgba(7, 21, 18, 0.04));
+  background: var(--white);
 }
 
 .inner {
@@ -37,7 +37,7 @@
 
 .links a:hover,
 .links a:focus-visible {
-  color: var(--ember-deep);
+  color: var(--link);
 }
 
 .disclosure,

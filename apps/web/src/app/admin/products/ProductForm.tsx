@@ -31,6 +31,8 @@ type FormState = {
   seoTitle: string;
   seoDescription: string;
   primaryCategoryId: string;
+  featured: boolean;
+  featuredRank: string;
 };
 
 function toForm(product?: ProductDetail | null): FormState {
@@ -60,6 +62,9 @@ function toForm(product?: ProductDetail | null): FormState {
       product?.primaryCategoryId != null
         ? String(product.primaryCategoryId)
         : "",
+    featured: Boolean(product?.featured),
+    featuredRank:
+      product?.featuredRank != null ? String(product.featuredRank) : "100",
   };
 }
 
@@ -130,6 +135,10 @@ export function ProductForm({ product }: Props) {
       seoTitle: form.seoTitle.trim() || undefined,
       seoDescription: form.seoDescription.trim() || undefined,
       primaryCategoryId: Number(form.primaryCategoryId),
+      featured: form.featured,
+      featuredRank: form.featured
+        ? (parseOptionalNumber(form.featuredRank) ?? 100)
+        : 0,
     };
 
     try {
@@ -210,6 +219,40 @@ export function ProductForm({ product }: Props) {
             <option value="OUTDATED">OUTDATED</option>
             <option value="BLOCKED">BLOCKED</option>
           </select>
+        </label>
+      </div>
+      <div className={styles.row}>
+        <label>
+          <span>Staff recommended</span>
+          <span
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              marginTop: "0.45rem",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={form.featured}
+              onChange={(e) =>
+                setForm({ ...form, featured: e.target.checked })
+              }
+            />
+            Show on homepage Recommended
+          </span>
+        </label>
+        <label>
+          Featured rank (lower = higher)
+          <input
+            type="number"
+            min={0}
+            value={form.featuredRank}
+            onChange={(e) =>
+              setForm({ ...form, featuredRank: e.target.value })
+            }
+            disabled={!form.featured}
+          />
         </label>
       </div>
       <label>

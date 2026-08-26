@@ -77,7 +77,10 @@ public class PublicCatalogController {
     public Map<String, Object> home() {
         return Map.of(
                 "categories", categoryService.listPublic(),
-                "featuredProducts", productService.latestPublished(8)
+                "recommendedDeals", productService.recommendedPublished(5),
+                "topBuyDeals", productService.topBuyPublished(5),
+                "featuredProducts", productService.latestPublished(8),
+                "latestDeals", productService.latestPublished(40)
         );
     }
 }

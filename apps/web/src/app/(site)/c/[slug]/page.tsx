@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
-import { ProductCard } from "@/components/ProductCard";
+import { DealList } from "@/components/DealList";
 import { getCategory, getCategoryProducts } from "@/lib/api";
 import { buildMetadata } from "@/lib/metadata";
 import styles from "./category.module.css";
@@ -47,12 +47,12 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
   let products;
   try {
-    products = await getCategoryProducts(slug, { sort, page, size: 24 });
+    products = await getCategoryProducts(slug, { sort, page, size: 40 });
   } catch {
     products = {
       items: [],
       page: 0,
-      size: 24,
+      size: 40,
       totalElements: 0,
       totalPages: 0,
     };
@@ -69,21 +69,24 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     <main className={styles.main}>
       <div className={styles.inner}>
         <nav className={styles.crumbs} aria-label="Breadcrumb">
-          <Link href="/">Home</Link>
+          <Link href="/">Frontpage</Link>
           <span aria-hidden>/</span>
           <span>{category.name}</span>
         </nav>
+
         <header className={styles.header}>
-          <h1 className={styles.title}>{category.name}</h1>
-          {category.description ? (
-            <p className={styles.lead}>{category.description}</p>
-          ) : null}
+          <div>
+            <h1 className={styles.title}>{category.name}</h1>
+            {category.description ? (
+              <p className={styles.lead}>{category.description}</p>
+            ) : null}
+          </div>
           <AffiliateDisclosure />
         </header>
 
         <div className={styles.toolbar}>
           <p className={styles.count}>
-            {products.totalElements} product
+            {products.totalElements} deal
             {products.totalElements === 1 ? "" : "s"}
           </p>
           <div className={styles.sorts} role="navigation" aria-label="Sort">
@@ -101,15 +104,10 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
           </div>
         </div>
 
-        {products.items.length > 0 ? (
-          <div className={styles.grid}>
-            {products.items.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} />
-            ))}
-          </div>
-        ) : (
-          <p className={styles.empty}>No published products in this category yet.</p>
-        )}
+        <DealList
+          products={products.items}
+          emptyMessage="No published deals in this category yet."
+        />
 
         {products.totalPages > 1 ? (
           <nav className={styles.pager} aria-label="Pagination">

@@ -1,27 +1,33 @@
 :root {
-  --ink: #071512;
-  --ink-soft: #0f2a24;
-  --ink-mid: #173a31;
+  --ink: #0b1f33;
+  --ink-soft: #12304a;
+  --brass: #d0b06a;
+  --accent: #1f6feb;
+  --accent-deep: #1558c0;
+  --accent-soft: #e8f1ff;
+  --link: #0b4ea2;
+  --link-hover: #083a78;
+  --price: #0a7a3e;
   --ember: #e85d3b;
   --ember-hot: #ff704d;
   --ember-deep: #c4452a;
-  --brass: #d0b06a;
-  --mist: #dceae4;
-  --surface: #eef5f1;
-  --surface-elevated: #f7fbf8;
-  --text: #102822;
-  --text-muted: #4d655c;
-  --line: rgba(16, 40, 34, 0.12);
+  --mist: #e8eef5;
+  --surface: #eef2f7;
+  --surface-elevated: #f7f9fc;
+  --row-hover: #f3f7fd;
+  --text: #1a2433;
+  --text-muted: #5b6b7c;
+  --line: rgba(15, 35, 55, 0.12);
   --white: #ffffff;
   --danger: #b42318;
-  --ok: #1b7a4e;
-  --shadow-soft: 0 18px 50px rgba(7, 21, 18, 0.18);
-  --radius: 14px;
-  --max: 1120px;
+  --ok: #0a7a3e;
+  --shadow-board: 0 8px 28px rgba(15, 35, 55, 0.08);
+  --shadow-soft: 0 18px 50px rgba(15, 35, 55, 0.12);
+  --radius: 10px;
+  --max: 980px;
   --font-display: var(--font-fraunces), "Iowan Old Style", "Palatino Linotype",
     serif;
   --font-body: var(--font-manrope), "Segoe UI", sans-serif;
-  --hero-shift: 0%;
 }
 
 * {
@@ -39,39 +45,9 @@ body {
   color: var(--text);
   font-family: var(--font-body);
   background:
-    radial-gradient(
-      1200px 600px at 10% -10%,
-      rgba(232, 93, 59, 0.18),
-      transparent 55%
-    ),
-    radial-gradient(
-      900px 500px at 90% 0%,
-      rgba(208, 176, 106, 0.16),
-      transparent 50%
-    ),
-    linear-gradient(
-      165deg,
-      #f4faf7 0%,
-      var(--surface) 42%,
-      #e5f0ea 100%
-    );
-  background-attachment: fixed;
+    linear-gradient(180deg, #dce7f4 0%, var(--surface) 180px, #e9eef5 100%);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.35;
-  background-image: radial-gradient(
-    rgba(16, 40, 34, 0.06) 0.7px,
-    transparent 0.7px
-  );
-  background-size: 18px 18px;
-  z-index: -1;
 }
 
 a {
@@ -106,7 +82,7 @@ textarea {
 @keyframes rise-in {
   from {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -114,23 +90,26 @@ textarea {
   }
 }
 
-@keyframes ember-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(232, 93, 59, 0.35);
+@keyframes slide-feed {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
-  50% {
-    box-shadow: 0 0 0 10px rgba(232, 93, 59, 0);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@keyframes drift-pan {
+@keyframes pulse-dot {
   0%,
   100% {
-    background-position: 0% 40%, 100% 0%, 0 0;
+    transform: scale(1);
+    opacity: 1;
   }
   50% {
-    background-position: 20% 60%, 80% 20%, 0 0;
+    transform: scale(1.15);
+    opacity: 0.7;
   }
 }
 
