@@ -74,8 +74,21 @@ See `.env.example`. Important knobs:
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Admin basic auth |
 | `API_BASE_URL` | Next.js → API base (web) |
 
+## Deploy (Railway)
+
+Domain/DNS stays on **Spaceship**. App hosting is **Railway** (web + API + Postgres).
+
+Step-by-step: [docs/deploy/railway.md](./docs/deploy/railway.md)
+
+Service roots:
+
+- API → `apps/api` (Dockerfile)
+- Web → `apps/web` (Dockerfile, Next standalone)
+- Database → Railway Postgres plugin
+
 ## Documentation
 
 - [Business Analysis Pack](./docs/business-analysis/README.md)
 - [Confirmed Decisions](./docs/business-analysis/03-confirmed-decisions.md)
 - [ADR-001 SSR](./docs/adr/ADR-001-ssr-nextjs.md)
+- [Railway deploy](./docs/deploy/railway.md)

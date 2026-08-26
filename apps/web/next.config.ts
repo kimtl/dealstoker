@@ -8,6 +8,8 @@ const apiBase = (process.env.API_BASE_URL || "http://localhost:8080").replace(
 const nextConfig: NextConfig = {
   // Prevent next dev from regenerating AGENTS.md / CLAUDE.md in the repo.
   agentRules: false,
+  // Smaller production image for Railway / Docker.
+  output: "standalone",
   async rewrites() {
     return [
       {
