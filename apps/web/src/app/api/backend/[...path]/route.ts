@@ -19,11 +19,28 @@ const HOP_BY_HOP = new Set([
   "upgrade",
   "host",
   "content-length",
+  // Prevent the browser from hijacking fetch() with a native Basic-auth dialog
+  // (cancel → TypeError: Failed to fetch).
+  "www-authenticate",
 ]);
 
 async function proxy(request: NextRequest, context: RouteContext) {
   const { path } = await context.params;
   const apiBase = getApiBaseUrl();
+  if (
+    process.env.NODE_ENV === "production" &&
+    (!apiBase || /localhost|127\.0\.0\.1/.test(apiBase))
+  ) {
+    return NextResponse.json(
+      {
+        error: "API_BASE_URL is not configured",
+        message:
+          "Set the Web service API_BASE_URL to https://api.dealstoker.com and redeploy.",
+        apiBase,
+      },
+      { status: 503 },
+    );
+  }
   const suffix = path?.length ? path.join("/") : "";
   const target = `${apiBase}/${suffix}${request.nextUrl.search}`;
 

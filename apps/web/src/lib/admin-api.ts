@@ -54,12 +54,19 @@ async function adminFetch<T>(
 
   if (res.status === 401) {
     clearStoredAuth();
-    throw new Error("Unauthorized");
+    throw new Error("Unauthorized — check admin username/password (Railway ADMIN_PASSWORD)");
   }
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(text || `Request failed (${res.status})`);
+    let detail = text;
+    try {
+      const json = JSON.parse(text) as { message?: string; error?: string };
+      detail = json.message || json.error || text;
+    } catch {
+      // keep raw text
+    }
+    throw new Error(detail || `Request failed (${res.status})`);
   }
 
   if (res.status === 204) {
