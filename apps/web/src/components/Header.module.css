@@ -24,24 +24,12 @@
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
   min-width: 0;
 }
 
-.mark {
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 3px;
-  background: linear-gradient(140deg, var(--ember-hot), var(--accent));
-  animation: pulse-dot 2.4s ease infinite;
-}
-
-.brandText {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.25rem;
-  letter-spacing: -0.02em;
-  color: var(--ink);
+.brand:hover,
+.brand:focus-visible {
+  opacity: 0.92;
 }
 
 .nav {
@@ -67,6 +55,11 @@
   .inner {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .brand :global(img) {
+    height: 34px !important;
+    width: auto !important;
   }
 
   .nav {

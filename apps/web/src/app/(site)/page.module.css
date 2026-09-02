@@ -4,15 +4,17 @@
 
 .masthead {
   background:
-    linear-gradient(120deg, #0b1f33 0%, #123a63 55%, #1f6feb 140%);
-  color: var(--white);
+    radial-gradient(120% 90% at 0% 0%, rgba(255, 112, 77, 0.16), transparent 55%),
+    radial-gradient(90% 80% at 100% 10%, rgba(31, 111, 235, 0.1), transparent 50%),
+    linear-gradient(180deg, #f7f4ef 0%, #eef3f9 100%);
+  border-bottom: 1px solid var(--line);
   animation: slide-feed 500ms ease both;
 }
 
 .mastheadInner {
   max-width: var(--max);
   margin: 0 auto;
-  padding: 1.35rem 1.15rem 1.5rem;
+  padding: 1.5rem 1.15rem 1.65rem;
   display: flex;
   flex-wrap: wrap;
   align-items: end;
@@ -21,16 +23,18 @@
 }
 
 .brandBlock {
-  max-width: 38rem;
+  max-width: 40rem;
 }
 
 .brand {
-  font-family: var(--font-display);
-  font-size: clamp(1.8rem, 4vw, 2.4rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.55rem;
+  line-height: 0;
+}
+
+.brandLogo {
+  max-width: min(100%, 22rem);
+  height: auto !important;
+  width: auto !important;
 }
 
 .headline {
@@ -39,12 +43,12 @@
   font-weight: 700;
   letter-spacing: 0.01em;
   text-transform: uppercase;
-  opacity: 0.92;
+  color: var(--ink-soft);
   margin-bottom: 0.4rem;
 }
 
 .support {
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--text-muted);
   font-size: 0.95rem;
   line-height: 1.5;
   max-width: 34rem;
@@ -78,13 +82,15 @@
 }
 
 .ctaSecondary {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  color: var(--white);
+  background: var(--white);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
 }
 
 .ctaSecondary:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--accent-soft);
+  border-color: rgba(31, 111, 235, 0.35);
+  color: var(--link);
 }
 
 .shell {
@@ -247,5 +253,15 @@
 
   .catList {
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .brandLogo {
+    max-width: min(100%, 16.5rem);
+  }
+
+  .mastheadInner {
+    padding-top: 1.15rem;
   }
 }

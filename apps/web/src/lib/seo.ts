@@ -221,6 +221,8 @@ export function buildOrganizationJsonLd(): Record<string, unknown> {
     "@type": "Organization",
     name: SITE_NAME,
     url: siteUrl,
+    logo: `${siteUrl}/brand/dealstoker-logo.png`,
+    image: `${siteUrl}/brand/dealstoker-logo.png`,
     description: homeMetaDescription(),
   };
 }

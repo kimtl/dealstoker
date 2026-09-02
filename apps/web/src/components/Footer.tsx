@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SiteLogo } from "@/components/SiteLogo";
 import {
   AFFILIATE_DISCLOSURE_SHORT,
   SITE_DOMAIN,
@@ -13,7 +14,9 @@ export function Footer() {
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <div className={styles.brandBlock}>
-          <p className={styles.brand}>{SITE_NAME}</p>
+          <Link href="/" className={styles.brandLink} aria-label={`${SITE_NAME} home`}>
+            <SiteLogo height={52} />
+          </Link>
           <p className={styles.tagline}>
             Curated Amazon.com picks for US shoppers — practical deals, clear
             context, no noise.

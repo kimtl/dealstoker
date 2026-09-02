@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { DealList } from "@/components/DealList";
 import { JsonLd } from "@/components/JsonLd";
+import { SiteLogo } from "@/components/SiteLogo";
 import { getHome, getProducts } from "@/lib/api";
 import {
   buildItemListJsonLd,
@@ -82,10 +83,11 @@ export default async function HomePage() {
       <section className={styles.masthead} aria-labelledby="hero-brand">
         <div className={styles.mastheadInner}>
           <div className={styles.brandBlock}>
-            <p id="hero-brand" className={styles.brand}>
-              {SITE_NAME}
-            </p>
-            <h1 className={styles.headline}>Frontpage deals</h1>
+            <h1 id="hero-brand" className={styles.brand}>
+              <span className="sr-only">{SITE_NAME}</span>
+              <SiteLogo height={88} priority className={styles.brandLogo} />
+            </h1>
+            <p className={styles.headline}>Frontpage deals</p>
             <p className={styles.support}>
               Curated Amazon.com picks in a clean deal list — price first, less
               noise.

@@ -17,18 +17,27 @@ const manrope = Manrope({
   display: "swap",
 });
 
-export const metadata: Metadata = buildMetadata({
-  title: homeMetaTitle(),
-  description: homeMetaDescription(),
-  path: "/",
-  keywords: [
-    "Amazon deals",
-    "best Amazon deals today",
-    "Amazon price drops",
-    "US Amazon discounts",
-    SITE_NAME,
-  ],
-});
+export const metadata: Metadata = {
+  ...buildMetadata({
+    title: homeMetaTitle(),
+    description: homeMetaDescription(),
+    path: "/",
+    keywords: [
+      "Amazon deals",
+      "best Amazon deals today",
+      "Amazon price drops",
+      "US Amazon discounts",
+      SITE_NAME,
+    ],
+  }),
+  icons: {
+    icon: [
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/brand/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/brand/apple-touch-icon.png", sizes: "180x180" }],
+  },
+};
 
 export default function RootLayout({
   children,
