@@ -198,7 +198,8 @@ export default async function ProductPage({ params }: PageProps) {
               <a
                 href={goHref}
                 className={styles.cta}
-                rel="nofollow sponsored noopener"
+                target="_blank"
+                rel="nofollow sponsored noopener noreferrer"
               >
                 View on Amazon
               </a>
