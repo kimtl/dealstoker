@@ -5,8 +5,9 @@
 | Site | https://dealstoker.com |
 | Brand | DealStoker |
 | Marketplace | Amazon.com (US) / en-US / USD |
-| Status | Phase 1 live → **submit US Associates re-application** |
-| Partner tag (prod) | Keep `AMAZON_PARTNER_TAG` **empty** until approval |
+| Status | **Associates approved** → activate partner tag in Railway |
+| Store ID / tracking tag | `dealstoker01-20` |
+| Partner tag (prod) | Set Railway API `AMAZON_PARTNER_TAG=dealstoker01-20` then redeploy |
 | Updated | 2026-09-02 |
 
 > This pack prepares and documents the re-application. **Only the account owner can submit** in [Amazon Associates Central](https://affiliate-program.amazon.com/). This repo cannot log into Amazon on your behalf.
@@ -26,7 +27,7 @@
 | Footer + CTA disclosure | Pass | Short Associates disclosure site-wide |
 | Sitemap / robots | Pass | `/sitemap.xml`, `/robots.txt` |
 | Outbound Amazon links | Pass | `/go/{slug}` → 302 to `amazon.com` product URL |
-| Partner tag before approval | Correct | Tag omitted until `AMAZON_PARTNER_TAG` is set |
+| Partner tag configured | **Pending Railway set** | After set, `/go/{slug}` Location must include `tag=dealstoker01-20` |
 | Not a kids site | Pass | Privacy states not directed to under-13 |
 
 ### Catalog snapshot (API)
@@ -99,20 +100,26 @@ Do these in order:
 
 ---
 
-## 4. Post-approval activation (Phase 1.5)
+## 4. Post-approval activation (Phase 1.5) — **do this now**
 
-When Associates Central shows an approved **Store ID / tracking ID** (tag like `yourtag-20`):
+Approved Store ID: **`dealstoker01-20`**
 
-### Railway (API service)
+### Railway (API service) — required
 
-1. Set `AMAZON_PARTNER_TAG=<your-approved-tag>`
-2. Confirm `AMAZON_MARKETPLACE=www.amazon.com`
-3. Redeploy / restart API so config reloads
+1. Open Railway → **API** service → **Variables**
+2. Add / update:
+
+| Variable | Value |
+|----------|--------|
+| `AMAZON_PARTNER_TAG` | `dealstoker01-20` |
+| `AMAZON_MARKETPLACE` | `www.amazon.com` |
+
+3. Redeploy / restart the **API** service (web restart not required).
 4. Verify:
 
 ```bash
-curl -sI "https://dealstoker.com/go/<published-slug>"
-# Expect Location: https://www.amazon.com/... containing tag=<your-tag>
+curl -sI "https://dealstoker.com/go/ninja-crispi-portable-air-fryer"
+# Expect Location containing: tag=dealstoker01-20
 ```
 
 5. Click once from a real browser → confirm click appears in Associates reports (may lag).
@@ -142,8 +149,8 @@ https://affiliate-program.amazon.com/help/operating/agreement/
 
 ## 6. Definition of done (Phase 1.5)
 
-- [ ] Associates US account **approved**
-- [ ] `AMAZON_PARTNER_TAG` set in production
-- [ ] `/go/{slug}` Location includes `tag=`
+- [x] Associates US account **approved** (Store ID `dealstoker01-20`)
+- [ ] `AMAZON_PARTNER_TAG=dealstoker01-20` set on Railway API
+- [ ] `/go/{slug}` Location includes `tag=dealstoker01-20`
 - [ ] Associates report shows attributed clicks
 - [ ] Then schedule Phase 2 (PA-API ingest) if desired
