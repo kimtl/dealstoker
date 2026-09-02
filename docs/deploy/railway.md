@@ -65,13 +65,12 @@ If the API fails with `'url' must start with "jdbc"`, redeploy the latest API im
 
 | Variable | Value |
 |----------|--------|
-| `API_BASE_URL` | Public API URL, e.g. `https://api.dealstoker.com` or `https://<api>.up.railway.app` |
-| `NEXT_PUBLIC_SITE_URL` | `https://dealstoker.com` |
+| `API_BASE_URL` | Public API URL, e.g. `https://api.dealstoker.com` or `https://<api>.up.railway.app` (**runtime** variable — required) |
+| `NEXT_PUBLIC_SITE_URL` | `https://dealstoker.com` (**build** arg / variable) |
 
-`API_BASE_URL` is also a **Docker build arg** (Next rewrites bake it at build time). In Railway, set it as a normal variable; for Docker builds also add it under **Build** variables / ARG if the UI separates them:
+`/api/backend/*` and `/go/*` are **runtime proxies** (not build-time rewrites). Set `API_BASE_URL` on the Web service and redeploy; no rebuild-arg needed for the API host.
 
-- Build arg: `API_BASE_URL`
-- Build arg: `NEXT_PUBLIC_SITE_URL`
+If Admin login hits `/api/backend/api/v1/admin/me` → 404/502, `API_BASE_URL` is missing or wrong on the **web** service.
 
 4. Generate a public domain for web (or attach `dealstoker.com` / `www`).
 
@@ -110,7 +109,11 @@ docker build -t dealstoker-api ./apps/api
 
 # Web image
 docker build \
-  --build-arg API_BASE_URL=http://host.docker.internal:8080 \
   --build-arg NEXT_PUBLIC_SITE_URL=http://localhost:3000 \
   -t dealstoker-web ./apps/web
+
+docker run --rm -p 3000:3000 \
+  -e API_BASE_URL=http://host.docker.internal:8080 \
+  -e NEXT_PUBLIC_SITE_URL=http://localhost:3000 \
+  dealstoker-web
 ```

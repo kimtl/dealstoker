@@ -9,10 +9,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Rewrites in next.config.ts bake API_BASE_URL at build time.
-ARG API_BASE_URL=http://localhost:8080
+# NEXT_PUBLIC_* is inlined at build time; API_BASE_URL is runtime (route proxy).
 ARG NEXT_PUBLIC_SITE_URL=https://dealstoker.com
-ENV API_BASE_URL=$API_BASE_URL
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 
 RUN npm run build
@@ -22,6 +20,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
+# Override on Railway with the public API URL, e.g. https://xxx.up.railway.app
+ENV API_BASE_URL=http://localhost:8080
 
 RUN addgroup -S dealstoker && adduser -S dealstoker -G dealstoker
 
