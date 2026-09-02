@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
 import { buildMetadata } from "@/lib/metadata";
+import { homeMetaDescription, homeMetaTitle } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 import "./globals.css";
 
@@ -17,10 +18,16 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = buildMetadata({
-  title: `${SITE_NAME} — Curated Amazon Deals for US Shoppers`,
-  description:
-    "DealStoker curates practical Amazon.com products across home, electronics, and outdoor gear — clear picks for US shoppers.",
+  title: homeMetaTitle(),
+  description: homeMetaDescription(),
   path: "/",
+  keywords: [
+    "Amazon deals",
+    "best Amazon deals today",
+    "Amazon price drops",
+    "US Amazon discounts",
+    SITE_NAME,
+  ],
 });
 
 export default function RootLayout({

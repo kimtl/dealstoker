@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { formatMoney, formatRating, formatReviewCount } from "@/lib/format";
+import { productImageAlt } from "@/lib/seo";
 import type { ProductSummary } from "@/lib/types";
 import styles from "./DealListItem.module.css";
 
@@ -22,6 +23,7 @@ export function DealListItem({
   const rating = formatRating(product.rating);
   const reviews = formatReviewCount(product.reviewCount);
   const delay = Math.min(index, 12) * 35;
+  const alt = productImageAlt(product);
   const showList =
     listPrice &&
     price &&
@@ -49,7 +51,7 @@ export function DealListItem({
           {product.imageUrl ? (
             <Image
               src={product.imageUrl}
-              alt=""
+              alt={alt}
               width={112}
               height={112}
               className={styles.image}

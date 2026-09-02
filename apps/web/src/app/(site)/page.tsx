@@ -1,17 +1,32 @@
 import Link from "next/link";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { DealList } from "@/components/DealList";
+import { JsonLd } from "@/components/JsonLd";
 import { getHome, getProducts } from "@/lib/api";
-import { buildMetadata } from "@/lib/metadata";
+import {
+  buildItemListJsonLd,
+  buildOrganizationJsonLd,
+  buildPageMetadata,
+  buildWebSiteJsonLd,
+  homeMetaDescription,
+  homeMetaTitle,
+} from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 import type { ProductSummary } from "@/lib/types";
 import styles from "./page.module.css";
 
-export const metadata = buildMetadata({
-  title: `${SITE_NAME} — Frontpage Deals for US Shoppers`,
-  description:
-    "A Slickdeals-style list of curated Amazon.com deals for home, electronics, and outdoor living.",
+export const metadata = buildPageMetadata({
+  title: homeMetaTitle(),
+  description: homeMetaDescription(),
   path: "/",
+  keywords: [
+    "Amazon deals",
+    "best Amazon deals today",
+    "Amazon price drops",
+    "US Amazon discounts",
+    "staff picks",
+    SITE_NAME,
+  ],
 });
 
 export default async function HomePage() {
@@ -41,8 +56,29 @@ export default async function HomePage() {
     }
   }
 
+  const listedForSchema = [
+    ...recommended,
+    ...topBuys.filter((p) => !recommended.some((r) => r.id === p.id)),
+    ...deals.filter(
+      (p) =>
+        !recommended.some((r) => r.id === p.id) &&
+        !topBuys.some((t) => t.id === p.id),
+    ),
+  ].slice(0, 20);
+
   return (
     <main className={styles.main}>
+      <JsonLd data={buildOrganizationJsonLd()} />
+      <JsonLd data={buildWebSiteJsonLd()} />
+      {listedForSchema.length > 0 ? (
+        <JsonLd
+          data={buildItemListJsonLd(
+            `Today's top Amazon deals on ${SITE_NAME}`,
+            listedForSchema,
+            "/",
+          )}
+        />
+      ) : null}
       <section className={styles.masthead} aria-labelledby="hero-brand">
         <div className={styles.mastheadInner}>
           <div className={styles.brandBlock}>
