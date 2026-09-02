@@ -89,6 +89,7 @@ Service roots:
 ## Documentation
 
 - [Business Analysis Pack](./docs/business-analysis/README.md)
+- [Associates re-application checklist](./docs/associates/reapplication-checklist.md)
 - [Confirmed Decisions](./docs/business-analysis/03-confirmed-decisions.md)
 - [ADR-001 SSR](./docs/adr/ADR-001-ssr-nextjs.md)
 - [Railway deploy](./docs/deploy/railway.md)

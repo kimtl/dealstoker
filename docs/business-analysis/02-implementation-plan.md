@@ -420,6 +420,6 @@ dealstoker/
 - [ ] Category taxonomy spreadsheet (US)  
 - [ ] API OpenAPI draft  
 - [ ] UI wireframes (home/category/product/admin)  
-- [ ] Compliance copy (disclosure, US)  
-- [ ] Phase 0 project bootstrap  
-- [ ] Associates re-application checklist  
+- [x] Compliance copy (disclosure, US)  
+- [x] Phase 0 project bootstrap  
+- [x] Associates re-application checklist  

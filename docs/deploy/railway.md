@@ -48,7 +48,7 @@ If you skip `api.` subdomain, use the Railway-generated API URL (`*.up.railway.a
 | `ADMIN_USERNAME` | strong username |
 | `ADMIN_PASSWORD` | strong password |
 | `AMAZON_MARKETPLACE` | `www.amazon.com` |
-| `AMAZON_PARTNER_TAG` | empty until Associates approval |
+| `AMAZON_PARTNER_TAG` | empty until Associates approval — see [Associates checklist](../associates/reapplication-checklist.md) |
 
 `PORT` is set by Railway automatically. The API converts Railway’s `postgresql://…` URL into a JDBC URL at startup (Docker entrypoint + DataSource config). You can also set `DATABASE_URL` to a JDBC URL yourself if preferred.
 
