@@ -1,0 +1,2 @@
+org.springframework.boot.EnvironmentPostProcessor=\
+com.dealstoker.api.config.RailwayDatabaseUrlEnvironmentPostProcessor
