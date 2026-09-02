@@ -24,7 +24,7 @@ export const metadata = buildPageMetadata({
     "best Amazon deals today",
     "Amazon price drops",
     "US Amazon discounts",
-    "staff picks",
+    "featured deals",
     SITE_NAME,
   ],
 });
