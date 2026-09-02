@@ -33,7 +33,12 @@ export function DealListItem({
       className={styles.row}
       style={{ animationDelay: `${delay}ms` }}
     >
-      <Link href={`/p/${product.slug}`} className={styles.link}>
+      <Link
+        href={`/p/${product.slug}`}
+        className={styles.link}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         {buyRank ? (
           <span className={styles.rank} aria-label={`Rank ${buyRank}`}>
             #{buyRank}
