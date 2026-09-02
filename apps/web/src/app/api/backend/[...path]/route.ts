@@ -106,7 +106,7 @@ async function proxy(request: NextRequest, context: RouteContext) {
         error: "unauthorized",
         message:
           text ||
-          "Unauthorized — check Railway API ADMIN_USERNAME / ADMIN_PASSWORD",
+          "Unauthorized - check Railway API ADMIN_USERNAME / ADMIN_PASSWORD",
       },
       { status: 401, headers: responseHeaders },
     );
@@ -117,6 +117,7 @@ async function proxy(request: NextRequest, context: RouteContext) {
     statusText: upstream.statusText,
     headers: responseHeaders,
   });
+}
 
 export const GET = proxy;
 export const POST = proxy;
