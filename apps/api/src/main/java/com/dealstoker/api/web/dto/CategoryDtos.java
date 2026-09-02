@@ -4,6 +4,8 @@ import com.dealstoker.api.domain.Category;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.time.Instant;
+
 public final class CategoryDtos {
     private CategoryDtos() {}
 
@@ -16,7 +18,8 @@ public final class CategoryDtos {
             String seoTitle,
             String seoDescription,
             int sortOrder,
-            boolean active
+            boolean active,
+            Instant updatedAt
     ) {
         public static CategoryResponse from(Category category) {
             return new CategoryResponse(
@@ -28,7 +31,8 @@ public final class CategoryDtos {
                     category.getSeoTitle(),
                     category.getSeoDescription(),
                     category.getSortOrder(),
-                    category.isActive()
+                    category.isActive(),
+                    category.getUpdatedAt()
             );
         }
     }

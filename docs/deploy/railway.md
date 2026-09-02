@@ -92,6 +92,8 @@ Then in Railway → each service → **Custom Domain** → add `dealstoker.com` 
 - [ ] `https://dealstoker.com/api/backend/api/v1/health` (or API host `/actuator/health`) OK
 - [ ] Product page + `/go/{slug}` redirect works
 - [ ] `/sitemap.xml` and `/robots.txt` reachable on the **site** host
+- [ ] Sitemap entries include product `lastmod` and image URLs when available
+- [ ] Submit `https://dealstoker.com/sitemap.xml` in Google Search Console
 - [ ] Admin login at `/admin/login`
 - [ ] Search Console URL Inspection shows SSR HTML
 
