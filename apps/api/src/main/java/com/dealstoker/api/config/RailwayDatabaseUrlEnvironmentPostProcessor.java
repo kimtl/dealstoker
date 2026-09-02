@@ -82,8 +82,9 @@ public class RailwayDatabaseUrlEnvironmentPostProcessor implements EnvironmentPo
             }
 
             environment.getPropertySources().addFirst(new MapPropertySource("railwayDatabaseUrl", props));
-        } catch (Exception ignored) {
-            // Leave original env untouched; Spring will fail with a clear datasource error.
+        } catch (Exception ex) {
+            // Keep going — DataSourceConfig also converts at bean creation time.
+            System.err.println("Railway DATABASE_URL conversion skipped: " + ex.getMessage());
         }
     }
 
