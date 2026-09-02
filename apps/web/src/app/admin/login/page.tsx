@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { adminMe, setStoredAuth } from "@/lib/admin-api";
+import { adminMe, clearStoredAuth, setStoredAuth } from "@/lib/admin-api";
 import styles from "../admin.module.css";
 
 export default function AdminLoginPage() {
@@ -16,12 +16,18 @@ export default function AdminLoginPage() {
     event.preventDefault();
     setLoading(true);
     setError(null);
+    clearStoredAuth();
     setStoredAuth(username.trim(), password);
     try {
       await adminMe();
       router.replace("/admin");
-    } catch {
-      setError("Login failed. Check username and password.");
+    } catch (err) {
+      clearStoredAuth();
+      const detail =
+        err instanceof Error && err.message ? err.message : "Login failed.";
+      setError(
+        `${detail} Use Railway API variables ADMIN_USERNAME / ADMIN_PASSWORD (not the old local default changeme unless you set that).`,
+      );
     } finally {
       setLoading(false);
     }
@@ -32,8 +38,8 @@ export default function AdminLoginPage() {
       <form className={`${styles.loginCard} ${styles.form}`} onSubmit={onSubmit}>
         <h1>Admin login</h1>
         <p className={styles.muted}>
-          Basic auth credentials are stored in sessionStorage for this browser
-          tab.
+          Credentials come from the API service env:{" "}
+          <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code>.
         </p>
         <label>
           Username
