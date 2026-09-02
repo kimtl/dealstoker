@@ -1,27 +1,12 @@
 import type { NextConfig } from "next";
 
-const apiBase = (process.env.API_BASE_URL || "http://localhost:8080").replace(
-  /\/$/,
-  "",
-);
-
 const nextConfig: NextConfig = {
   // Prevent next dev from regenerating AGENTS.md / CLAUDE.md in the repo.
   agentRules: false,
   // Smaller production image for Railway / Docker.
   output: "standalone",
-  async rewrites() {
-    return [
-      {
-        source: "/go/:slug",
-        destination: `${apiBase}/go/:slug`,
-      },
-      {
-        source: "/api/backend/:path*",
-        destination: `${apiBase}/:path*`,
-      },
-    ];
-  },
+  // /api/backend/* and /go/* are handled by App Router route handlers so
+  // API_BASE_URL is read at runtime (rewrites bake destinations at build time).
   images: {
     remotePatterns: [
       {
