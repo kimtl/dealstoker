@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { clearStoredAuth, hasStoredAuth } from "@/lib/admin-api";
+import { adminMe, clearStoredAuth, hasStoredAuth } from "@/lib/admin-api";
 import styles from "./admin.module.css";
 
 export function AdminChrome({ children }: { children: React.ReactNode }) {
@@ -21,7 +21,18 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
       router.replace("/admin/login");
       return;
     }
-    setReady(true);
+    let cancelled = false;
+    adminMe()
+      .then(() => {
+        if (!cancelled) setReady(true);
+      })
+      .catch(() => {
+        clearStoredAuth();
+        if (!cancelled) router.replace("/admin/login");
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [isLogin, pathname, router]);
 
   if (isLogin) {
