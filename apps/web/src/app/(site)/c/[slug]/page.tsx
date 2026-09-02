@@ -2,8 +2,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { DealList } from "@/components/DealList";
+import { JsonLd } from "@/components/JsonLd";
 import { getCategory, getCategoryProducts } from "@/lib/api";
-import { buildMetadata } from "@/lib/metadata";
+import {
+  buildBreadcrumbJsonLd,
+  buildItemListJsonLd,
+  buildPageMetadata,
+  categoryMetaDescription,
+  categoryMetaTitle,
+} from "@/lib/seo";
+import { SITE_NAME } from "@/lib/site";
 import styles from "./category.module.css";
 
 type PageProps = {
@@ -15,18 +23,23 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   try {
     const category = await getCategory(slug);
-    return buildMetadata({
-      title: category.seoTitle || category.name,
-      description:
-        category.seoDescription ||
-        category.description ||
-        `Shop curated ${category.name} products on DealStoker.`,
+    return buildPageMetadata({
+      title: categoryMetaTitle(category),
+      description: categoryMetaDescription(category),
       path: `/c/${slug}`,
+      keywords: [
+        category.name,
+        `${category.name} deals`,
+        `${category.name} Amazon`,
+        "Amazon deals",
+        "price drop",
+        SITE_NAME,
+      ],
     });
   } catch {
-    return buildMetadata({
-      title: "Category",
-      description: "Browse curated Amazon products on DealStoker.",
+    return buildPageMetadata({
+      title: "Amazon Category Deals",
+      description: `Browse curated Amazon.com category deals on ${SITE_NAME}.`,
       path: `/c/${slug}`,
     });
   }
@@ -67,6 +80,19 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
   return (
     <main className={styles.main}>
+      <JsonLd
+        data={[
+          buildBreadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: category.name, path: `/c/${category.slug}` },
+          ]),
+          buildItemListJsonLd(
+            `${category.name} deals on ${SITE_NAME}`,
+            products.items,
+            `/c/${category.slug}`,
+          ),
+        ]}
+      />
       <div className={styles.inner}>
         <nav className={styles.crumbs} aria-label="Breadcrumb">
           <Link href="/">Frontpage</Link>

@@ -10,8 +10,15 @@ import {
   formatRating,
   formatReviewCount,
 } from "@/lib/format";
-import { buildMetadata } from "@/lib/metadata";
-import { getSiteUrl, SITE_NAME } from "@/lib/site";
+import {
+  buildBreadcrumbJsonLd,
+  buildPageMetadata,
+  buildProductJsonLd,
+  productImageAlt,
+  productMetaDescription,
+  productMetaTitle,
+} from "@/lib/seo";
+import { SITE_NAME } from "@/lib/site";
 import styles from "./product.module.css";
 
 type PageProps = {
@@ -22,19 +29,24 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   try {
     const product = await getProduct(slug);
-    return buildMetadata({
-      title: product.seoTitle || product.title,
-      description:
-        product.seoDescription ||
-        product.description ||
-        `${product.title} — curated on DealStoker.`,
+    return buildPageMetadata({
+      title: productMetaTitle(product),
+      description: productMetaDescription(product),
       path: `/p/${slug}`,
       image: product.imageUrl,
+      keywords: [
+        product.title,
+        product.brand,
+        product.categoryName,
+        "Amazon deal",
+        "price drop",
+        SITE_NAME,
+      ].filter(Boolean) as string[],
     });
   } catch {
-    return buildMetadata({
-      title: "Product",
-      description: "Curated Amazon product on DealStoker.",
+    return buildPageMetadata({
+      title: "Amazon Product Deal",
+      description: `Browse curated Amazon.com product deals and prices on ${SITE_NAME}.`,
       path: `/p/${slug}`,
     });
   }
@@ -61,80 +73,22 @@ export default async function ProductPage({ params }: PageProps) {
   const listPrice = formatMoney(product.listPrice, product.currency);
   const rating = formatRating(product.rating);
   const reviews = formatReviewCount(product.reviewCount);
-  const siteUrl = getSiteUrl();
-  const productUrl = `${siteUrl}/p/${product.slug}`;
   const goHref = `/go/${product.slug}`;
+  const imageAlt = productImageAlt(product);
 
-  const breadcrumbLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: `${siteUrl}/`,
-      },
-      ...(product.categorySlug && product.categoryName
-        ? [
-            {
-              "@type": "ListItem",
-              position: 2,
-              name: product.categoryName,
-              item: `${siteUrl}/c/${product.categorySlug}`,
-            },
-          ]
-        : []),
-      {
-        "@type": "ListItem",
-        position: product.categorySlug ? 3 : 2,
-        name: product.title,
-        item: productUrl,
-      },
-    ],
-  };
-
-  const productLd: Record<string, unknown> = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.title,
-    description: product.description || product.seoDescription || product.title,
-    image: product.imageUrl ? [product.imageUrl] : undefined,
-    brand: product.brand
-      ? { "@type": "Brand", name: product.brand }
-      : undefined,
-    sku: product.externalId,
-    url: productUrl,
-  };
-
-  if (product.priceAmount != null) {
-    productLd.offers = {
-      "@type": "Offer",
-      url: `${siteUrl}${goHref}`,
-      priceCurrency: product.currency || "USD",
-      price: String(product.priceAmount),
-      availability:
-        product.availability === "InStock"
-          ? "https://schema.org/InStock"
-          : "https://schema.org/OutOfStock",
-      seller: {
-        "@type": "Organization",
-        name: "Amazon.com",
-      },
-    };
-  }
-
-  if (product.rating != null && product.reviewCount) {
-    productLd.aggregateRating = {
-      "@type": "AggregateRating",
-      ratingValue: String(product.rating),
-      reviewCount: product.reviewCount,
-    };
-  }
+  const breadcrumbItems = [
+    { name: "Home", path: "/" },
+    ...(product.categorySlug && product.categoryName
+      ? [{ name: product.categoryName, path: `/c/${product.categorySlug}` }]
+      : []),
+    { name: product.title, path: `/p/${product.slug}` },
+  ];
 
   return (
     <main className={styles.main}>
-      <JsonLd data={[productLd, breadcrumbLd]} />
+      <JsonLd
+        data={[buildProductJsonLd(product), buildBreadcrumbJsonLd(breadcrumbItems)]}
+      />
       <div className={styles.inner}>
         <nav className={styles.crumbs} aria-label="Breadcrumb">
           <Link href="/">Home</Link>
@@ -155,7 +109,7 @@ export default async function ProductPage({ params }: PageProps) {
             {product.imageUrl ? (
               <Image
                 src={product.imageUrl}
-                alt={product.title}
+                alt={imageAlt}
                 width={720}
                 height={720}
                 className={styles.image}
