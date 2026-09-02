@@ -46,10 +46,18 @@ async function proxy(request: NextRequest, context: RouteContext) {
 
   const headers = new Headers();
   request.headers.forEach((value, key) => {
-    if (!HOP_BY_HOP.has(key.toLowerCase())) {
-      headers.set(key, value);
+    const lower = key.toLowerCase();
+    if (HOP_BY_HOP.has(lower) || lower === "accept-encoding") {
+      return;
     }
+    headers.set(key, value);
   });
+
+  // Next may not always expose Authorization via forEach — set explicitly.
+  const authorization = request.headers.get("authorization");
+  if (authorization) {
+    headers.set("authorization", authorization);
+  }
 
   const init: RequestInit = {
     method: request.method,
@@ -79,17 +87,36 @@ async function proxy(request: NextRequest, context: RouteContext) {
 
   const responseHeaders = new Headers();
   upstream.headers.forEach((value, key) => {
-    if (!HOP_BY_HOP.has(key.toLowerCase())) {
-      responseHeaders.set(key, value);
+    const lower = key.toLowerCase();
+    if (
+      HOP_BY_HOP.has(lower) ||
+      lower === "content-encoding" ||
+      lower === "content-length"
+    ) {
+      return;
     }
+    responseHeaders.set(key, value);
   });
+
+  // Always return a JSON body for 401 so the admin UI can show a clear message.
+  if (upstream.status === 401) {
+    const text = await upstream.text().catch(() => "");
+    return NextResponse.json(
+      {
+        error: "unauthorized",
+        message:
+          text ||
+          "Unauthorized — check Railway API ADMIN_USERNAME / ADMIN_PASSWORD",
+      },
+      { status: 401, headers: responseHeaders },
+    );
+  }
 
   return new NextResponse(upstream.body, {
     status: upstream.status,
     statusText: upstream.statusText,
     headers: responseHeaders,
   });
-}
 
 export const GET = proxy;
 export const POST = proxy;

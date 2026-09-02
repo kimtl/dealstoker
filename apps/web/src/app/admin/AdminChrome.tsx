@@ -10,17 +10,21 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const isLogin = pathname === "/admin/login";
-  const [ready, setReady] = useState(isLogin);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (isLogin) {
       setReady(true);
       return;
     }
+
+    setReady(false);
+
     if (!hasStoredAuth()) {
       router.replace("/admin/login");
       return;
     }
+
     let cancelled = false;
     adminMe()
       .then(() => {
@@ -28,8 +32,12 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
       })
       .catch(() => {
         clearStoredAuth();
-        if (!cancelled) router.replace("/admin/login");
+        if (!cancelled) {
+          setReady(false);
+          router.replace("/admin/login");
+        }
       });
+
     return () => {
       cancelled = true;
     };
@@ -39,6 +47,8 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
     return <div className={styles.shell}>{children}</div>;
   }
 
+  // Do not mount admin pages until /me succeeds — prevents Failed to fetch
+  // races when stale credentials abort in-flight category/product calls.
   if (!ready) {
     return (
       <div className={styles.shell}>
