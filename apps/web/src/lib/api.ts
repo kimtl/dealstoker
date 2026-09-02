@@ -114,7 +114,7 @@ export async function getRelatedProducts(
 
 export async function getSitemapXml(): Promise<string | null> {
   try {
-    const res = await fetch(`${getApiBaseUrl()}/sitemap.xml`, {
+    const res = await fetch(`${getApiBaseUrl()}/api/v1/sitemap.xml`, {
       next: { revalidate: 300 },
       headers: { Accept: "application/xml,text/xml,*/*" },
     });

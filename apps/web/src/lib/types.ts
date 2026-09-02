@@ -15,6 +15,7 @@ export type Category = {
   seoDescription: string | null;
   sortOrder: number;
   active: boolean;
+  updatedAt?: string | null;
 };
 
 export type ProductSummary = {
@@ -34,6 +35,8 @@ export type ProductSummary = {
   featured?: boolean;
   featuredRank?: number;
   buyClickCount?: number | null;
+  publishedAt?: string | null;
+  updatedAt?: string | null;
 };
 
 export type ProductDetail = {

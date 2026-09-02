@@ -11,12 +11,16 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
 public class SeoController {
+
+    private static final DateTimeFormatter LASTMOD =
+            DateTimeFormatter.ISO_LOCAL_DATE.withZone(ZoneOffset.UTC);
 
     private final DealStokerProperties properties;
     private final CategoryRepository categoryRepository;
@@ -54,27 +58,35 @@ public class SeoController {
         StringBuilder xml = new StringBuilder();
         xml.append("""
                 <?xml version="1.0" encoding="UTF-8"?>
-                <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+                <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+                        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
                 """);
-        addUrl(xml, base + "/", null);
-        addUrl(xml, base + "/about", null);
-        addUrl(xml, base + "/disclosure", null);
-        addUrl(xml, base + "/privacy", null);
-        addUrl(xml, base + "/contact", null);
+        addUrl(xml, base + "/", Instant.now(), "daily", "1.0", null, null);
+        addUrl(xml, base + "/about", null, "monthly", "0.4", null, null);
+        addUrl(xml, base + "/disclosure", null, "monthly", "0.4", null, null);
+        addUrl(xml, base + "/privacy", null, "monthly", "0.4", null, null);
+        addUrl(xml, base + "/contact", null, "monthly", "0.4", null, null);
 
         categoryRepository.findByActiveTrueOrderBySortOrderAscNameAsc().forEach(category ->
-                addUrl(xml, base + "/c/" + category.getSlug(),
-                        category.getUpdatedAt() != null
-                                ? DateTimeFormatter.ISO_LOCAL_DATE.format(category.getUpdatedAt().atZone(ZoneOffset.UTC))
-                                : null));
+                addUrl(
+                        xml,
+                        base + "/c/" + category.getSlug(),
+                        category.getUpdatedAt(),
+                        "daily",
+                        "0.8",
+                        null,
+                        null
+                ));
 
         productRepository.findByStatus(ProductStatus.PUBLISHED, PageRequest.of(0, 5000))
                 .forEach(product -> addUrl(
                         xml,
                         base + "/p/" + product.getSlug(),
-                        product.getUpdatedAt() != null
-                                ? DateTimeFormatter.ISO_LOCAL_DATE.format(product.getUpdatedAt().atZone(ZoneOffset.UTC))
-                                : null
+                        product.getUpdatedAt() != null ? product.getUpdatedAt() : product.getPublishedAt(),
+                        "daily",
+                        product.isFeatured() ? "0.85" : "0.7",
+                        product.getImageUrl(),
+                        product.getTitle()
                 ));
 
         xml.append("</urlset>");
@@ -91,16 +103,42 @@ public class SeoController {
         );
     }
 
-    private void addUrl(StringBuilder xml, String loc, String lastmod) {
+    private void addUrl(
+            StringBuilder xml,
+            String loc,
+            Instant lastmod,
+            String changeFreq,
+            String priority,
+            String imageUrl,
+            String imageTitle
+    ) {
         xml.append("<url><loc>").append(escape(loc)).append("</loc>");
         if (lastmod != null) {
-            xml.append("<lastmod>").append(lastmod).append("</lastmod>");
+            xml.append("<lastmod>").append(LASTMOD.format(lastmod)).append("</lastmod>");
+        }
+        if (changeFreq != null) {
+            xml.append("<changefreq>").append(changeFreq).append("</changefreq>");
+        }
+        if (priority != null) {
+            xml.append("<priority>").append(priority).append("</priority>");
+        }
+        if (imageUrl != null && !imageUrl.isBlank()) {
+            xml.append("<image:image><image:loc>").append(escape(imageUrl)).append("</image:loc>");
+            if (imageTitle != null && !imageTitle.isBlank()) {
+                xml.append("<image:title>").append(escape(imageTitle)).append("</image:title>");
+            }
+            xml.append("</image:image>");
         }
         xml.append("</url>\n");
     }
 
     private String escape(String value) {
-        return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+        return value
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;");
     }
 
     private String trimSlash(String value) {
