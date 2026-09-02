@@ -50,9 +50,16 @@ If you skip `api.` subdomain, use the Railway-generated API URL (`*.up.railway.a
 | `AMAZON_MARKETPLACE` | `www.amazon.com` |
 | `AMAZON_PARTNER_TAG` | empty until Associates approval |
 
-`PORT` is set by Railway automatically. The API converts Railway’s `postgresql://…` URL into a JDBC URL at startup (Docker entrypoint + DataSource config). You can also set `DATABASE_URL` to a JDBC URL yourself if preferred.
+`PORT` is set by Railway automatically. The API converts Railway’s `postgresql://…` URL into a JDBC URL at startup (Docker entrypoint + `RailwayDatabaseUrls` + custom `DataSource`).
 
-If the API fails with `'url' must start with "jdbc"`, redeploy the latest API image and confirm the Postgres service is linked (so `DATABASE_URL` is present).
+### Troubleshoot: `'url' must start with "jdbc"`
+
+1. Logs **must** start with `=== dealstoker-api-datasource-v4-20260902 starting ===`.  
+   If missing → Railway reused an old image. Click **Redeploy** and clear build cache (a full Docker rebuild takes several minutes).
+2. Remove API variable `SPRING_DATASOURCE_URL` if it points at `${{Postgres.DATABASE_URL}}`.
+3. Keep Postgres linked (`DATABASE_URL` only); the app converts it.
+4. Emergency (no deploy): set API `DATABASE_URL` manually to  
+   `jdbc:postgresql://HOST:PORT/railway?sslmode=require`.
 
 4. Generate a public domain for the API (or attach `api.dealstoker.com`).
 5. Health check path: `/actuator/health`.

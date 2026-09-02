@@ -1,12 +1,17 @@
 spring:
   application:
     name: dealstoker-api
+  autoconfigure:
+    # Belt-and-suspenders with @SpringBootApplication(exclude=…).
+    # Boot must not build Hikari from a raw Railway postgres:// URL.
+    exclude:
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
   datasource:
-    # Populated by RailwayDatabaseUrls / DataSourceConfig. Do not point these
-    # at raw Railway postgres:// values — conversion happens in code.
-    url: ${dealstoker.jdbc-url:${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://localhost:5432/dealstoker}}}
-    username: ${dealstoker.jdbc-username:${SPRING_DATASOURCE_USERNAME:${DATABASE_USERNAME:dealstoker}}}
-    password: ${dealstoker.jdbc-password:${SPRING_DATASOURCE_PASSWORD:${DATABASE_PASSWORD:dealstoker}}}
+    # Only our converted property. Do NOT prefer SPRING_DATASOURCE_URL here —
+    # Railway env can still hold postgres:// and override via relaxed binding.
+    url: ${dealstoker.jdbc-url:jdbc:postgresql://localhost:5432/dealstoker}
+    username: ${dealstoker.jdbc-username:${DATABASE_USERNAME:dealstoker}}
+    password: ${dealstoker.jdbc-password:${DATABASE_PASSWORD:dealstoker}}
   jpa:
     hibernate:
       ddl-auto: validate

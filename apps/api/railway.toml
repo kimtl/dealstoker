@@ -1,8 +1,10 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
+watchPatterns = ["**"]
 
 [deploy]
+startCommand = "/app/docker-entrypoint.sh"
 healthcheckPath = "/actuator/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
