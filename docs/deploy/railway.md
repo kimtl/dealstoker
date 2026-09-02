@@ -88,7 +88,7 @@ Then in Railway → each service → **Custom Domain** → add `dealstoker.com` 
 
 ## 6. Smoke checklist
 
-- [ ] `https://dealstoker.com/` loads Staff recommended / Top buys / Latest
+- [ ] `https://dealstoker.com/` loads Featured deals / Top buys / Latest
 - [ ] `https://dealstoker.com/api/backend/api/v1/health` (or API host `/actuator/health`) OK
 - [ ] Product page + `/go/{slug}` redirect works
 - [ ] `/sitemap.xml` and `/robots.txt` reachable on the **site** host

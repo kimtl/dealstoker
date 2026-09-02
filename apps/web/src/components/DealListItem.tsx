@@ -65,7 +65,7 @@ export function DealListItem({
           <div className={styles.titleRow}>
             {showNewBadge ? <span className={styles.badge}>New</span> : null}
             {product.featured ? (
-              <span className={styles.badgeFeatured}>Pick</span>
+              <span className={styles.badgeFeatured}>Featured</span>
             ) : null}
             <h3 className={styles.title}>{product.title}</h3>
           </div>

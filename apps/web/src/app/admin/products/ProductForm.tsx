@@ -223,7 +223,7 @@ export function ProductForm({ product }: Props) {
       </div>
       <div className={styles.row}>
         <label>
-          <span>Staff recommended</span>
+          <span>Featured deals</span>
           <span
             style={{
               display: "flex",
@@ -239,7 +239,7 @@ export function ProductForm({ product }: Props) {
                 setForm({ ...form, featured: e.target.checked })
               }
             />
-            Show on homepage Recommended
+            Show on homepage Featured deals
           </span>
         </label>
         <label>

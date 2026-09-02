@@ -69,17 +69,17 @@ export function categoryMetaDescription(category: Category): string {
   }
   const base =
     category.description?.trim() ||
-    `Browse curated ${category.name} deals on Amazon.com. ${SITE_NAME} lists price drops, top-rated picks, and staff recommended products for US shoppers.`;
+    `Browse curated ${category.name} deals on Amazon.com. ${SITE_NAME} lists price drops, top-rated picks, and featured deals for US shoppers.`;
   return clampText(base, 160);
 }
 
 export function homeMetaTitle(): string {
-  return `${SITE_NAME} — Amazon Deals, Price Drops & Staff Picks (US)`;
+  return `${SITE_NAME} — Amazon Deals, Price Drops & Featured Deals (US)`;
 }
 
 export function homeMetaDescription(): string {
   return clampText(
-    `Find today's best Amazon.com deals on ${SITE_NAME}. Staff recommended picks, top buys, and curated home, electronics, and outdoor products with clear prices for US shoppers.`,
+    `Find today's best Amazon.com deals on ${SITE_NAME}. Featured deals, top buys, and curated home, electronics, and outdoor products with clear prices for US shoppers.`,
     160,
   );
 }
