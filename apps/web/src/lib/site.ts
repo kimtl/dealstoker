@@ -15,7 +15,7 @@ export function getApiBaseUrl(): string {
 export const API_PROXY_PREFIX = "/api/backend";
 
 export const AFFILIATE_DISCLOSURE_SHORT =
-  "As an Amazon Associate, DealStoker earns from qualifying purchases.";
+  "As an Amazon Associate I earn from qualifying purchases.";
 
 export const AFFILIATE_DISCLOSURE_LONG =
   "DealStoker is a participant in the Amazon Services LLC Associates Program, an affiliate advertising program designed to provide a means for sites to earn advertising fees by advertising and linking to Amazon.com. Prices and availability are accurate as of the time of writing and may change.";

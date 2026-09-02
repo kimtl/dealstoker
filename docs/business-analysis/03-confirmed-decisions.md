@@ -21,8 +21,8 @@
 ## Delivery implication
 
 ```text
-Build DealStoker on dealstoker.com (US content)
-        → Apply Amazon Associates US again
+Build DealStoker on dealstoker.com (US content)   ✅ Phase 1 live
+        → Apply Amazon Associates US again         ← current step
         → Activate partner tag on product links
         → Enable PA-API ingestion jobs
 ```
@@ -32,6 +32,8 @@ Until Associates is restored:
 - Ship SEO-ready catalog with manual product entry  
 - Keep `partnerTag` configurable and nullable  
 - Do not block Phase 1 on PA-API access  
+
+Ops checklist: [`docs/associates/reapplication-checklist.md`](../associates/reapplication-checklist.md)
 
 ## Pending decisions
 
