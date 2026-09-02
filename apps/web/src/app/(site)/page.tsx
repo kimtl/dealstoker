@@ -92,8 +92,8 @@ export default async function HomePage() {
             </p>
           </div>
           <div className={styles.ctaGroup}>
-            <Link href="#recommended" className={styles.ctaPrimary}>
-              Staff picks
+            <Link href="#featured" className={styles.ctaPrimary}>
+              Featured deals
             </Link>
             <Link href="#deal-feed" className={styles.ctaSecondary}>
               All deals
@@ -132,7 +132,7 @@ export default async function HomePage() {
             ))}
           </ul>
           <nav className={styles.jumpNav} aria-label="Frontpage sections">
-            <a href="#recommended">Recommended</a>
+            <a href="#featured">Featured</a>
             <a href="#top-buys">Top buys</a>
             <a href="#deal-feed">Latest</a>
           </nav>
@@ -141,25 +141,25 @@ export default async function HomePage() {
 
         <div className={styles.feedStack}>
           <section
-            id="recommended"
+            id="featured"
             className={styles.feed}
-            aria-labelledby="recommended-heading"
+            aria-labelledby="featured-heading"
           >
             <div className={styles.feedHeader}>
               <div>
-                <h2 id="recommended-heading" className={styles.feedTitle}>
-                  Staff recommended
+                <h2 id="featured-heading" className={styles.feedTitle}>
+                  Featured deals
                 </h2>
                 <p className={styles.feedMeta}>
-                  Hand-picked by DealStoker · up to 5 deals
+                  Featured by DealStoker · up to 5 deals
                 </p>
               </div>
-              <span className={styles.pill}>Curated</span>
+              <span className={styles.pill}>Featured</span>
             </div>
             <DealList
               products={recommended}
               showNewBadge={false}
-              emptyMessage="No recommended deals yet. Mark products as featured in Admin."
+              emptyMessage="No featured deals yet. Mark products as featured in Admin."
             />
           </section>
 
