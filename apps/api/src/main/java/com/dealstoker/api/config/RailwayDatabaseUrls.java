@@ -3,41 +3,113 @@ package com.dealstoker.api.config;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Converts Railway/Heroku-style {@code postgres(ql)://} URLs into JDBC form
- * before the Spring context starts. System properties outrank OS env vars, so
- * {@code ${DATABASE_URL}} in application.yml resolves to a jdbc: URL.
+ * before the Spring context starts.
+ *
+ * <p>Railway may expose the same non-JDBC URL via several env vars
+ * ({@code DATABASE_URL}, {@code SPRING_DATASOURCE_URL}, …). All of them are
+ * rewritten, and {@code dealstoker.jdbc-*} system properties are set as the
+ * single source of truth for {@code DataSourceConfig}.
  */
 public final class RailwayDatabaseUrls {
+
+    public static final String JDBC_URL_PROPERTY = "dealstoker.jdbc-url";
+    public static final String JDBC_USER_PROPERTY = "dealstoker.jdbc-username";
+    public static final String JDBC_PASSWORD_PROPERTY = "dealstoker.jdbc-password";
 
     private RailwayDatabaseUrls() {}
 
     public static void applyFromEnvironment() {
-        String raw = firstNonBlank(
-                System.getProperty("DATABASE_URL"),
-                System.getenv("DATABASE_URL"),
-                System.getenv("DATABASE_PRIVATE_URL")
-        );
-        if (raw == null || raw.isBlank() || raw.startsWith("jdbc:")) {
-            return;
+        Map<String, String> candidates = new LinkedHashMap<>();
+        putCandidate(candidates, "SPRING_DATASOURCE_URL");
+        putCandidate(candidates, "DATABASE_URL");
+        putCandidate(candidates, "DATABASE_PRIVATE_URL");
+        putCandidate(candidates, "DATABASE_PUBLIC_URL");
+        putCandidate(candidates, "JDBC_DATABASE_URL");
+
+        String raw = null;
+        for (String value : candidates.values()) {
+            if (value != null && !value.isBlank()) {
+                raw = value;
+                break;
+            }
         }
-        if (!(raw.startsWith("postgres://") || raw.startsWith("postgresql://"))) {
+        if (raw == null || raw.isBlank()) {
+            System.out.println("No DATABASE_URL / SPRING_DATASOURCE_URL found to convert");
             return;
         }
 
-        Parsed parsed = parse(raw);
-        System.setProperty("DATABASE_URL", parsed.jdbcUrl());
-        System.setProperty("spring.datasource.url", parsed.jdbcUrl());
+        Parsed parsed;
+        if (raw.startsWith("jdbc:")) {
+            parsed = new Parsed(
+                    raw,
+                    firstNonBlank(
+                            System.getProperty("SPRING_DATASOURCE_USERNAME"),
+                            System.getenv("SPRING_DATASOURCE_USERNAME"),
+                            System.getProperty("DATABASE_USERNAME"),
+                            System.getenv("DATABASE_USERNAME"),
+                            System.getenv("PGUSER")
+                    ),
+                    firstNonBlank(
+                            System.getProperty("SPRING_DATASOURCE_PASSWORD"),
+                            System.getenv("SPRING_DATASOURCE_PASSWORD"),
+                            System.getProperty("DATABASE_PASSWORD"),
+                            System.getenv("DATABASE_PASSWORD"),
+                            System.getenv("PGPASSWORD")
+                    )
+            );
+        } else if (raw.startsWith("postgres://") || raw.startsWith("postgresql://")) {
+            parsed = parse(raw);
+            System.out.println("Converted postgres URL to JDBC before Spring Boot start");
+        } else {
+            System.err.println("Unrecognized database URL scheme; leaving unchanged");
+            return;
+        }
+
+        // Single source of truth used by DataSourceConfig / application.yml
+        System.setProperty(JDBC_URL_PROPERTY, parsed.jdbcUrl());
         if (parsed.username() != null) {
-            System.setProperty("DATABASE_USERNAME", parsed.username());
-            System.setProperty("spring.datasource.username", parsed.username());
+            System.setProperty(JDBC_USER_PROPERTY, parsed.username());
         }
         if (parsed.password() != null) {
-            System.setProperty("DATABASE_PASSWORD", parsed.password());
-            System.setProperty("spring.datasource.password", parsed.password());
+            System.setProperty(JDBC_PASSWORD_PROPERTY, parsed.password());
         }
-        System.out.println("Converted DATABASE_URL to JDBC before Spring Boot start");
+
+        // Override every common Spring / Railway key so auto-config cannot see postgres://
+        setAll("DATABASE_URL", parsed.jdbcUrl());
+        setAll("SPRING_DATASOURCE_URL", parsed.jdbcUrl());
+        setAll("JDBC_DATABASE_URL", parsed.jdbcUrl());
+        setAll("spring.datasource.url", parsed.jdbcUrl());
+        if (parsed.username() != null) {
+            setAll("DATABASE_USERNAME", parsed.username());
+            setAll("SPRING_DATASOURCE_USERNAME", parsed.username());
+            setAll("spring.datasource.username", parsed.username());
+        }
+        if (parsed.password() != null) {
+            setAll("DATABASE_PASSWORD", parsed.password());
+            setAll("SPRING_DATASOURCE_PASSWORD", parsed.password());
+            setAll("spring.datasource.password", parsed.password());
+        }
+    }
+
+    private static void putCandidate(Map<String, String> candidates, String key) {
+        String fromProp = System.getProperty(key);
+        if (fromProp != null && !fromProp.isBlank()) {
+            candidates.put(key, fromProp);
+            return;
+        }
+        String fromEnv = System.getenv(key);
+        if (fromEnv != null && !fromEnv.isBlank()) {
+            candidates.put(key, fromEnv);
+        }
+    }
+
+    private static void setAll(String key, String value) {
+        System.setProperty(key, value);
     }
 
     static Parsed parse(String raw) {

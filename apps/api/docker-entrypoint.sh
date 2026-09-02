@@ -1,13 +1,18 @@
 #!/bin/sh
 set -eu
 
-# Railway injects postgres(ql):// URLs. Convert to JDBC before Spring starts.
-if [ -n "${DATABASE_URL:-}" ]; then
-  case "$DATABASE_URL" in
+convert_if_needed() {
+  var_name="$1"
+  eval "val=\${$var_name:-}"
+  if [ -z "$val" ]; then
+    return 0
+  fi
+  case "$val" in
     jdbc:*)
+      return 0
       ;;
     postgres://*|postgresql://*)
-      rest="${DATABASE_URL#*://}"
+      rest="${val#*://}"
       userinfo="${rest%%@*}"
       hostportdb="${rest#*@}"
       user="${userinfo%%:*}"
@@ -18,15 +23,25 @@ if [ -n "${DATABASE_URL:-}" ]; then
       if [ -z "$db" ]; then
         db="railway"
       fi
+      jdbc="jdbc:postgresql://${hostport}/${db}?sslmode=require"
+      export "$var_name=$jdbc"
       export DATABASE_USERNAME="${DATABASE_USERNAME:-$user}"
       export DATABASE_PASSWORD="${DATABASE_PASSWORD:-$pass}"
-      export DATABASE_URL="jdbc:postgresql://${hostport}/${db}?sslmode=require"
-      export SPRING_DATASOURCE_URL="$DATABASE_URL"
-      export SPRING_DATASOURCE_USERNAME="$DATABASE_USERNAME"
-      export SPRING_DATASOURCE_PASSWORD="$DATABASE_PASSWORD"
-      echo "Converted DATABASE_URL to JDBC form for Spring Boot"
+      export SPRING_DATASOURCE_USERNAME="${SPRING_DATASOURCE_USERNAME:-$user}"
+      export SPRING_DATASOURCE_PASSWORD="${SPRING_DATASOURCE_PASSWORD:-$pass}"
+      echo "Converted $var_name to JDBC form for Spring Boot"
       ;;
   esac
+}
+
+convert_if_needed DATABASE_URL
+convert_if_needed DATABASE_PRIVATE_URL
+convert_if_needed DATABASE_PUBLIC_URL
+convert_if_needed SPRING_DATASOURCE_URL
+convert_if_needed JDBC_DATABASE_URL
+
+if [ -n "${DATABASE_URL:-}" ]; then
+  export SPRING_DATASOURCE_URL="${SPRING_DATASOURCE_URL:-$DATABASE_URL}"
 fi
 
 exec java -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -jar /app/app.jar

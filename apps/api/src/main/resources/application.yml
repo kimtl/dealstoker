@@ -2,11 +2,11 @@ spring:
   application:
     name: dealstoker-api
   datasource:
-    # Prefer explicit JDBC vars; Railway postgres:// URLs are converted in
-    # ApiApplication.main via RailwayDatabaseUrls before the context starts.
-    url: ${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://localhost:5432/dealstoker}}
-    username: ${SPRING_DATASOURCE_USERNAME:${DATABASE_USERNAME:dealstoker}}
-    password: ${SPRING_DATASOURCE_PASSWORD:${DATABASE_PASSWORD:dealstoker}}
+    # Populated by RailwayDatabaseUrls / DataSourceConfig. Do not point these
+    # at raw Railway postgres:// values — conversion happens in code.
+    url: ${dealstoker.jdbc-url:${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://localhost:5432/dealstoker}}}
+    username: ${dealstoker.jdbc-username:${SPRING_DATASOURCE_USERNAME:${DATABASE_USERNAME:dealstoker}}}
+    password: ${dealstoker.jdbc-password:${SPRING_DATASOURCE_PASSWORD:${DATABASE_PASSWORD:dealstoker}}}
   jpa:
     hibernate:
       ddl-auto: validate

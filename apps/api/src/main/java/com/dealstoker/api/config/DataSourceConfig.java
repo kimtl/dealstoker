@@ -3,7 +3,6 @@ package com.dealstoker.api.config;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -16,11 +15,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Builds the primary {@link DataSource}, converting Railway-style
- * {@code postgres(ql)://} URLs into JDBC URLs when needed.
- *
- * <p>EnvironmentPostProcessor registration is brittle across Boot versions /
- * fat-jar layouts; constructing the DataSource here is the reliable path.
+ * Sole {@link DataSource} for the app. Auto-config Hikari is excluded so a raw
+ * Railway {@code postgres://} URL cannot blow up {@code DataSourceProperties}.
  */
 @Configuration
 public class DataSourceConfig {
@@ -29,20 +25,29 @@ public class DataSourceConfig {
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean(DataSource.class)
     DataSource dataSource(Environment environment) {
         ParsedJdbc parsed = parse(
                 firstNonBlank(
+                        environment.getProperty(RailwayDatabaseUrls.JDBC_URL_PROPERTY),
                         environment.getProperty("spring.datasource.url"),
-                        environment.getProperty("DATABASE_URL")
+                        environment.getProperty("SPRING_DATASOURCE_URL"),
+                        environment.getProperty("DATABASE_URL"),
+                        environment.getProperty("DATABASE_PRIVATE_URL"),
+                        environment.getProperty("JDBC_DATABASE_URL")
                 ),
                 firstNonBlank(
+                        environment.getProperty(RailwayDatabaseUrls.JDBC_USER_PROPERTY),
                         environment.getProperty("spring.datasource.username"),
-                        environment.getProperty("DATABASE_USERNAME")
+                        environment.getProperty("SPRING_DATASOURCE_USERNAME"),
+                        environment.getProperty("DATABASE_USERNAME"),
+                        environment.getProperty("PGUSER")
                 ),
                 firstNonBlank(
+                        environment.getProperty(RailwayDatabaseUrls.JDBC_PASSWORD_PROPERTY),
                         environment.getProperty("spring.datasource.password"),
-                        environment.getProperty("DATABASE_PASSWORD")
+                        environment.getProperty("SPRING_DATASOURCE_PASSWORD"),
+                        environment.getProperty("DATABASE_PASSWORD"),
+                        environment.getProperty("PGPASSWORD")
                 )
         );
 
@@ -54,14 +59,14 @@ public class DataSourceConfig {
         if (parsed.password() != null) {
             dataSource.setPassword(parsed.password());
         }
-        log.info("Configured datasource with JDBC URL (startsWithJdbc={})", parsed.url().startsWith("jdbc:"));
+        log.info("Using JDBC datasource (jdbcUrlStartsWithJdbc={})", parsed.url().startsWith("jdbc:"));
         return dataSource;
     }
 
     static ParsedJdbc parse(String rawUrl, String username, String password) {
         if (!StringUtils.hasText(rawUrl)) {
             throw new IllegalStateException(
-                    "DATABASE_URL / spring.datasource.url is required"
+                    "DATABASE_URL / SPRING_DATASOURCE_URL / dealstoker.jdbc-url is required"
             );
         }
         String url = rawUrl.trim();
@@ -115,7 +120,8 @@ public class DataSourceConfig {
 
         if (!url.startsWith("jdbc:")) {
             throw new IllegalStateException(
-                    "Datasource URL must start with jdbc: (got: " + url + ")"
+                    "Datasource URL must start with jdbc: (got scheme from: "
+                            + url.substring(0, Math.min(url.length(), 32)) + "…)"
             );
         }
         return new ParsedJdbc(url, user, pass);
