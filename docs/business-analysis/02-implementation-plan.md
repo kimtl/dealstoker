@@ -417,7 +417,7 @@ dealstoker/
 - [x] Implementation plan & architecture  
 - [x] Market/brand/Associates decisions captured  
 - [ ] ADR set (remaining)  
-- [ ] Category taxonomy spreadsheet (US)  
+- [x] Category taxonomy spreadsheet (US)  
 - [ ] API OpenAPI draft  
 - [ ] UI wireframes (home/category/product/admin)  
 - [x] Compliance copy (disclosure, US)  
