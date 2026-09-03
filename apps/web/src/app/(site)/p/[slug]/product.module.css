@@ -29,6 +29,12 @@
 
 .media {
   display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.imageWrap {
+  display: grid;
   place-items: center;
   min-height: 280px;
   background: linear-gradient(160deg, var(--surface-elevated), var(--mist));
@@ -45,6 +51,7 @@
 .placeholder {
   width: 120px;
   height: 120px;
+  margin: 4rem auto;
   border-radius: 999px;
   background: rgba(16, 40, 34, 0.08);
 }
@@ -111,8 +118,9 @@
 .ctaBlock {
   display: grid;
   gap: 0.7rem;
-  margin-top: 0.35rem;
+  width: 100%;
   max-width: 26rem;
+  margin-inline: auto;
 }
 
 .cta {
