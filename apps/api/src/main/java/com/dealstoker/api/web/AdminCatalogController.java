@@ -1,8 +1,12 @@
 package com.dealstoker.api.web;
 
 import com.dealstoker.api.domain.ProductStatus;
+import com.dealstoker.api.service.AmazonImportService;
 import com.dealstoker.api.service.CategoryService;
 import com.dealstoker.api.service.ProductService;
+import com.dealstoker.api.web.dto.AmazonImportDtos.ImportRequest;
+import com.dealstoker.api.web.dto.AmazonImportDtos.PreviewRequest;
+import com.dealstoker.api.web.dto.AmazonImportDtos.PreviewResponse;
 import com.dealstoker.api.web.dto.CategoryDtos.CategoryRequest;
 import com.dealstoker.api.web.dto.CategoryDtos.CategoryResponse;
 import com.dealstoker.api.web.dto.ProductDtos.FeatureRequest;
@@ -30,10 +34,16 @@ public class AdminCatalogController {
 
     private final CategoryService categoryService;
     private final ProductService productService;
+    private final AmazonImportService amazonImportService;
 
-    public AdminCatalogController(CategoryService categoryService, ProductService productService) {
+    public AdminCatalogController(
+            CategoryService categoryService,
+            ProductService productService,
+            AmazonImportService amazonImportService
+    ) {
         this.categoryService = categoryService;
         this.productService = productService;
+        this.amazonImportService = amazonImportService;
     }
 
     @GetMapping("/me")
@@ -79,6 +89,16 @@ public class AdminCatalogController {
     @PostMapping("/products")
     public ProductDetail createProduct(@Valid @RequestBody ProductRequest request) {
         return productService.create(request);
+    }
+
+    @PostMapping("/products/import/preview")
+    public PreviewResponse previewAmazonImport(@Valid @RequestBody PreviewRequest request) {
+        return amazonImportService.preview(request.amazonUrl());
+    }
+
+    @PostMapping("/products/import")
+    public ProductDetail importAmazonProduct(@Valid @RequestBody ImportRequest request) {
+        return amazonImportService.importProduct(request);
     }
 
     @PutMapping("/products/{id}")

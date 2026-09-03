@@ -4,7 +4,9 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   adminCreateProduct,
+  adminImportAmazonProduct,
   adminListCategories,
+  adminPreviewAmazonImport,
   adminUpdateProduct,
 } from "@/lib/admin-api";
 import type { Category, ProductDetail, ProductStatus } from "@/lib/types";
@@ -83,7 +85,10 @@ export function ProductForm({ product }: Props) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState<FormState>(() => toForm(product));
   const [error, setError] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [amazonUrl, setAmazonUrl] = useState("");
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     adminListCategories()
@@ -105,6 +110,87 @@ export function ProductForm({ product }: Props) {
   useEffect(() => {
     setForm(toForm(product));
   }, [product]);
+
+  function applyPreviewToForm(preview: Awaited<ReturnType<typeof adminPreviewAmazonImport>>) {
+    setForm((prev) => ({
+      ...prev,
+      externalId: preview.asin || prev.externalId,
+      source: "AMAZON",
+      marketplace: preview.marketplace || prev.marketplace || "www.amazon.com",
+      title: preview.title || prev.title,
+      description: preview.description || prev.description,
+      imageUrl: preview.imageUrl || prev.imageUrl,
+      priceAmount:
+        preview.priceAmount != null ? String(preview.priceAmount) : prev.priceAmount,
+      listPrice:
+        preview.listPrice != null ? String(preview.listPrice) : prev.listPrice,
+      currency: preview.currency || prev.currency || "USD",
+      rating: preview.rating != null ? String(preview.rating) : prev.rating,
+      reviewCount:
+        preview.reviewCount != null ? String(preview.reviewCount) : prev.reviewCount,
+      detailPageUrl: preview.canonicalUrl || prev.detailPageUrl,
+      brand: preview.brand || prev.brand,
+      features:
+        preview.features?.length > 0
+          ? preview.features.join("\n")
+          : prev.features,
+      status: prev.status || "DRAFT",
+      seoTitle: preview.title
+        ? preview.title.slice(0, 60)
+        : prev.seoTitle,
+      seoDescription: preview.description
+        ? preview.description.slice(0, 155)
+        : prev.seoDescription,
+    }));
+    setNote(
+      [
+        preview.note,
+        "Outbound URL is set to the Amazon product page for now. Replace it with a SiteStripe affiliate link before or after publish.",
+        preview.alreadyExists
+          ? `Existing product id: ${preview.existingProductId}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" "),
+    );
+  }
+
+  async function onPreviewImport() {
+    setImporting(true);
+    setError(null);
+    setNote(null);
+    try {
+      const preview = await adminPreviewAmazonImport(amazonUrl.trim());
+      applyPreviewToForm(preview);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Import preview failed");
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  async function onImportAndSaveDraft() {
+    if (!form.primaryCategoryId) {
+      setError("Select a primary category first");
+      return;
+    }
+    setImporting(true);
+    setError(null);
+    setNote(null);
+    try {
+      const created = await adminImportAmazonProduct({
+        amazonUrl: amazonUrl.trim(),
+        primaryCategoryId: Number(form.primaryCategoryId),
+        affiliateUrl: form.detailPageUrl.trim() || undefined,
+        createAsDraft: true,
+      });
+      router.replace(`/admin/products/${created.id}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Import failed");
+    } finally {
+      setImporting(false);
+    }
+  }
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -160,6 +246,46 @@ export function ProductForm({ product }: Props) {
   return (
     <form className={styles.form} onSubmit={onSubmit}>
       {error ? <p className={styles.error}>{error}</p> : null}
+      {note ? <p className={styles.okNote}>{note}</p> : null}
+
+      <div className={styles.importBox}>
+        <h2>Import from Amazon URL</h2>
+        <p className={styles.hint}>
+          Paste an Amazon product URL (or ASIN). We extract the ASIN and try to
+          fill title/image/price from the public page (no PA-API). Affiliate
+          links from SiteStripe can be pasted into the outbound URL field
+          afterward.
+        </p>
+        <label>
+          Amazon URL or ASIN
+          <input
+            value={amazonUrl}
+            onChange={(e) => setAmazonUrl(e.target.value)}
+            placeholder="https://www.amazon.com/dp/B0XXXXXXXX"
+          />
+        </label>
+        <div className={styles.importActions}>
+          <button
+            type="button"
+            className={styles.buttonSecondary}
+            onClick={onPreviewImport}
+            disabled={importing || !amazonUrl.trim()}
+          >
+            {importing ? "Working…" : "Preview & fill form"}
+          </button>
+          {!product ? (
+            <button
+              type="button"
+              className={styles.button}
+              onClick={onImportAndSaveDraft}
+              disabled={importing || !amazonUrl.trim()}
+            >
+              {importing ? "Working…" : "Import as draft"}
+            </button>
+          ) : null}
+        </div>
+      </div>
+
       <div className={styles.row}>
         <label>
           External ID (ASIN)
@@ -256,7 +382,7 @@ export function ProductForm({ product }: Props) {
         </label>
       </div>
       <label>
-        Detail page URL
+        Outbound Amazon / SiteStripe URL
         <input
           value={form.detailPageUrl}
           onChange={(e) =>
@@ -264,6 +390,12 @@ export function ProductForm({ product }: Props) {
           }
           required
         />
+        <span className={styles.hint}>
+          After import this is usually https://www.amazon.com/dp/ASIN. Replace
+          with a SiteStripe affiliate link when you have one. Short links
+          (amzn.to) are left as-is on redirect; full amazon.com links get
+          tag=dealstoker01-20 appended when missing.
+        </span>
       </label>
       <label>
         Image URL

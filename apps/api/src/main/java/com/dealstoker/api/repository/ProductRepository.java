@@ -22,6 +22,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     boolean existsBySourceAndExternalIdAndMarketplace(String source, String externalId, String marketplace);
 
+    Optional<Product> findBySourceAndExternalIdAndMarketplace(String source, String externalId, String marketplace);
+
     boolean existsBySourceAndExternalIdAndMarketplaceAndIdNot(
             String source, String externalId, String marketplace, Long id);
 
