@@ -106,18 +106,36 @@ export default async function ProductPage({ params }: PageProps) {
 
         <div className={styles.layout}>
           <div className={styles.media}>
-            {product.imageUrl ? (
-              <Image
-                src={product.imageUrl}
-                alt={imageAlt}
-                width={720}
-                height={720}
-                className={styles.image}
-                priority
-              />
-            ) : (
-              <div className={styles.placeholder} />
-            )}
+            <div className={styles.imageWrap}>
+              {product.imageUrl ? (
+                <Image
+                  src={product.imageUrl}
+                  alt={imageAlt}
+                  width={720}
+                  height={720}
+                  className={styles.image}
+                  priority
+                />
+              ) : (
+                <div className={styles.placeholder} />
+              )}
+            </div>
+
+            <div className={styles.ctaBlock}>
+              <a
+                href={goHref}
+                className={styles.cta}
+                target="_blank"
+                rel="nofollow sponsored noopener noreferrer"
+              >
+                View on Amazon
+              </a>
+              <AffiliateDisclosure />
+              <p className={styles.siteNote}>
+                Curated by {SITE_NAME}. Price and availability may change on
+                Amazon.com.
+              </p>
+            </div>
           </div>
 
           <div className={styles.info}>
@@ -147,22 +165,6 @@ export default async function ProductPage({ params }: PageProps) {
                 ))}
               </ul>
             ) : null}
-
-            <div className={styles.ctaBlock}>
-              <a
-                href={goHref}
-                className={styles.cta}
-                target="_blank"
-                rel="nofollow sponsored noopener noreferrer"
-              >
-                View on Amazon
-              </a>
-              <AffiliateDisclosure />
-              <p className={styles.siteNote}>
-                Curated by {SITE_NAME}. Price and availability may change on
-                Amazon.com.
-              </p>
-            </div>
           </div>
         </div>
 
