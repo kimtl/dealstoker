@@ -35,14 +35,19 @@ public final class ProductDtos {
             boolean featured,
             int featuredRank,
             Long buyClickCount,
+            Long viewCount,
             Instant publishedAt,
             Instant updatedAt
     ) {
         public static ProductSummary from(Product product) {
-            return from(product, null);
+            return from(product, null, null);
         }
 
         public static ProductSummary from(Product product, Long buyClickCount) {
+            return from(product, buyClickCount, null);
+        }
+
+        public static ProductSummary from(Product product, Long buyClickCount, Long viewCount) {
             return new ProductSummary(
                     product.getId(),
                     product.getTitle(),
@@ -60,6 +65,7 @@ public final class ProductDtos {
                     product.isFeatured(),
                     product.getFeaturedRank(),
                     buyClickCount,
+                    viewCount,
                     product.getPublishedAt(),
                     product.getUpdatedAt()
             );

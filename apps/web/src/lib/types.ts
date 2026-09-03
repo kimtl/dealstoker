@@ -35,8 +35,37 @@ export type ProductSummary = {
   featured?: boolean;
   featuredRank?: number;
   buyClickCount?: number | null;
+  viewCount?: number | null;
   publishedAt?: string | null;
   updatedAt?: string | null;
+};
+
+export type AnalyticsDailyStat = {
+  date: string;
+  pageViews: number;
+  visitors: number;
+  sessions: number;
+  productViews: number;
+  outboundClicks: number;
+};
+
+export type AnalyticsProductStat = {
+  productId: number;
+  slug: string;
+  title: string;
+  views: number;
+  clicks: number;
+};
+
+export type AnalyticsSummary = {
+  rangeDays: number;
+  pageViews: number;
+  uniqueVisitors: number;
+  uniqueSessions: number;
+  productViews: number;
+  outboundClicks: number;
+  daily: AnalyticsDailyStat[];
+  topProducts: AnalyticsProductStat[];
 };
 
 export type ProductDetail = {

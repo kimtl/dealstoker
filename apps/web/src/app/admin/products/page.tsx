@@ -107,6 +107,8 @@ export default function AdminProductsPage() {
               <th>Category</th>
               <th>Status</th>
               <th>Featured</th>
+              <th>Views</th>
+              <th>Clicks</th>
               <th>Price</th>
               <th />
             </tr>
@@ -126,6 +128,8 @@ export default function AdminProductsPage() {
                     ? `Yes (#${product.featuredRank ?? "—"})`
                     : "No"}
                 </td>
+                <td>{product.viewCount ?? 0}</td>
+                <td>{product.buyClickCount ?? 0}</td>
                 <td>
                   {product.priceAmount != null
                     ? `${product.currency || "USD"} ${product.priceAmount}`
