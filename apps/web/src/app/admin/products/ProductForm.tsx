@@ -251,10 +251,11 @@ export function ProductForm({ product }: Props) {
       <div className={styles.importBox}>
         <h2>Import from Amazon URL</h2>
         <p className={styles.hint}>
-          Paste an Amazon product URL (or ASIN). We extract the ASIN and try to
-          fill title/image/price from the public page (no PA-API). Affiliate
-          links from SiteStripe can be pasted into the outbound URL field
-          afterward.
+          Paste an Amazon product URL (or ASIN). We crawl the product detail
+          page for title, price, image, bullets, and rating (no PA-API). If
+          Amazon blocks the crawl, ASIN still imports and you can fill the rest
+          manually. After import, paste a SiteStripe affiliate link into the
+          outbound URL field when ready.
         </p>
         <label>
           Amazon URL or ASIN
