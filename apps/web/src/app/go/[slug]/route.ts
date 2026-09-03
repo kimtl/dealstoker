@@ -14,15 +14,31 @@ type RouteContext = {
  */
 export async function GET(request: NextRequest, context: RouteContext) {
   const { slug } = await context.params;
-  const target = `${getApiBaseUrl()}/go/${encodeURIComponent(slug)}${request.nextUrl.search}`;
+  const apiUrl = new URL(
+    `${getApiBaseUrl()}/go/${encodeURIComponent(slug)}`,
+  );
+  request.nextUrl.searchParams.forEach((value, key) => {
+    apiUrl.searchParams.set(key, value);
+  });
+
+  const sessionId =
+    request.cookies.get("ds_sid")?.value ||
+    request.nextUrl.searchParams.get("sid");
+  if (sessionId && !apiUrl.searchParams.has("sid")) {
+    apiUrl.searchParams.set("sid", sessionId);
+  }
 
   try {
-    const upstream = await fetch(target, {
+    const upstream = await fetch(apiUrl.toString(), {
       method: "GET",
       redirect: "manual",
       headers: {
         "user-agent": request.headers.get("user-agent") || "dealstoker-web",
         referer: request.headers.get("referer") || "",
+        "x-forwarded-for":
+          request.headers.get("x-forwarded-for") ||
+          request.headers.get("x-real-ip") ||
+          "",
       },
     });
 

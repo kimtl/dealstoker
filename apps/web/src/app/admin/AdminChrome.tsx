@@ -67,6 +67,7 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
         </Link>
         <nav className={styles.nav}>
           <Link href="/admin">Dashboard</Link>
+          <Link href="/admin/analytics">Analytics</Link>
           <Link href="/admin/categories">Categories</Link>
           <Link href="/admin/products">Products</Link>
           <Link href="/">View site</Link>

@@ -3,6 +3,7 @@
 import { API_PROXY_PREFIX } from "./site";
 import type {
   AmazonImportPreview,
+  AnalyticsSummary,
   Category,
   CategoryRequest,
   PageResponse,
@@ -190,4 +191,10 @@ export async function adminFeatureProduct(
 
 export async function adminDeleteProduct(id: number): Promise<void> {
   await adminFetch(`/api/v1/admin/products/${id}`, { method: "DELETE" });
+}
+
+export async function adminAnalyticsSummary(
+  days = 7,
+): Promise<AnalyticsSummary> {
+  return adminFetch(`/api/v1/admin/analytics/summary?days=${days}`);
 }

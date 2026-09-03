@@ -4,6 +4,7 @@ import com.dealstoker.api.domain.Category;
 import com.dealstoker.api.domain.Product;
 import com.dealstoker.api.domain.ProductStatus;
 import com.dealstoker.api.repository.ClickEventRepository;
+import com.dealstoker.api.repository.PageViewEventRepository;
 import com.dealstoker.api.repository.ProductRepository;
 import com.dealstoker.api.util.Slugify;
 import com.dealstoker.api.web.ApiExceptionHandler.ConflictException;
@@ -31,15 +32,18 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryService categoryService;
     private final ClickEventRepository clickEventRepository;
+    private final PageViewEventRepository pageViewEventRepository;
 
     public ProductService(
             ProductRepository productRepository,
             CategoryService categoryService,
-            ClickEventRepository clickEventRepository
+            ClickEventRepository clickEventRepository,
+            PageViewEventRepository pageViewEventRepository
     ) {
         this.productRepository = productRepository;
         this.categoryService = categoryService;
         this.clickEventRepository = clickEventRepository;
+        this.pageViewEventRepository = pageViewEventRepository;
     }
 
     @Transactional(readOnly = true)
@@ -63,7 +67,7 @@ public class ProductService {
         Page<Product> result = status == null
                 ? productRepository.findAll(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt")))
                 : productRepository.findByStatus(status, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt")));
-        return toPage(result);
+        return toAdminPage(result);
     }
 
     @Transactional(readOnly = true)
@@ -306,6 +310,40 @@ public class ProductService {
     private PageResponse<ProductSummary> toPage(Page<Product> page) {
         return new PageResponse<>(
                 page.getContent().stream().map(ProductSummary::from).toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
+    }
+
+    private PageResponse<ProductSummary> toAdminPage(Page<Product> page) {
+        List<Long> ids = page.getContent().stream().map(Product::getId).toList();
+        Map<Long, Long> clickCounts = Map.of();
+        Map<Long, Long> viewCounts = Map.of();
+        if (!ids.isEmpty()) {
+            clickCounts = clickEventRepository.countByProductIds(ids).stream()
+                    .collect(Collectors.toMap(
+                            row -> ((Number) row[0]).longValue(),
+                            row -> ((Number) row[1]).longValue()
+                    ));
+            Instant epoch = Instant.EPOCH;
+            viewCounts = pageViewEventRepository.countByProductIdsSince(ids, epoch).stream()
+                    .collect(Collectors.toMap(
+                            row -> ((Number) row[0]).longValue(),
+                            row -> ((Number) row[1]).longValue()
+                    ));
+        }
+        Map<Long, Long> finalClickCounts = clickCounts;
+        Map<Long, Long> finalViewCounts = viewCounts;
+        return new PageResponse<>(
+                page.getContent().stream()
+                        .map(product -> ProductSummary.from(
+                                product,
+                                finalClickCounts.getOrDefault(product.getId(), 0L),
+                                finalViewCounts.getOrDefault(product.getId(), 0L)
+                        ))
+                        .toList(),
                 page.getNumber(),
                 page.getSize(),
                 page.getTotalElements(),
