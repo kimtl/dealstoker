@@ -22,6 +22,13 @@ class AffiliateLinkBuilderTest {
         assertEquals("https://www.amazon.com/dp/B000123", url);
     }
 
+    @Test
+    void leavesShortAffiliateLinksUntouched() {
+        AffiliateLinkBuilder builder = new AffiliateLinkBuilder(props("dealstoker01-20"));
+        String shortLink = "https://amzn.to/abc123";
+        assertEquals(shortLink, builder.buildOutboundUrl(shortLink));
+    }
+
     private DealStokerProperties props(String tag) {
         return new DealStokerProperties(
                 "https://dealstoker.com",

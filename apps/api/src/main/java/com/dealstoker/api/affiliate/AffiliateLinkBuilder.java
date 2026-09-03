@@ -6,9 +6,17 @@ import org.springframework.stereotype.Component;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import java.util.Set;
 
 @Component
 public class AffiliateLinkBuilder {
+
+    private static final Set<String> AFFILIATE_SHORT_HOSTS = Set.of(
+            "amzn.to",
+            "a.co",
+            "amzn.com"
+    );
 
     private final DealStokerProperties properties;
 
@@ -26,6 +34,11 @@ public class AffiliateLinkBuilder {
         }
         try {
             URI uri = URI.create(detailPageUrl);
+            String host = uri.getHost() == null ? "" : uri.getHost().toLowerCase(Locale.ROOT);
+            // SiteStripe short links already carry attribution — do not rewrite.
+            if (AFFILIATE_SHORT_HOSTS.contains(host)) {
+                return detailPageUrl;
+            }
             String query = uri.getQuery();
             String encodedTag = URLEncoder.encode(tag.trim(), StandardCharsets.UTF_8);
             if (query == null || query.isBlank()) {

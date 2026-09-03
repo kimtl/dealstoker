@@ -2,6 +2,7 @@
 
 import { API_PROXY_PREFIX } from "./site";
 import type {
+  AmazonImportPreview,
   Category,
   CategoryRequest,
   PageResponse,
@@ -128,6 +129,28 @@ export async function adminCreateProduct(
   body: ProductRequest,
 ): Promise<ProductDetail> {
   return adminFetch("/api/v1/admin/products", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function adminPreviewAmazonImport(
+  amazonUrl: string,
+): Promise<AmazonImportPreview> {
+  return adminFetch("/api/v1/admin/products/import/preview", {
+    method: "POST",
+    body: JSON.stringify({ amazonUrl }),
+  });
+}
+
+export async function adminImportAmazonProduct(body: {
+  amazonUrl: string;
+  primaryCategoryId: number;
+  affiliateUrl?: string;
+  titleOverride?: string;
+  createAsDraft?: boolean;
+}): Promise<ProductDetail> {
+  return adminFetch("/api/v1/admin/products/import", {
     method: "POST",
     body: JSON.stringify(body),
   });

@@ -120,3 +120,23 @@ export type ProductRequest = {
   featured?: boolean;
   featuredRank?: number;
 };
+
+export type AmazonImportPreview = {
+  asin: string;
+  canonicalUrl: string;
+  title: string | null;
+  imageUrl: string | null;
+  description: string | null;
+  brand: string | null;
+  priceAmount: number | string | null;
+  listPrice: number | string | null;
+  currency: string | null;
+  rating: number | string | null;
+  reviewCount: number | null;
+  features: string[];
+  marketplace: string;
+  pageFetched: boolean;
+  note: string | null;
+  alreadyExists: boolean;
+  existingProductId: number | null;
+};
