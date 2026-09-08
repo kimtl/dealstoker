@@ -54,6 +54,8 @@ export async function getProducts(
     category?: string;
     q?: string;
     sort?: string;
+    minPrice?: number | string;
+    maxPrice?: number | string;
     page?: number;
     size?: number;
   } = {},
@@ -62,6 +64,12 @@ export async function getProducts(
   if (params.category) search.set("category", params.category);
   if (params.q) search.set("q", params.q);
   if (params.sort) search.set("sort", params.sort);
+  if (params.minPrice !== undefined && params.minPrice !== "") {
+    search.set("minPrice", String(params.minPrice));
+  }
+  if (params.maxPrice !== undefined && params.maxPrice !== "") {
+    search.set("maxPrice", String(params.maxPrice));
+  }
   if (params.page !== undefined) search.set("page", String(params.page));
   if (params.size !== undefined) search.set("size", String(params.size));
   const qs = search.toString();

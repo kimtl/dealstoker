@@ -99,37 +99,95 @@
   color: var(--link);
 }
 
-.emptySearch {
-  display: flex;
-  align-items: stretch;
-  max-width: 36rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
+.filters {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+  padding: 0.9rem;
+  margin-bottom: 1rem;
   background: var(--white);
-  overflow: hidden;
-  margin-top: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
 }
 
-.emptyInput {
-  flex: 1;
+.filterField {
+  display: grid;
+  gap: 0.3rem;
   min-width: 0;
-  border: 0;
-  background: transparent;
-  padding: 0.75rem 1rem;
-  outline: none;
 }
 
-.emptyButton {
+.filterField label {
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.filterField input,
+.filterField select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-elevated);
+  padding: 0.55rem 0.65rem;
+  color: var(--ink);
+}
+
+.filterField input:focus,
+.filterField select:focus {
+  outline: none;
+  border-color: rgba(31, 111, 235, 0.45);
+  box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.12);
+  background: var(--white);
+}
+
+.filterActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.applyButton {
   border: 0;
-  border-left: 1px solid var(--line);
   background: var(--ember);
   color: #fff;
   font-weight: 750;
-  padding: 0.75rem 1.1rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 8px;
   cursor: pointer;
 }
 
-.emptyButton:hover,
-.emptyButton:focus-visible {
+.applyButton:hover,
+.applyButton:focus-visible {
   background: var(--ember-deep);
+}
+
+.clearLink {
+  color: var(--link);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.hint {
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+@media (max-width: 960px) {
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filterActions {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
 }

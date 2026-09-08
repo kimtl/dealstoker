@@ -1,17 +1,47 @@
 import Link from "next/link";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { DealList } from "@/components/DealList";
-import { getProducts } from "@/lib/api";
+import { getCategories, getProducts } from "@/lib/api";
 import { buildPageMetadata } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 import styles from "./search.module.css";
 
+type SearchQuery = {
+  q?: string;
+  category?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  sort?: string;
+  page?: string;
+};
+
 type PageProps = {
-  searchParams: Promise<{ q?: string; sort?: string; page?: string }>;
+  searchParams: Promise<SearchQuery>;
 };
 
 function normalizeQuery(raw: string | undefined): string {
   return (raw || "").trim().slice(0, 120);
+}
+
+function normalizeCategory(raw: string | undefined): string {
+  return (raw || "").trim().slice(0, 120);
+}
+
+function normalizePrice(raw: string | undefined): string {
+  const value = (raw || "").trim();
+  if (!value) return "";
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return "";
+  return String(Math.min(n, 1_000_000));
+}
+
+function hasActiveFilters(input: {
+  q: string;
+  category: string;
+  minPrice: string;
+  maxPrice: string;
+}): boolean {
+  return Boolean(input.q || input.category || input.minPrice || input.maxPrice);
 }
 
 export async function generateMetadata({ searchParams }: PageProps) {
@@ -20,13 +50,13 @@ export async function generateMetadata({ searchParams }: PageProps) {
   if (!q) {
     return buildPageMetadata({
       title: `Search Amazon deals | ${SITE_NAME}`,
-      description: `Search curated Amazon.com deals on ${SITE_NAME}. Find products by name or brand.`,
+      description: `Search curated Amazon.com deals on ${SITE_NAME}. Filter by category and price.`,
       path: "/search",
     });
   }
   return buildPageMetadata({
     title: `Search “${q}” | ${SITE_NAME}`,
-    description: `Amazon deals matching “${q}” on ${SITE_NAME}. Compare prices, ratings, and featured picks.`,
+    description: `Amazon deals matching “${q}” on ${SITE_NAME}. Filter by category and price.`,
     path: `/search?q=${encodeURIComponent(q)}`,
   });
 }
@@ -34,8 +64,12 @@ export async function generateMetadata({ searchParams }: PageProps) {
 export default async function SearchPage({ searchParams }: PageProps) {
   const query = await searchParams;
   const q = normalizeQuery(query.q);
+  const category = normalizeCategory(query.category);
+  const minPrice = normalizePrice(query.minPrice);
+  const maxPrice = normalizePrice(query.maxPrice);
   const sort = query.sort || "newest";
   const page = Math.max(0, Number(query.page || "0") || 0);
+  const active = hasActiveFilters({ q, category, minPrice, maxPrice });
 
   const sorts = [
     { value: "newest", label: "Newest" },
@@ -43,6 +77,13 @@ export default async function SearchPage({ searchParams }: PageProps) {
     { value: "price_desc", label: "Price ↓" },
     { value: "rating", label: "Top rated" },
   ];
+
+  let categories: Awaited<ReturnType<typeof getCategories>> = [];
+  try {
+    categories = await getCategories();
+  } catch {
+    categories = [];
+  }
 
   let products = {
     items: [] as Awaited<ReturnType<typeof getProducts>>["items"],
@@ -52,9 +93,17 @@ export default async function SearchPage({ searchParams }: PageProps) {
     totalPages: 0,
   };
 
-  if (q) {
+  if (active) {
     try {
-      products = await getProducts({ q, sort, page, size: 40 });
+      products = await getProducts({
+        q: q || undefined,
+        category: category || undefined,
+        minPrice: minPrice || undefined,
+        maxPrice: maxPrice || undefined,
+        sort,
+        page,
+        size: 40,
+      });
     } catch {
       // keep empty fallback
     }
@@ -63,12 +112,30 @@ export default async function SearchPage({ searchParams }: PageProps) {
   function hrefFor(next: { sort?: string; page?: number }) {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
+    if (category) params.set("category", category);
+    if (minPrice) params.set("minPrice", minPrice);
+    if (maxPrice) params.set("maxPrice", maxPrice);
     params.set("sort", next.sort || sort);
     if ((next.page ?? page) > 0) {
       params.set("page", String(next.page ?? page));
     }
     return `/search?${params.toString()}`;
   }
+
+  const categoryName =
+    categories.find((item) => item.slug === category)?.name || category;
+
+  const title = q
+    ? `Results for “${q}”`
+    : category
+      ? `${categoryName} deals`
+      : minPrice || maxPrice
+        ? "Filtered deals"
+        : "Search deals";
+
+  const lead = active
+    ? `Browse curated Amazon.com deals on ${SITE_NAME} with your selected filters.`
+    : `Search by keyword, pick a category, or set a price range to find deals on ${SITE_NAME}.`;
 
   return (
     <main className={styles.main}>
@@ -81,37 +148,91 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
         <header className={styles.header}>
           <div>
-            <h1 className={styles.title}>
-              {q ? `Results for “${q}”` : "Search deals"}
-            </h1>
-            <p className={styles.lead}>
-              {q
-                ? `Browse curated Amazon.com deals matching your search on ${SITE_NAME}.`
-                : `Type a product name or brand in the search box above to find deals on ${SITE_NAME}.`}
-            </p>
+            <h1 className={styles.title}>{title}</h1>
+            <p className={styles.lead}>{lead}</p>
           </div>
           <AffiliateDisclosure />
         </header>
 
-        {!q ? (
-          <form className={styles.emptySearch} action="/search" method="get" role="search">
-            <label className="sr-only" htmlFor="search-page-q">
-              Search deals
-            </label>
+        <form className={styles.filters} action="/search" method="get">
+          <div className={styles.filterField}>
+            <label htmlFor="search-q">Keywords</label>
             <input
-              id="search-page-q"
-              className={styles.emptyInput}
+              id="search-q"
               type="search"
               name="q"
-              placeholder="Try Instant Pot, Anker, AirTag…"
+              defaultValue={q}
+              placeholder="Product or brand"
               autoComplete="off"
-              autoFocus
             />
-            <button className={styles.emptyButton} type="submit">
-              Search
+          </div>
+
+          <div className={styles.filterField}>
+            <label htmlFor="search-category">Category</label>
+            <select
+              id="search-category"
+              name="category"
+              defaultValue={category}
+            >
+              <option value="">All categories</option>
+              {categories.map((item) => (
+                <option key={item.id} value={item.slug}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={styles.filterField}>
+            <label htmlFor="search-min-price">Min price ($)</label>
+            <input
+              id="search-min-price"
+              type="number"
+              name="minPrice"
+              min={0}
+              step="1"
+              inputMode="decimal"
+              defaultValue={minPrice}
+              placeholder="0"
+            />
+          </div>
+
+          <div className={styles.filterField}>
+            <label htmlFor="search-max-price">Max price ($)</label>
+            <input
+              id="search-max-price"
+              type="number"
+              name="maxPrice"
+              min={0}
+              step="1"
+              inputMode="decimal"
+              defaultValue={maxPrice}
+              placeholder="Any"
+            />
+          </div>
+
+          <div className={styles.filterField}>
+            <label htmlFor="search-sort">Sort</label>
+            <select id="search-sort" name="sort" defaultValue={sort}>
+              {sorts.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={styles.filterActions}>
+            <button className={styles.applyButton} type="submit">
+              Apply filters
             </button>
-          </form>
-        ) : (
+            <Link className={styles.clearLink} href="/search">
+              Clear
+            </Link>
+          </div>
+        </form>
+
+        {active ? (
           <>
             <div className={styles.toolbar}>
               <p className={styles.count}>
@@ -135,7 +256,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
             <DealList
               products={products.items}
-              emptyMessage={`No deals matched “${q}”. Try another product name or brand.`}
+              emptyMessage="No deals matched these filters. Try another category, price range, or keyword."
             />
 
             {products.totalPages > 1 ? (
@@ -156,6 +277,11 @@ export default async function SearchPage({ searchParams }: PageProps) {
               </nav>
             ) : null}
           </>
+        ) : (
+          <p className={styles.hint}>
+            Use the filters above, or search from the header, to see matching
+            deals.
+          </p>
         )}
       </div>
     </main>

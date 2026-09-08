@@ -21,6 +21,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -47,16 +48,44 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<ProductSummary> listPublished(String categorySlug, String q, String sort, int page, int size) {
+    public PageResponse<ProductSummary> listPublished(
+            String categorySlug,
+            String q,
+            String sort,
+            int page,
+            int size
+    ) {
+        return listPublished(categorySlug, q, sort, page, size, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<ProductSummary> listPublished(
+            String categorySlug,
+            String q,
+            String sort,
+            int page,
+            int size,
+            BigDecimal minPrice,
+            BigDecimal maxPrice
+    ) {
         Long categoryId = null;
         if (categorySlug != null && !categorySlug.isBlank()) {
             categoryId = categoryService.requireBySlug(categorySlug).getId();
+        }
+        BigDecimal effectiveMin = sanitizePrice(minPrice);
+        BigDecimal effectiveMax = sanitizePrice(maxPrice);
+        if (effectiveMin != null && effectiveMax != null && effectiveMin.compareTo(effectiveMax) > 0) {
+            BigDecimal swap = effectiveMin;
+            effectiveMin = effectiveMax;
+            effectiveMax = swap;
         }
         Sort sortSpec = resolveSort(sort);
         Page<Product> result = productRepository.searchPublished(
                 ProductStatus.PUBLISHED,
                 categoryId,
                 blankToNull(q),
+                effectiveMin,
+                effectiveMax,
                 PageRequest.of(page, size, sortSpec)
         );
         return toPage(result);
@@ -353,6 +382,18 @@ public class ProductService {
 
     private String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private BigDecimal sanitizePrice(BigDecimal value) {
+        if (value == null) {
+            return null;
+        }
+        if (value.compareTo(BigDecimal.ZERO) < 0) {
+            return BigDecimal.ZERO;
+        }
+        // Guard absurd values from query spam.
+        BigDecimal max = new BigDecimal("1000000");
+        return value.compareTo(max) > 0 ? max : value;
     }
 
     private String blankToDefault(String value, String defaultValue) {
