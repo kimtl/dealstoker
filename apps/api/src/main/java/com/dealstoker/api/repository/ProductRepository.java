@@ -33,7 +33,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             SELECT p FROM Product p
             WHERE p.status = :status
               AND (:categoryId IS NULL OR p.primaryCategory.id = :categoryId)
-              AND (:q IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%')))
+              AND (
+                    :q IS NULL
+                    OR LOWER(p.title) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%'))
+                    OR LOWER(COALESCE(p.brand, '')) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%'))
+                  )
             """)
     Page<Product> searchPublished(
             @Param("status") ProductStatus status,
