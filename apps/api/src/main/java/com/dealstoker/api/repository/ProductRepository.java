@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,12 +34,20 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             SELECT p FROM Product p
             WHERE p.status = :status
               AND (:categoryId IS NULL OR p.primaryCategory.id = :categoryId)
-              AND (:q IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%')))
+              AND (
+                    :q IS NULL
+                    OR LOWER(p.title) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%'))
+                    OR LOWER(COALESCE(p.brand, '')) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%'))
+                  )
+              AND (:minPrice IS NULL OR p.priceAmount >= :minPrice)
+              AND (:maxPrice IS NULL OR p.priceAmount <= :maxPrice)
             """)
     Page<Product> searchPublished(
             @Param("status") ProductStatus status,
             @Param("categoryId") Long categoryId,
             @Param("q") String q,
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice,
             Pageable pageable);
 
     List<Product> findTop12ByStatusAndPrimaryCategoryIdAndIdNotOrderByPublishedAtDesc(

@@ -1,12 +1,41 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { SITE_NAME } from "@/lib/site";
 import type { Category } from "@/lib/types";
+import { HeaderSearch } from "./HeaderSearch";
 import styles from "./Header.module.css";
 
 type HeaderProps = {
   categories?: Category[];
   compact?: boolean;
 };
+
+function SearchFallback() {
+  return (
+    <form
+      className={styles.search}
+      action="/search"
+      method="get"
+      role="search"
+    >
+      <label className="sr-only" htmlFor="site-search">
+        Search deals
+      </label>
+      <input
+        id="site-search"
+        className={styles.searchInput}
+        type="search"
+        name="q"
+        placeholder="Search deals…"
+        autoComplete="off"
+        enterKeyHint="search"
+      />
+      <button className={styles.searchButton} type="submit">
+        Search
+      </button>
+    </form>
+  );
+}
 
 export function Header({ categories = [], compact = false }: HeaderProps) {
   return (
@@ -16,6 +45,11 @@ export function Header({ categories = [], compact = false }: HeaderProps) {
           <span className={styles.mark} aria-hidden />
           <span className={styles.brandText}>{SITE_NAME}</span>
         </Link>
+
+        <Suspense fallback={<SearchFallback />}>
+          <HeaderSearch />
+        </Suspense>
+
         <nav className={styles.nav} aria-label="Primary">
           {categories.slice(0, 5).map((category) => (
             <Link

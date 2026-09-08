@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -57,10 +58,20 @@ public class PublicCatalogController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String sort,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "24") int size
     ) {
-        return productService.listPublished(category, q, sort, page, Math.min(size, 100));
+        return productService.listPublished(
+                category,
+                q,
+                sort,
+                page,
+                Math.min(size, 100),
+                minPrice,
+                maxPrice
+        );
     }
 
     @GetMapping("/products/{slug}")
