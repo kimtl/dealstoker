@@ -2,9 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
-import { JsonLd } from "@/components/JsonLd";
 import { DealList } from "@/components/DealList";
+import { FaqSection } from "@/components/FaqSection";
+import { JsonLd } from "@/components/JsonLd";
 import { getProduct, getRelatedProducts } from "@/lib/api";
+import { getProductFaqs } from "@/lib/faq";
 import {
   formatMoney,
   formatRating,
@@ -12,6 +14,7 @@ import {
 } from "@/lib/format";
 import {
   buildBreadcrumbJsonLd,
+  buildFaqJsonLd,
   buildPageMetadata,
   buildProductJsonLd,
   productImageAlt,
@@ -83,11 +86,17 @@ export default async function ProductPage({ params }: PageProps) {
       : []),
     { name: product.title, path: `/p/${product.slug}` },
   ];
+  const faqs = getProductFaqs(product);
+  const faqJsonLd = buildFaqJsonLd(faqs);
 
   return (
     <main className={styles.main}>
       <JsonLd
-        data={[buildProductJsonLd(product), buildBreadcrumbJsonLd(breadcrumbItems)]}
+        data={[
+          buildProductJsonLd(product),
+          buildBreadcrumbJsonLd(breadcrumbItems),
+          ...(faqJsonLd ? [faqJsonLd] : []),
+        ]}
       />
       <div className={styles.inner}>
         <nav className={styles.crumbs} aria-label="Breadcrumb">
@@ -167,6 +176,8 @@ export default async function ProductPage({ params }: PageProps) {
             ) : null}
           </div>
         </div>
+
+        <FaqSection items={faqs} />
 
         {related.length > 0 ? (
           <section className={styles.related} aria-labelledby="related-heading">

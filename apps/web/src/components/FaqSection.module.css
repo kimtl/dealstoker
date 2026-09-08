@@ -1,0 +1,54 @@
+.section {
+  margin-top: 2rem;
+  padding-top: 0.25rem;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--ink);
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.item {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.9rem;
+}
+
+.question {
+  cursor: pointer;
+  font-weight: 750;
+  color: var(--ink);
+  line-height: 1.4;
+  list-style: none;
+}
+
+.question::-webkit-details-marker {
+  display: none;
+}
+
+.question::after {
+  content: "+";
+  float: right;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.item[open] .question::after {
+  content: "–";
+}
+
+.answer {
+  margin-top: 0.55rem;
+  color: var(--text);
+  line-height: 1.6;
+  max-width: 46rem;
+}

@@ -2,10 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { DealList } from "@/components/DealList";
+import { FaqSection } from "@/components/FaqSection";
 import { JsonLd } from "@/components/JsonLd";
 import { getCategory, getCategoryProducts } from "@/lib/api";
+import { getCategoryFaqs, getCategoryGuide } from "@/lib/faq";
 import {
   buildBreadcrumbJsonLd,
+  buildFaqJsonLd,
   buildItemListJsonLd,
   buildPageMetadata,
   categoryMetaDescription,
@@ -78,21 +81,25 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     { value: "rating", label: "Top rated" },
   ];
 
+  const faqs = getCategoryFaqs(category);
+  const guide = getCategoryGuide(category.slug);
+  const faqJsonLd = buildFaqJsonLd(faqs);
+  const jsonLd = [
+    buildBreadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: category.name, path: `/c/${category.slug}` },
+    ]),
+    buildItemListJsonLd(
+      `${category.name} deals on ${SITE_NAME}`,
+      products.items,
+      `/c/${category.slug}`,
+    ),
+    ...(faqJsonLd ? [faqJsonLd] : []),
+  ];
+
   return (
     <main className={styles.main}>
-      <JsonLd
-        data={[
-          buildBreadcrumbJsonLd([
-            { name: "Home", path: "/" },
-            { name: category.name, path: `/c/${category.slug}` },
-          ]),
-          buildItemListJsonLd(
-            `${category.name} deals on ${SITE_NAME}`,
-            products.items,
-            `/c/${category.slug}`,
-          ),
-        ]}
-      />
+      <JsonLd data={jsonLd} />
       <div className={styles.inner}>
         <nav className={styles.crumbs} aria-label="Breadcrumb">
           <Link href="/">Frontpage</Link>
@@ -106,6 +113,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             {category.description ? (
               <p className={styles.lead}>{category.description}</p>
             ) : null}
+            {guide ? <p className={styles.guide}>{guide}</p> : null}
           </div>
           <AffiliateDisclosure />
         </header>
@@ -156,6 +164,8 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             )}
           </nav>
         ) : null}
+
+        <FaqSection items={faqs} />
       </div>
     </main>
   );
