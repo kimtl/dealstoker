@@ -1,4 +1,8 @@
+import { FaqSection } from "@/components/FaqSection";
+import { JsonLd } from "@/components/JsonLd";
+import { getAboutFaqs } from "@/lib/faq";
 import { buildMetadata } from "@/lib/metadata";
+import { buildFaqJsonLd } from "@/lib/seo";
 import { SITE_DOMAIN, SITE_NAME } from "@/lib/site";
 import styles from "../policy.module.css";
 
@@ -18,8 +22,12 @@ export const metadata = buildMetadata({
 });
 
 export default function AboutPage() {
+  const faqs = getAboutFaqs();
+  const faqJsonLd = buildFaqJsonLd(faqs);
+
   return (
     <main className={styles.main}>
+      {faqJsonLd ? <JsonLd data={faqJsonLd} /> : null}
       <article className={styles.inner}>
         <h1 className={styles.title}>About {SITE_NAME}</h1>
         <p className={styles.updated}>
@@ -77,6 +85,8 @@ export default function AboutPage() {
           researching, curating, and maintaining the site. See our{" "}
           <a href="/disclosure">affiliate disclosure</a> for full details.
         </p>
+
+        <FaqSection items={faqs} />
 
         <h2>Contact</h2>
         <p>

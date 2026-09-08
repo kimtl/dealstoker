@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import type { FaqItem } from "./faq";
+import { buildIntentProductMetaDescription } from "./faq";
 import { formatMoney } from "./format";
 import { getSiteUrl, SITE_NAME } from "./site";
 import type { Category, ProductDetail, ProductSummary } from "./types";
@@ -39,23 +41,7 @@ export function productMetaTitle(product: ProductDetail): string {
 }
 
 export function productMetaDescription(product: ProductDetail): string {
-  if (product.seoDescription?.trim()) {
-    return clampText(product.seoDescription.trim(), 160);
-  }
-  const price = formatMoney(product.priceAmount, product.currency);
-  const rating = asNumber(product.rating);
-  const reviews = product.reviewCount;
-  const category = product.categoryName || "Amazon";
-  const brand = product.brand ? `${product.brand} ` : "";
-  const ratingBit =
-    rating != null
-      ? ` Rated ${rating.toFixed(1)}/5${reviews ? ` from ${reviews} reviews` : ""}.`
-      : "";
-  const priceBit = price ? ` Current price ${price}.` : "";
-  const base =
-    product.description?.trim() ||
-    `Shop the ${brand}${product.title} ${category} deal on Amazon.com via ${SITE_NAME}.${priceBit}${ratingBit} Compare price, rating, and availability before you buy.`;
-  return clampText(base, 160);
+  return clampText(buildIntentProductMetaDescription(product), 160);
 }
 
 export function categoryMetaTitle(category: Category): string {
@@ -155,6 +141,29 @@ export function buildBreadcrumbJsonLd(
       position: index + 1,
       name: item.name,
       item: `${siteUrl}${item.path.startsWith("/") ? item.path : `/${item.path}`}`,
+    })),
+  };
+}
+
+export function buildFaqJsonLd(faqs: FaqItem[]): Record<string, unknown> | null {
+  const cleaned = faqs
+    .map((faq) => ({
+      question: faq.question.trim(),
+      answer: faq.answer.trim(),
+    }))
+    .filter((faq) => faq.question && faq.answer);
+  if (!cleaned.length) return null;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: cleaned.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
     })),
   };
 }
