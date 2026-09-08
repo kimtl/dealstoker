@@ -60,9 +60,6 @@ export function Header({ categories = [], compact = false }: HeaderProps) {
               {category.name}
             </Link>
           ))}
-          <Link href="/about" className={styles.navLink}>
-            About
-          </Link>
         </nav>
       </div>
     </header>
