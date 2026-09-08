@@ -154,7 +154,12 @@ export default async function SearchPage({ searchParams }: PageProps) {
           <AffiliateDisclosure />
         </header>
 
-        <form className={styles.filters} action="/search" method="get">
+        <form
+          key={`${q}|${category}|${minPrice}|${maxPrice}|${sort}`}
+          className={styles.filters}
+          action="/search"
+          method="get"
+        >
           <div className={styles.filterField}>
             <label htmlFor="search-q">Keywords</label>
             <input
