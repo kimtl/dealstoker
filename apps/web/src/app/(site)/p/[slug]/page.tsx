@@ -164,8 +164,20 @@ export default async function ProductPage({ params }: PageProps) {
                 </span>
               ) : null}
             </div>
-            {product.description ? (
-              <p className={styles.description}>{product.description}</p>
+            {product.recommendation ? (
+              <section
+                className={styles.recommendation}
+                aria-labelledby="why-recommend"
+              >
+                <h2 id="why-recommend" className={styles.recommendationTitle}>
+                  Why we recommend it
+                </h2>
+                <div className={styles.recommendationBody}>
+                  {product.recommendation.split(/\n+/).map((para, index) => (
+                    <p key={`${index}-${para.slice(0, 24)}`}>{para}</p>
+                  ))}
+                </div>
+              </section>
             ) : null}
             {product.features?.length ? (
               <ul className={styles.features}>

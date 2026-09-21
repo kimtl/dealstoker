@@ -43,6 +43,9 @@ public class Product {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(columnDefinition = "TEXT")
+    private String recommendation;
+
     @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
@@ -167,6 +170,14 @@ public class Product {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getRecommendation() {
+        return recommendation;
+    }
+
+    public void setRecommendation(String recommendation) {
+        this.recommendation = recommendation;
     }
 
     public String getImageUrl() {

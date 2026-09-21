@@ -83,7 +83,7 @@ export function buildProductJsonLd(product: ProductDetail): Record<string, unkno
     name: product.title,
     description:
       product.seoDescription ||
-      product.description ||
+      product.recommendation ||
       `${product.title} curated deal on ${SITE_NAME}`,
     url: productUrl,
     sku: product.externalId,

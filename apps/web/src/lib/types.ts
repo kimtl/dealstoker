@@ -76,6 +76,7 @@ export type ProductDetail = {
   title: string;
   slug: string;
   description: string | null;
+  recommendation: string | null;
   imageUrl: string | null;
   priceAmount: number | string | null;
   currency: string | null;
@@ -132,6 +133,7 @@ export type ProductRequest = {
   title: string;
   slug?: string;
   description?: string;
+  recommendation?: string;
   imageUrl?: string;
   priceAmount?: number | null;
   currency?: string;

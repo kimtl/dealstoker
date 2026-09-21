@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import {
   adminDeleteProduct,
   adminFeatureProduct,
+  adminGenerateMissingRecommendations,
   adminListProducts,
   adminPublishProduct,
   adminUnpublishProduct,
@@ -17,6 +18,8 @@ export default function AdminProductsPage() {
   const [total, setTotal] = useState(0);
   const [status, setStatus] = useState<ProductStatus | "">("");
   const [error, setError] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
 
   async function load(nextStatus: ProductStatus | "" = status) {
     const data = await adminListProducts({
@@ -70,6 +73,27 @@ export default function AdminProductsPage() {
     }
   }
 
+  async function onGenerateMissing() {
+    setGenerating(true);
+    setError(null);
+    setNote(null);
+    try {
+      const result = await adminGenerateMissingRecommendations(20);
+      setNote(
+        `AI recommendations: ${result.updated} updated, ${result.failed} failed (${result.attempted} attempted).`,
+      );
+      await load();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Batch recommendation generation failed",
+      );
+    } finally {
+      setGenerating(false);
+    }
+  }
+
   return (
     <div>
       <h1 className={styles.title}>Products</h1>
@@ -77,6 +101,16 @@ export default function AdminProductsPage() {
         <Link className={styles.button} href="/admin/products/new">
           New product
         </Link>
+        <button
+          type="button"
+          className={styles.buttonSecondary}
+          onClick={onGenerateMissing}
+          disabled={generating}
+        >
+          {generating
+            ? "Generating…"
+            : "AI fill missing recommendations"}
+        </button>
         <select
           value={status}
           onChange={(e) => {
@@ -97,6 +131,7 @@ export default function AdminProductsPage() {
         <span className={styles.muted}>{total} total</span>
       </div>
       {error ? <p className={styles.error}>{error}</p> : null}
+      {note ? <p className={styles.okNote}>{note}</p> : null}
 
       <div className={styles.tableWrap}>
         <table className={styles.table}>

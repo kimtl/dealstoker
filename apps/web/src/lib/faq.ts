@@ -261,6 +261,13 @@ export function getProductFaqs(product: ProductDetail): FaqItem[] {
     },
   ];
 
+  if (product.recommendation?.trim()) {
+    faqs.push({
+      question: "Why does DealStoker recommend this product?",
+      answer: product.recommendation.trim().replace(/\s+/g, " "),
+    });
+  }
+
   if (product.features?.length) {
     const highlights = product.features
       .slice(0, 3)
@@ -284,10 +291,13 @@ export function getProductFaqs(product: ProductDetail): FaqItem[] {
   return faqs.slice(0, 5);
 }
 
-/** Prefer a concise editorial meta description over raw Amazon paste. */
+/** Prefer editorial SEO / recommendation over raw Amazon paste. */
 export function buildIntentProductMetaDescription(product: ProductDetail): string {
   if (product.seoDescription?.trim()) {
     return product.seoDescription.trim();
+  }
+  if (product.recommendation?.trim()) {
+    return product.recommendation.trim().replace(/\s+/g, " ");
   }
   const price = formatMoney(product.priceAmount, product.currency);
   const rating = formatRating(product.rating);

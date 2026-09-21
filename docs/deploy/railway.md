@@ -49,6 +49,9 @@ If you skip `api.` subdomain, use the Railway-generated API URL (`*.up.railway.a
 | `ADMIN_PASSWORD` | strong password |
 | `AMAZON_MARKETPLACE` | `www.amazon.com` |
 | `AMAZON_PARTNER_TAG` | `dealstoker01-20` (Associates Store ID — API service) |
+| `OPENAI_API_KEY` | OpenAI (or compatible) key for “Why we recommend” AI blurbs |
+| `OPENAI_MODEL` | optional, default `gpt-4o-mini` |
+| `OPENAI_BASE_URL` | optional, default `https://api.openai.com/v1` |
 
 `PORT` is set by Railway automatically. The API converts Railway’s `postgresql://…` URL into a JDBC URL at startup (Docker entrypoint + DataSource config). You can also set `DATABASE_URL` to a JDBC URL yourself if preferred.
 

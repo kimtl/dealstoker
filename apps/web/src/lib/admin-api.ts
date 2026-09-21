@@ -193,6 +193,37 @@ export async function adminDeleteProduct(id: number): Promise<void> {
   await adminFetch(`/api/v1/admin/products/${id}`, { method: "DELETE" });
 }
 
+export async function adminGenerateRecommendation(
+  id: number,
+  save = true,
+): Promise<ProductDetail> {
+  return adminFetch(
+    `/api/v1/admin/products/${id}/recommendation/generate?save=${save ? "true" : "false"}`,
+    { method: "POST" },
+  );
+}
+
+export type GenerateMissingRecommendationsResult = {
+  attempted: number;
+  updated: number;
+  failed: number;
+  results: Array<{
+    id: number;
+    title: string;
+    ok: boolean;
+    error?: string;
+  }>;
+};
+
+export async function adminGenerateMissingRecommendations(
+  limit = 20,
+): Promise<GenerateMissingRecommendationsResult> {
+  return adminFetch(
+    `/api/v1/admin/products/recommendation/generate-missing?limit=${limit}`,
+    { method: "POST" },
+  );
+}
+
 export async function adminAnalyticsSummary(
   days = 7,
 ): Promise<AnalyticsSummary> {

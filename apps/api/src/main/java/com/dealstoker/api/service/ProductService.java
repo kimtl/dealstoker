@@ -225,6 +225,35 @@ public class ProductService {
     }
 
     @Transactional
+    public ProductDetail saveRecommendation(Long id, String recommendation) {
+        Product product = requireById(id);
+        product.setRecommendation(blankToNull(recommendation));
+        return ProductDetail.from(productRepository.save(product));
+    }
+
+    @Transactional(readOnly = true)
+    public Product requireByIdWithCategory(Long id) {
+        Product product = requireById(id);
+        if (product.getPrimaryCategory() != null) {
+            product.getPrimaryCategory().getName();
+        }
+        return product;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Product> listMissingRecommendation(int limit) {
+        List<Product> products = productRepository.findMissingRecommendation(
+                PageRequest.of(0, Math.max(1, Math.min(limit, 50)))
+        );
+        for (Product product : products) {
+            if (product.getPrimaryCategory() != null) {
+                product.getPrimaryCategory().getName();
+            }
+        }
+        return products;
+    }
+
+    @Transactional
     public void delete(Long id) {
         if (!productRepository.existsById(id)) {
             throw new NotFoundException("Product not found: " + id);
@@ -262,6 +291,7 @@ public class ProductService {
         product.setTitle(request.title().trim());
         product.setSlug(slug);
         product.setDescription(request.description());
+        product.setRecommendation(blankToNull(request.recommendation()));
         product.setImageUrl(request.imageUrl());
         product.setPriceAmount(request.priceAmount());
         product.setCurrency(blankToDefault(request.currency(), "USD"));

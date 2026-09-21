@@ -1,9 +1,11 @@
 package com.dealstoker.api.web;
 
+import com.dealstoker.api.domain.Product;
 import com.dealstoker.api.domain.ProductStatus;
 import com.dealstoker.api.service.AmazonImportService;
 import com.dealstoker.api.service.CategoryService;
 import com.dealstoker.api.service.ProductService;
+import com.dealstoker.api.service.RecommendationGenerationService;
 import com.dealstoker.api.web.dto.AmazonImportDtos.ImportRequest;
 import com.dealstoker.api.web.dto.AmazonImportDtos.PreviewRequest;
 import com.dealstoker.api.web.dto.AmazonImportDtos.PreviewResponse;
@@ -25,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,15 +39,18 @@ public class AdminCatalogController {
     private final CategoryService categoryService;
     private final ProductService productService;
     private final AmazonImportService amazonImportService;
+    private final RecommendationGenerationService recommendationGenerationService;
 
     public AdminCatalogController(
             CategoryService categoryService,
             ProductService productService,
-            AmazonImportService amazonImportService
+            AmazonImportService amazonImportService,
+            RecommendationGenerationService recommendationGenerationService
     ) {
         this.categoryService = categoryService;
         this.productService = productService;
         this.amazonImportService = amazonImportService;
+        this.recommendationGenerationService = recommendationGenerationService;
     }
 
     @GetMapping("/me")
@@ -123,6 +130,57 @@ public class AdminCatalogController {
             body = new FeatureRequest(true, body.featuredRank());
         }
         return productService.updateFeatured(id, body);
+    }
+
+    @PostMapping("/products/{id}/recommendation/generate")
+    public ProductDetail generateRecommendation(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "true") boolean save
+    ) {
+        Product product = productService.requireByIdWithCategory(id);
+        String text = recommendationGenerationService.generate(product);
+        if (!save) {
+            product.setRecommendation(text);
+            return ProductDetail.from(product);
+        }
+        return productService.saveRecommendation(id, text);
+    }
+
+    @PostMapping("/products/recommendation/generate-missing")
+    public Map<String, Object> generateMissingRecommendations(
+            @RequestParam(defaultValue = "20") int limit
+    ) {
+        if (!recommendationGenerationService.isConfigured()) {
+            throw new IllegalArgumentException(
+                    "AI is not configured. Set OPENAI_API_KEY on the API service."
+            );
+        }
+        List<Product> missing = productService.listMissingRecommendation(limit);
+        List<Map<String, Object>> results = new ArrayList<>();
+        int updated = 0;
+        int failed = 0;
+        for (Product product : missing) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("id", product.getId());
+            row.put("title", product.getTitle());
+            try {
+                String text = recommendationGenerationService.generate(product);
+                productService.saveRecommendation(product.getId(), text);
+                row.put("ok", true);
+                updated++;
+            } catch (Exception ex) {
+                row.put("ok", false);
+                row.put("error", ex.getMessage());
+                failed++;
+            }
+            results.add(row);
+        }
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("attempted", missing.size());
+        response.put("updated", updated);
+        response.put("failed", failed);
+        response.put("results", results);
+        return response;
     }
 
     @DeleteMapping("/products/{id}")

@@ -34,7 +34,8 @@ class AffiliateLinkBuilderTest {
                 "https://dealstoker.com",
                 new DealStokerProperties.Amazon("www.amazon.com", tag),
                 new DealStokerProperties.Admin("admin", "pass"),
-                new DealStokerProperties.Cors("http://localhost:3000")
+                new DealStokerProperties.Cors("http://localhost:3000"),
+                new DealStokerProperties.Ai("", "https://api.openai.com/v1", "gpt-4o-mini")
         );
     }
 }

@@ -55,6 +55,7 @@ public class AmazonProductPageFetcher {
             BigDecimal rating,
             Integer reviewCount,
             List<String> features,
+            List<String> reviewSnippets,
             boolean fetched,
             String fetchNote
     ) {}
@@ -230,6 +231,8 @@ public class AmazonProductPageFetcher {
                 findRegex(html, RATINGS_COUNT)
         ));
 
+        List<String> reviewSnippets = extractReviewSnippets(doc);
+
         boolean hasSignal = title != null && (imageUrl != null || price != null || !features.isEmpty());
         return new ScrapedProduct(
                 title,
@@ -241,6 +244,7 @@ public class AmazonProductPageFetcher {
                 rating,
                 reviewCount,
                 features,
+                reviewSnippets,
                 hasSignal,
                 null
         );
@@ -266,6 +270,27 @@ public class AmazonProductPageFetcher {
             }
         }
         return new ArrayList<>(features);
+    }
+
+    private static List<String> extractReviewSnippets(Document doc) {
+        LinkedHashSet<String> snippets = new LinkedHashSet<>();
+        Elements bodies = doc.select(
+                "[data-hook=review-body] span, [data-hook=review-collapsed] span, .review-text-content span"
+        );
+        for (Element el : bodies) {
+            String t = normalizeSpace(el.text());
+            if (t == null || t.length() < 40) {
+                continue;
+            }
+            if (t.length() > 280) {
+                t = t.substring(0, 280);
+            }
+            snippets.add(t);
+            if (snippets.size() >= 8) {
+                break;
+            }
+        }
+        return new ArrayList<>(snippets);
     }
 
     private static String extractOverview(Document doc) {
@@ -388,13 +413,16 @@ public class AmazonProductPageFetcher {
                 scraped.rating(),
                 scraped.reviewCount(),
                 scraped.features(),
+                scraped.reviewSnippets() == null ? List.of() : scraped.reviewSnippets(),
                 fetched,
                 note
         );
     }
 
     private static ScrapedProduct empty(boolean fetched, String note) {
-        return new ScrapedProduct(null, null, null, null, null, null, null, null, List.of(), fetched, note);
+        return new ScrapedProduct(
+                null, null, null, null, null, null, null, null, List.of(), List.of(), fetched, note
+        );
     }
 
     private static boolean looksBlocked(String body) {
