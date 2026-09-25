@@ -37,6 +37,7 @@ class AmazonProductPageFetcherTest {
         assertEquals(0, scraped.priceAmount().compareTo(new BigDecimal("49.99")));
         assertEquals("Acme", scraped.brand());
         assertEquals(2, scraped.features().size());
+        assertNotNull(scraped.reviewSnippets());
     }
 
     @Test

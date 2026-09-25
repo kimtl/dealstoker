@@ -107,6 +107,32 @@
   max-width: 40rem;
 }
 
+.recommendation {
+  display: grid;
+  gap: 0.55rem;
+  max-width: 40rem;
+  padding-top: 0.35rem;
+}
+
+.recommendationTitle {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.recommendationBody {
+  display: grid;
+  gap: 0.7rem;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.recommendationBody p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
 .features {
   margin-left: 1.1rem;
   display: grid;

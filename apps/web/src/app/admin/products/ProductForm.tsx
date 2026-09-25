@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   adminCreateProduct,
+  adminGenerateRecommendation,
   adminImportAmazonProduct,
   adminListCategories,
   adminPreviewAmazonImport,
@@ -19,6 +20,7 @@ type FormState = {
   title: string;
   slug: string;
   description: string;
+  recommendation: string;
   imageUrl: string;
   priceAmount: string;
   currency: string;
@@ -45,6 +47,7 @@ function toForm(product?: ProductDetail | null): FormState {
     title: product?.title || "",
     slug: product?.slug || "",
     description: product?.description || "",
+    recommendation: product?.recommendation || "",
     imageUrl: product?.imageUrl || "",
     priceAmount:
       product?.priceAmount != null ? String(product.priceAmount) : "",
@@ -89,6 +92,7 @@ export function ProductForm({ product }: Props) {
   const [saving, setSaving] = useState(false);
   const [amazonUrl, setAmazonUrl] = useState("");
   const [importing, setImporting] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     adminListCategories()
@@ -146,6 +150,7 @@ export function ProductForm({ product }: Props) {
       [
         preview.note,
         "Outbound URL is set to the Amazon product page for now. Replace it with a SiteStripe affiliate link before or after publish.",
+        "Generate a “Why we recommend” blurb after saving — it is not filled from the Amazon description.",
         preview.alreadyExists
           ? `Existing product id: ${preview.existingProductId}`
           : null,
@@ -192,6 +197,30 @@ export function ProductForm({ product }: Props) {
     }
   }
 
+  async function onGenerateRecommendation() {
+    if (!product) {
+      setError("Save the product first, then generate a recommendation.");
+      return;
+    }
+    setGenerating(true);
+    setError(null);
+    setNote(null);
+    try {
+      const updated = await adminGenerateRecommendation(product.id, true);
+      setForm((prev) => ({
+        ...prev,
+        recommendation: updated.recommendation || "",
+      }));
+      setNote("Recommendation generated from product signals and review themes.");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Recommendation generation failed",
+      );
+    } finally {
+      setGenerating(false);
+    }
+  }
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setSaving(true);
@@ -204,6 +233,7 @@ export function ProductForm({ product }: Props) {
       title: form.title.trim(),
       slug: form.slug.trim() || undefined,
       description: form.description.trim() || undefined,
+      recommendation: form.recommendation.trim() || undefined,
       imageUrl: form.imageUrl.trim() || undefined,
       priceAmount: parseOptionalNumber(form.priceAmount),
       currency: form.currency.trim() || undefined,
@@ -406,7 +436,31 @@ export function ProductForm({ product }: Props) {
         />
       </label>
       <label>
-        Description
+        Why we recommend (shown on product page)
+        <textarea
+          value={form.recommendation}
+          onChange={(e) =>
+            setForm({ ...form, recommendation: e.target.value })
+          }
+          rows={7}
+        />
+        <span className={styles.hint}>
+          Editorial summary of shopper review themes — not a paste of the Amazon
+          description. Requires OPENAI_API_KEY on the API for AI generate.
+        </span>
+      </label>
+      <div className={styles.importActions}>
+        <button
+          type="button"
+          className={styles.buttonSecondary}
+          onClick={onGenerateRecommendation}
+          disabled={generating || !product}
+        >
+          {generating ? "Generating…" : "Generate with AI"}
+        </button>
+      </div>
+      <label>
+        Internal notes / Amazon description (not shown publicly)
         <textarea
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}

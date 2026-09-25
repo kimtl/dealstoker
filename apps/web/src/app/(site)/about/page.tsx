@@ -63,8 +63,9 @@ export default function AboutPage() {
             Pets, and more.
           </li>
           <li>
-            <strong>Product pages</strong> — a short summary, key features when
-            available, and a clear path to view the item on Amazon.com.
+            <strong>Product pages</strong> — why we recommend the pick (from
+            review themes), key features when available, and a clear path to
+            view the item on Amazon.com.
           </li>
         </ul>
 

@@ -69,4 +69,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findTopByBuyClicks(@Param("status") String status, @Param("limit") int limit);
 
     long countByStatus(ProductStatus status);
+
+    @Query("""
+            SELECT p FROM Product p
+            WHERE p.recommendation IS NULL OR p.recommendation = ''
+            ORDER BY p.updatedAt DESC
+            """)
+    List<Product> findMissingRecommendation(Pageable pageable);
 }

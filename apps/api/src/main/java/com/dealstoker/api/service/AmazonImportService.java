@@ -105,6 +105,7 @@ public class AmazonImportService {
                 title,
                 null,
                 preview.description(),
+                null,
                 preview.imageUrl(),
                 preview.priceAmount(),
                 preview.currency(),
