@@ -38,29 +38,41 @@ function SearchFallback() {
 }
 
 export function Header({ categories = [], compact = false }: HeaderProps) {
+  const activeCategories = categories.filter(
+    (category) => category.active !== false,
+  );
+
   return (
     <header className={`${styles.header} ${compact ? styles.compact : ""}`}>
       <div className={styles.inner}>
-        <Link href="/" className={styles.brand} aria-label={`${SITE_NAME} home`}>
-          <span className={styles.mark} aria-hidden />
-          <span className={styles.brandText}>{SITE_NAME}</span>
-        </Link>
+        <div className={styles.topRow}>
+          <Link
+            href="/"
+            className={styles.brand}
+            aria-label={`${SITE_NAME} home`}
+          >
+            <span className={styles.mark} aria-hidden />
+            <span className={styles.brandText}>{SITE_NAME}</span>
+          </Link>
 
-        <Suspense fallback={<SearchFallback />}>
-          <HeaderSearch />
-        </Suspense>
+          <Suspense fallback={<SearchFallback />}>
+            <HeaderSearch />
+          </Suspense>
+        </div>
 
-        <nav className={styles.nav} aria-label="Primary">
-          {categories.slice(0, 5).map((category) => (
-            <Link
-              key={category.id}
-              href={`/c/${category.slug}`}
-              className={styles.navLink}
-            >
-              {category.name}
-            </Link>
-          ))}
-        </nav>
+        {activeCategories.length > 0 ? (
+          <nav className={styles.nav} aria-label="Categories">
+            {activeCategories.map((category) => (
+              <Link
+                key={category.id}
+                href={`/c/${category.slug}`}
+                className={styles.navLink}
+              >
+                {category.name}
+              </Link>
+            ))}
+          </nav>
+        ) : null}
       </div>
     </header>
   );

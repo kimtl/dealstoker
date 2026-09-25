@@ -14,9 +14,14 @@
 .inner {
   max-width: var(--max);
   margin: 0 auto;
-  padding: 0.75rem 1.15rem;
+  padding: 0.7rem 1.15rem 0.65rem;
   display: grid;
-  grid-template-columns: auto minmax(16rem, 1.6fr) minmax(0, auto);
+  gap: 0.55rem;
+}
+
+.topRow {
+  display: grid;
+  grid-template-columns: auto minmax(16rem, 1fr);
   align-items: center;
   gap: 0.75rem 1.1rem;
 }
@@ -96,9 +101,9 @@
 .nav {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.15rem 0.7rem;
-  max-width: 22rem;
+  justify-content: flex-start;
+  gap: 0.2rem 0.85rem;
+  padding-top: 0.15rem;
 }
 
 .navLink {
@@ -113,25 +118,8 @@
   color: var(--link);
 }
 
-@media (max-width: 860px) {
-  .inner {
-    grid-template-columns: auto 1fr;
-    gap: 0.65rem 0.85rem;
-  }
-
-  .search {
-    grid-column: 1 / -1;
-    order: 3;
-  }
-
-  .nav {
-    max-width: none;
-    justify-content: flex-start;
-    grid-column: 1 / -1;
-    order: 2;
-  }
-
-  .brand {
-    order: 1;
+@media (max-width: 640px) {
+  .topRow {
+    grid-template-columns: 1fr;
   }
 }
