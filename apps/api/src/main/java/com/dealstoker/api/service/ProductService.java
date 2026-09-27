@@ -1,5 +1,6 @@
 package com.dealstoker.api.service;
 
+import com.dealstoker.api.affiliate.AffiliateLinkBuilder;
 import com.dealstoker.api.domain.Category;
 import com.dealstoker.api.domain.Product;
 import com.dealstoker.api.domain.ProductStatus;
@@ -34,17 +35,20 @@ public class ProductService {
     private final CategoryService categoryService;
     private final ClickEventRepository clickEventRepository;
     private final PageViewEventRepository pageViewEventRepository;
+    private final AffiliateLinkBuilder affiliateLinkBuilder;
 
     public ProductService(
             ProductRepository productRepository,
             CategoryService categoryService,
             ClickEventRepository clickEventRepository,
-            PageViewEventRepository pageViewEventRepository
+            PageViewEventRepository pageViewEventRepository,
+            AffiliateLinkBuilder affiliateLinkBuilder
     ) {
         this.productRepository = productRepository;
         this.categoryService = categoryService;
         this.clickEventRepository = clickEventRepository;
         this.pageViewEventRepository = pageViewEventRepository;
+        this.affiliateLinkBuilder = affiliateLinkBuilder;
     }
 
     @Transactional(readOnly = true)
@@ -295,11 +299,19 @@ public class ProductService {
         product.setImageUrl(request.imageUrl());
         product.setPriceAmount(request.priceAmount());
         product.setCurrency(blankToDefault(request.currency(), "USD"));
-        product.setListPrice(request.listPrice());
+        BigDecimal listPrice = request.listPrice();
+        if (listPrice != null && request.priceAmount() != null
+                && listPrice.compareTo(request.priceAmount()) <= 0) {
+            listPrice = null;
+        }
+        product.setListPrice(listPrice);
         product.setAvailability(request.availability());
         product.setRating(request.rating());
         product.setReviewCount(request.reviewCount());
-        product.setDetailPageUrl(request.detailPageUrl().trim());
+        product.setDetailPageUrl(affiliateLinkBuilder.buildOutboundUrl(
+                request.detailPageUrl().trim(),
+                request.externalId()
+        ));
         product.setBrand(request.brand());
         product.setFeaturesJson(ProductDtos.writeFeatures(request.features()));
         product.setSeoTitle(request.seoTitle());

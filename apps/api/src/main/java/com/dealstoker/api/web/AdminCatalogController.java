@@ -117,6 +117,11 @@ public class AdminCatalogController {
         return amazonImportService.importProduct(request);
     }
 
+    @PostMapping("/products/{id}/resync-amazon")
+    public ProductDetail resyncAmazonPricing(@PathVariable Long id) {
+        return amazonImportService.resyncPricing(id);
+    }
+
     @PostMapping("/products/import/keyword-search")
     public KeywordSearchResponse keywordSearch(@Valid @RequestBody KeywordSearchRequest request) {
         return amazonKeywordImportService.search(request);

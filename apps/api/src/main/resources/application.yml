@@ -32,7 +32,7 @@ dealstoker:
   app-base-url: ${APP_BASE_URL:https://dealstoker.com}
   amazon:
     marketplace: ${AMAZON_MARKETPLACE:www.amazon.com}
-    partner-tag: ${AMAZON_PARTNER_TAG:}
+    partner-tag: ${AMAZON_PARTNER_TAG:dealstoker01-20}
   admin:
     username: ${ADMIN_USERNAME:admin}
     password: ${ADMIN_PASSWORD:changeme}

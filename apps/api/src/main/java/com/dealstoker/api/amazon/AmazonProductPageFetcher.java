@@ -38,6 +38,14 @@ public class AmazonProductPageFetcher {
             Pattern.compile("\"(?:hiRes|large|mainUrl|landingImageUrl)\"\\s*:\\s*\"(https:[^\"]*media-amazon[^\"]+)\"");
     private static final Pattern IMG_SRC =
             Pattern.compile("https://[^\"'\\s]+media-amazon\\.com/images/I/[A-Za-z0-9+,_%-]+\\.(?:jpg|jpeg|png)");
+    private static final Pattern JSON_PRICE_AMOUNT =
+            Pattern.compile("\"(?:priceAmount|amount|value)\"\\s*:\\s*\"?([0-9]+(?:\\.[0-9]{1,2})?)\"?");
+    private static final Pattern JSON_DISPLAY_PRICE =
+            Pattern.compile("\"(?:displayPrice|displayAmount|priceToPay|buyingPrice)\"\\s*:\\s*\"\\$?([0-9]+(?:,[0-9]{3})*(?:\\.[0-9]{2})?)\"");
+    private static final Pattern JSON_BASIS_PRICE =
+            Pattern.compile("\"(?:basisPrice|listPrice|strikethroughPrice|typicalPrice)\"\\s*:\\s*\\{[^}]{0,180}?\"(?:amount|value|priceAmount)\"\\s*:\\s*\"?([0-9]+(?:\\.[0-9]{1,2})?)\"?");
+    private static final Pattern LABEL_LIST_PRICE =
+            Pattern.compile("(?i)(?:list\\s*price|was|typical\\s*price|compare\\s*at)\\s*:?\\s*\\$?([0-9]+(?:,[0-9]{3})*(?:\\.[0-9]{2})?)");
 
     private static final List<String> USER_AGENTS = List.of(
             "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36",
@@ -192,30 +200,9 @@ public class AmazonProductPageFetcher {
                 overviewBrand(overview)
         ));
 
-        BigDecimal price = firstPrice(
-                text(doc, "#corePrice_feature_div .a-price .a-offscreen"),
-                text(doc, "#corePriceDisplay_desktop_feature_div .a-price .a-offscreen"),
-                text(doc, "#corePrice_mobile_feature_div span.a-offscreen"),
-                text(doc, "#corePrice_mobile span.a-offscreen"),
-                text(doc, "#apex_desktop .a-price .a-offscreen"),
-                text(doc, "#priceblock_ourprice"),
-                text(doc, "#priceblock_dealprice"),
-                text(doc, "#price_inside_buybox"),
-                firstOffscreenPrice(doc),
-                meta(doc, "product:price:amount")
-        );
-
-        BigDecimal listPrice = firstPrice(
-                text(doc, "#corePrice_feature_div .a-text-price .a-offscreen"),
-                text(doc, "#corePriceDisplay_desktop_feature_div .a-text-price .a-offscreen"),
-                text(doc, "#corePrice_mobile_feature_div .a-text-price .a-offscreen"),
-                text(doc, ".a-price.a-text-price .a-offscreen"),
-                text(doc, "#listPrice"),
-                text(doc, "#priceblock_listprice")
-        );
-        if (listPrice != null && price != null && listPrice.compareTo(price) <= 0) {
-            listPrice = null;
-        }
+        PricePair prices = extractPrices(doc, html);
+        BigDecimal price = prices.sale();
+        BigDecimal listPrice = prices.list();
 
         BigDecimal rating = parseRating(firstNonBlank(
                 text(doc, "span[data-hook=rating-out-of-text]"),
@@ -321,13 +308,146 @@ public class AmazonProductPageFetcher {
         return null;
     }
 
+    private record PricePair(BigDecimal sale, BigDecimal list) {}
+
+    private static PricePair extractPrices(Document doc, String html) {
+        BigDecimal sale = firstPrice(
+                text(doc, "#corePrice_feature_div .a-price:not(.a-text-price) .a-offscreen"),
+                text(doc, "#corePriceDisplay_desktop_feature_div .a-price:not(.a-text-price) .a-offscreen"),
+                text(doc, "#corePrice_mobile_feature_div .a-price:not(.a-text-price) .a-offscreen"),
+                text(doc, "#corePrice_mobile_feature_div span.a-offscreen"),
+                text(doc, "#apex_desktop .a-price:not(.a-text-price) .a-offscreen"),
+                text(doc, "#apex_desktop_newAccordionRow .a-price:not(.a-text-price) .a-offscreen"),
+                text(doc, "#tp_price_block_total_price_ww .a-offscreen"),
+                text(doc, "#priceblock_dealprice"),
+                text(doc, "#priceblock_ourprice"),
+                text(doc, "#price_inside_buybox"),
+                text(doc, "#newBuyBoxPrice"),
+                text(doc, "span[data-a-color=price] .a-offscreen"),
+                composePriceFromWholeFraction(doc.selectFirst(
+                        "#corePrice_feature_div .a-price:not(.a-text-price), "
+                                + "#corePriceDisplay_desktop_feature_div .a-price:not(.a-text-price), "
+                                + "#corePrice_mobile_feature_div .a-price:not(.a-text-price), "
+                                + "#apex_desktop .a-price:not(.a-text-price)"
+                )),
+                firstOfferPrice(doc),
+                firstOffscreenPrice(doc),
+                meta(doc, "product:price:amount"),
+                findRegexGroup(html, JSON_DISPLAY_PRICE, 1),
+                findRegexGroup(html, JSON_PRICE_AMOUNT, 1)
+        );
+
+        BigDecimal list = firstPrice(
+                text(doc, "#corePrice_feature_div .a-price.a-text-price .a-offscreen"),
+                text(doc, "#corePriceDisplay_desktop_feature_div .a-price.a-text-price .a-offscreen"),
+                text(doc, "#corePrice_mobile_feature_div .a-price.a-text-price .a-offscreen"),
+                text(doc, "#apex_desktop .a-price.a-text-price .a-offscreen"),
+                text(doc, "span[data-a-strike=true] .a-offscreen"),
+                text(doc, ".a-price.a-text-price[data-a-strike=true] .a-offscreen"),
+                text(doc, ".a-price.a-text-price .a-offscreen"),
+                text(doc, "#listPrice"),
+                text(doc, "#priceblock_listprice"),
+                text(doc, "span.basisPrice .a-offscreen"),
+                text(doc, ".a-size-small.a-color-secondary.aok-align-center.basisPrice .a-offscreen"),
+                composePriceFromWholeFraction(doc.selectFirst(
+                        "#corePrice_feature_div .a-price.a-text-price, "
+                                + "#corePriceDisplay_desktop_feature_div .a-price.a-text-price, "
+                                + "span[data-a-strike=true]"
+                )),
+                findRegexGroup(html, JSON_BASIS_PRICE, 1),
+                findRegexGroup(html, LABEL_LIST_PRICE, 1)
+        );
+
+        if (list != null && sale != null && list.compareTo(sale) <= 0) {
+            list = null;
+        }
+        return new PricePair(sale, list);
+    }
+
+    private static String composePriceFromWholeFraction(Element priceRoot) {
+        if (priceRoot == null) {
+            return null;
+        }
+        Element whole = priceRoot.selectFirst(".a-price-whole");
+        Element fraction = priceRoot.selectFirst(".a-price-fraction");
+        if (whole == null) {
+            return null;
+        }
+        String wholeText = normalizeSpace(whole.text());
+        if (wholeText == null) {
+            return null;
+        }
+        wholeText = wholeText.replace(",", "").replace(".", "");
+        String fractionText = fraction == null ? "00" : normalizeSpace(fraction.text());
+        if (fractionText == null || fractionText.isBlank()) {
+            fractionText = "00";
+        }
+        fractionText = fractionText.replaceAll("[^0-9]", "");
+        if (fractionText.isBlank()) {
+            fractionText = "00";
+        }
+        if (fractionText.length() == 1) {
+            fractionText = fractionText + "0";
+        }
+        if (fractionText.length() > 2) {
+            fractionText = fractionText.substring(0, 2);
+        }
+        return "$" + wholeText + "." + fractionText;
+    }
+
+    private static String firstOfferPrice(Document doc) {
+        Elements offers = doc.select(
+                "#corePrice_feature_div .a-price:not(.a-text-price), "
+                        + "#corePriceDisplay_desktop_feature_div .a-price:not(.a-text-price), "
+                        + "#apex_desktop .a-price:not(.a-text-price)"
+        );
+        for (Element offer : offers) {
+            String offscreen = text(offer, ".a-offscreen");
+            if (offscreen != null) {
+                return offscreen;
+            }
+            String composed = composePriceFromWholeFraction(offer);
+            if (composed != null) {
+                return composed;
+            }
+        }
+        return null;
+    }
+
     private static String firstOffscreenPrice(Document doc) {
-        Elements prices = doc.select("span.a-price > span.a-offscreen, span.a-price span.a-offscreen");
+        Elements prices = doc.select(
+                "span.a-price:not(.a-text-price) > span.a-offscreen, "
+                        + "span.a-price:not(.a-text-price) span.a-offscreen"
+        );
         for (Element el : prices) {
             String text = normalizeSpace(el.text());
             if (text != null && text.contains("$")) {
                 return text;
             }
+        }
+        // Fall back to any offscreen price if non-strike ones were empty.
+        prices = doc.select("span.a-price > span.a-offscreen, span.a-price span.a-offscreen");
+        for (Element el : prices) {
+            String text = normalizeSpace(el.text());
+            if (text != null && text.contains("$")) {
+                return text;
+            }
+        }
+        return null;
+    }
+
+    private static String text(Element root, String css) {
+        Element el = root.selectFirst(css);
+        return el == null ? null : normalizeSpace(el.text());
+    }
+
+    private static String findRegexGroup(String html, Pattern pattern, int group) {
+        if (html == null) {
+            return null;
+        }
+        Matcher m = pattern.matcher(html);
+        if (m.find()) {
+            return m.group(group);
         }
         return null;
     }
