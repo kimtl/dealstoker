@@ -32,6 +32,12 @@ public class AmazonSearchPageFetcher {
     private static final Pattern RATING = Pattern.compile("([0-9]+(?:\\.[0-9]+)?)\\s*out of\\s*5", Pattern.CASE_INSENSITIVE);
     private static final Pattern RATINGS_COUNT = Pattern.compile("([0-9,]+)\\s+ratings?", Pattern.CASE_INSENSITIVE);
     private static final Pattern ASIN = Pattern.compile("^[A-Z0-9]{10}$");
+    private static final Pattern LABEL_LIST_PRICE =
+            Pattern.compile(
+                    "(?i)(?:list\\s*price|was|typical\\s*price|compare\\s*at|regular\\s*price)\\s*:?\\s*\\$?([0-9]+(?:,[0-9]{3})*(?:\\.[0-9]{2})?)"
+            );
+    private static final Pattern REFERENCE_PRICE_LABEL =
+            Pattern.compile("(?i)\\b(?:typical\\s*price|list\\s*price|compare\\s*at|regular\\s*price|was)\\b");
 
     public record SearchHit(
             String asin,
@@ -154,12 +160,15 @@ public class AmazonSearchPageFetcher {
                     text(card, ".a-price .a-offscreen"),
                     composePriceFromWholeFraction(card.selectFirst("span.a-price:not(.a-text-price)"))
             );
-            BigDecimal listPrice = firstPrice(
-                    text(card, "span.a-price.a-text-price > span.a-offscreen"),
-                    text(card, "span[data-a-strike=true] .a-offscreen"),
-                    text(card, ".a-text-price .a-offscreen"),
-                    composePriceFromWholeFraction(card.selectFirst("span.a-price.a-text-price"))
-            );
+            BigDecimal listPrice = extractTypicalOrReferenceFromCard(card);
+            if (listPrice == null) {
+                listPrice = firstPrice(
+                        text(card, "span.a-price.a-text-price > span.a-offscreen"),
+                        text(card, "span[data-a-strike=true] .a-offscreen"),
+                        text(card, ".a-text-price .a-offscreen"),
+                        composePriceFromWholeFraction(card.selectFirst("span.a-price.a-text-price"))
+                );
+            }
             if (listPrice != null && price != null && listPrice.compareTo(price) <= 0) {
                 listPrice = null;
             }
@@ -223,6 +232,55 @@ public class AmazonSearchPageFetcher {
             fractionText = fractionText.substring(0, 2);
         }
         return "$" + wholeText + "." + fractionText;
+    }
+
+    /** Treat Amazon "Typical price" (and similar) labels as the list/normal price. */
+    private static BigDecimal extractTypicalOrReferenceFromCard(Element card) {
+        BigDecimal fromBasis = firstPrice(
+                text(card, ".basisPrice .a-offscreen"),
+                text(card, "[class*=basisPrice] .a-offscreen"),
+                composePriceFromWholeFraction(card.selectFirst(".basisPrice .a-price, [class*=basisPrice] .a-price"))
+        );
+        if (fromBasis != null) {
+            return fromBasis;
+        }
+        for (Element el : card.select("span, div, td, li")) {
+            String raw = normalizeSpace(el.text());
+            if (raw == null || raw.length() > 100) {
+                continue;
+            }
+            if (!REFERENCE_PRICE_LABEL.matcher(raw).find()) {
+                continue;
+            }
+            Matcher labeled = LABEL_LIST_PRICE.matcher(raw);
+            if (labeled.find()) {
+                return parseMoney(labeled.group(1));
+            }
+            BigDecimal nested = firstPrice(
+                    text(el, ".a-price.a-text-price .a-offscreen"),
+                    text(el, ".a-offscreen"),
+                    composePriceFromWholeFraction(el.selectFirst(".a-price.a-text-price, .a-price"))
+            );
+            if (nested != null) {
+                return nested;
+            }
+            Element sibling = el.nextElementSibling();
+            if (sibling != null) {
+                BigDecimal fromSibling = firstPrice(
+                        text(sibling, ".a-offscreen"),
+                        composePriceFromWholeFraction(sibling.selectFirst(".a-price")),
+                        normalizeSpace(sibling.text())
+                );
+                if (fromSibling != null) {
+                    return fromSibling;
+                }
+            }
+        }
+        Matcher m = LABEL_LIST_PRICE.matcher(card.text() == null ? "" : card.text());
+        if (m.find()) {
+            return parseMoney(m.group(1));
+        }
+        return null;
     }
 
     private static boolean isSponsored(Element card) {
