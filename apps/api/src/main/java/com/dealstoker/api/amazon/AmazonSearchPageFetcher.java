@@ -149,12 +149,16 @@ public class AmazonSearchPageFetcher {
 
             BigDecimal price = firstPrice(
                     text(card, "span.a-price:not(.a-text-price) > span.a-offscreen"),
+                    text(card, "span.a-price:not(.a-text-price) span.a-offscreen"),
                     text(card, "span.a-price > span.a-offscreen"),
-                    text(card, ".a-price .a-offscreen")
+                    text(card, ".a-price .a-offscreen"),
+                    composePriceFromWholeFraction(card.selectFirst("span.a-price:not(.a-text-price)"))
             );
             BigDecimal listPrice = firstPrice(
                     text(card, "span.a-price.a-text-price > span.a-offscreen"),
-                    text(card, ".a-text-price .a-offscreen")
+                    text(card, "span[data-a-strike=true] .a-offscreen"),
+                    text(card, ".a-text-price .a-offscreen"),
+                    composePriceFromWholeFraction(card.selectFirst("span.a-price.a-text-price"))
             );
             if (listPrice != null && price != null && listPrice.compareTo(price) <= 0) {
                 listPrice = null;
@@ -188,6 +192,37 @@ public class AmazonSearchPageFetcher {
             ));
         }
         return new ArrayList<>(byAsin.values());
+    }
+
+    private static String composePriceFromWholeFraction(Element priceRoot) {
+        if (priceRoot == null) {
+            return null;
+        }
+        Element whole = priceRoot.selectFirst(".a-price-whole");
+        Element fraction = priceRoot.selectFirst(".a-price-fraction");
+        if (whole == null) {
+            return null;
+        }
+        String wholeText = normalizeSpace(whole.text());
+        if (wholeText == null) {
+            return null;
+        }
+        wholeText = wholeText.replace(",", "").replace(".", "");
+        String fractionText = fraction == null ? "00" : normalizeSpace(fraction.text());
+        if (fractionText == null || fractionText.isBlank()) {
+            fractionText = "00";
+        }
+        fractionText = fractionText.replaceAll("[^0-9]", "");
+        if (fractionText.isBlank()) {
+            fractionText = "00";
+        }
+        if (fractionText.length() == 1) {
+            fractionText = fractionText + "0";
+        }
+        if (fractionText.length() > 2) {
+            fractionText = fractionText.substring(0, 2);
+        }
+        return "$" + wholeText + "." + fractionText;
     }
 
     private static boolean isSponsored(Element card) {

@@ -1,5 +1,6 @@
 package com.dealstoker.api.service;
 
+import com.dealstoker.api.affiliate.AffiliateLinkBuilder;
 import com.dealstoker.api.amazon.AmazonAsinParser;
 import com.dealstoker.api.amazon.AmazonProductPageFetcher;
 import com.dealstoker.api.amazon.AmazonProductPageFetcher.ScrapedProduct;
@@ -15,6 +16,7 @@ import com.dealstoker.api.web.dto.ProductDtos.ProductRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -28,17 +30,20 @@ public class AmazonImportService {
     private final ProductService productService;
     private final ProductRepository productRepository;
     private final DealStokerProperties properties;
+    private final AffiliateLinkBuilder affiliateLinkBuilder;
 
     public AmazonImportService(
             AmazonProductPageFetcher pageFetcher,
             ProductService productService,
             ProductRepository productRepository,
-            DealStokerProperties properties
+            DealStokerProperties properties,
+            AffiliateLinkBuilder affiliateLinkBuilder
     ) {
         this.pageFetcher = pageFetcher;
         this.productService = productService;
         this.productRepository = productRepository;
         this.properties = properties;
+        this.affiliateLinkBuilder = affiliateLinkBuilder;
     }
 
     public PreviewResponse preview(String amazonUrl) {
@@ -95,8 +100,17 @@ public class AmazonImportService {
             );
         }
 
-        String outbound = firstNonBlank(request.affiliateUrl(), preview.canonicalUrl());
+        String outbound = affiliateLinkBuilder.buildOutboundUrl(
+                firstNonBlank(request.affiliateUrl(), preview.canonicalUrl()),
+                preview.asin()
+        );
         String title = firstNonBlank(request.titleOverride(), preview.title());
+
+        BigDecimal listPrice = preview.listPrice();
+        if (listPrice != null && preview.priceAmount() != null
+                && listPrice.compareTo(preview.priceAmount()) <= 0) {
+            listPrice = null;
+        }
 
         ProductRequest body = new ProductRequest(
                 preview.asin(),
@@ -109,7 +123,7 @@ public class AmazonImportService {
                 preview.imageUrl(),
                 preview.priceAmount(),
                 preview.currency(),
-                preview.listPrice(),
+                listPrice,
                 "InStock",
                 preview.rating(),
                 preview.reviewCount(),
@@ -126,6 +140,53 @@ public class AmazonImportService {
                 0
         );
         return productService.create(body);
+    }
+
+    @Transactional
+    public ProductDetail resyncPricing(Long productId) {
+        Product product = productService.requireById(productId);
+        String asin = product.getExternalId();
+        if (asin == null || asin.isBlank()) {
+            throw new IllegalArgumentException("Product has no ASIN/externalId to resync");
+        }
+        String canonical = AmazonAsinParser.canonicalProductUrl(asin.trim());
+        ScrapedProduct scraped = pageFetcher.fetch(asin.trim(), canonical);
+        if (!scraped.fetched() && scraped.priceAmount() == null && scraped.listPrice() == null) {
+            throw new IllegalArgumentException(
+                    scraped.fetchNote() == null
+                            ? "Could not refresh prices from Amazon"
+                            : scraped.fetchNote()
+            );
+        }
+
+        if (scraped.priceAmount() != null) {
+            product.setPriceAmount(scraped.priceAmount());
+        }
+        BigDecimal listPrice = scraped.listPrice();
+        if (listPrice != null && product.getPriceAmount() != null
+                && listPrice.compareTo(product.getPriceAmount()) <= 0) {
+            listPrice = null;
+        }
+        if (scraped.listPrice() != null || scraped.priceAmount() != null) {
+            product.setListPrice(listPrice);
+        }
+        if (scraped.rating() != null) {
+            product.setRating(scraped.rating());
+        }
+        if (scraped.reviewCount() != null) {
+            product.setReviewCount(scraped.reviewCount());
+        }
+        if (scraped.imageUrl() != null && !scraped.imageUrl().isBlank()) {
+            product.setImageUrl(scraped.imageUrl());
+        }
+        product.setDetailPageUrl(affiliateLinkBuilder.buildOutboundUrl(
+                product.getDetailPageUrl() == null || product.getDetailPageUrl().isBlank()
+                        ? canonical
+                        : product.getDetailPageUrl(),
+                asin
+        ));
+        product.setLastSyncedAt(java.time.Instant.now());
+        return ProductDetail.from(productRepository.save(product));
     }
 
     private static String normalizeMarketplace(String marketplace) {

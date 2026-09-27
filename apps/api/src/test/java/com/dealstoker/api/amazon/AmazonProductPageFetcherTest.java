@@ -80,6 +80,32 @@ class AmazonProductPageFetcherTest {
     }
 
     @Test
+    void parsesWholeFractionAndBasisListPrice() {
+        String html = """
+                <html><body>
+                  <span id="productTitle">Desk Lamp LED</span>
+                  <div id="corePriceDisplay_desktop_feature_div">
+                    <span class="a-price" data-a-size="xl">
+                      <span class="a-price-symbol">$</span>
+                      <span class="a-price-whole">39</span>
+                      <span class="a-price-fraction">99</span>
+                    </span>
+                    <span class="a-price a-text-price" data-a-strike="true">
+                      <span class="a-offscreen">$59.99</span>
+                    </span>
+                  </div>
+                  <script>
+                    window.ue_mid = "price";
+                    var data = {"basisPrice":{"amount":59.99},"displayPrice":"$39.99"};
+                  </script>
+                </body></html>
+                """;
+        AmazonProductPageFetcher.ScrapedProduct scraped = fetcher.parseHtml(html);
+        assertEquals(0, scraped.priceAmount().compareTo(new BigDecimal("39.99")));
+        assertEquals(0, scraped.listPrice().compareTo(new BigDecimal("59.99")));
+    }
+
+    @Test
     void rejectsTinyCaptchaPagesAsBlockedViaFetchNotePath() {
         // parseHtml itself doesn't block; looksBlocked is used by fetch().
         // Ensure tiny pages aren't considered useful PDP content.

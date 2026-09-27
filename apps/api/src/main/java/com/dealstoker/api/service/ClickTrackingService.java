@@ -50,7 +50,10 @@ public class ClickTrackingService {
         event.setUtmCampaign(trimTo(request.getParameter("utm_campaign"), 120));
         clickEventRepository.save(event);
 
-        return affiliateLinkBuilder.buildOutboundUrl(product.getDetailPageUrl());
+        return affiliateLinkBuilder.buildOutboundUrl(
+                product.getDetailPageUrl(),
+                product.getExternalId()
+        );
     }
 
     private String clientIp(HttpServletRequest request) {

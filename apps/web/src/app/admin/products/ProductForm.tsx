@@ -8,6 +8,7 @@ import {
   adminImportAmazonProduct,
   adminListCategories,
   adminPreviewAmazonImport,
+  adminResyncAmazonProduct,
   adminUpdateProduct,
   adminUpdateRecommendation,
 } from "@/lib/admin-api";
@@ -107,6 +108,7 @@ export function ProductForm({ product, onProductSaved }: Props) {
   const [amazonUrl, setAmazonUrl] = useState("");
   const [importing, setImporting] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [resyncing, setResyncing] = useState(false);
 
   useEffect(() => {
     adminListCategories()
@@ -208,6 +210,28 @@ export function ProductForm({ product, onProductSaved }: Props) {
       setError(err instanceof Error ? err.message : "Import failed");
     } finally {
       setImporting(false);
+    }
+  }
+
+  async function onResyncAmazon() {
+    if (!product) {
+      setError("Save the product first, then refresh prices from Amazon.");
+      return;
+    }
+    setResyncing(true);
+    setError(null);
+    setNote(null);
+    try {
+      const updated = await adminResyncAmazonProduct(product.id);
+      setForm(toForm(updated));
+      onProductSaved?.(updated);
+      setNote(
+        "Refreshed price / list price / rating from Amazon and normalized the outbound link tag.",
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Amazon resync failed");
+    } finally {
+      setResyncing(false);
     }
   }
 
@@ -365,25 +389,34 @@ export function ProductForm({ product, onProductSaved }: Props) {
           />
         </label>
         <div className={styles.importActions}>
+        <button
+          type="button"
+          className={styles.buttonSecondary}
+          onClick={onPreviewImport}
+          disabled={importing || !amazonUrl.trim()}
+        >
+          {importing ? "Working…" : "Preview & fill form"}
+        </button>
+        {!product ? (
+          <button
+            type="button"
+            className={styles.button}
+            onClick={onImportAndSaveDraft}
+            disabled={importing || !amazonUrl.trim()}
+          >
+            {importing ? "Working…" : "Import as draft"}
+          </button>
+        ) : (
           <button
             type="button"
             className={styles.buttonSecondary}
-            onClick={onPreviewImport}
-            disabled={importing || !amazonUrl.trim()}
+            onClick={onResyncAmazon}
+            disabled={resyncing}
           >
-            {importing ? "Working…" : "Preview & fill form"}
+            {resyncing ? "Refreshing…" : "Refresh prices from Amazon"}
           </button>
-          {!product ? (
-            <button
-              type="button"
-              className={styles.button}
-              onClick={onImportAndSaveDraft}
-              disabled={importing || !amazonUrl.trim()}
-            >
-              {importing ? "Working…" : "Import as draft"}
-            </button>
-          ) : null}
-        </div>
+        )}
+      </div>
       </div>
 
       <div className={styles.row}>
@@ -493,8 +526,8 @@ export function ProductForm({ product, onProductSaved }: Props) {
         <span className={styles.hint}>
           After import this is usually https://www.amazon.com/dp/ASIN. Replace
           with a SiteStripe affiliate link when you have one. Short links
-          (amzn.to) are left as-is on redirect; full amazon.com links get
-          tag=dealstoker01-20 appended when missing.
+          (amzn.to) are left as-is on redirect; other Amazon links are
+          normalized to /dp/ASIN with tag=dealstoker01-20 when missing/wrong.
         </span>
       </label>
       <label>

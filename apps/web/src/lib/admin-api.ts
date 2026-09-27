@@ -159,6 +159,14 @@ export async function adminImportAmazonProduct(body: {
   });
 }
 
+export async function adminResyncAmazonProduct(
+  id: number,
+): Promise<ProductDetail> {
+  return adminFetch(`/api/v1/admin/products/${id}/resync-amazon`, {
+    method: "POST",
+  });
+}
+
 export async function adminKeywordSearch(body: {
   keywords: string[];
   minPrice?: number | null;
