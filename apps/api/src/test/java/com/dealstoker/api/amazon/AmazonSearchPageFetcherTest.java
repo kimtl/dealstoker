@@ -51,4 +51,21 @@ class AmazonSearchPageFetcherTest {
 
         assertTrue(hits.get(1).sponsored());
     }
+
+    @Test
+    void treatsTypicalPriceLabelAsListPriceOnSearchCard() {
+        String html = """
+                <html><body>
+                  <div data-component-type="s-search-result" data-asin="B0TYPICAL1">
+                    <h2><a href="/dp/B0TYPICAL1"><span>Travel Mug</span></a></h2>
+                    <span class="a-price"><span class="a-offscreen">$18.99</span></span>
+                    <span class="a-size-base a-color-secondary">Typical price: $34.99</span>
+                  </div>
+                </body></html>
+                """;
+        List<AmazonSearchPageFetcher.SearchHit> hits = fetcher.parseHtml(html, "travel mug", 10);
+        assertEquals(1, hits.size());
+        assertEquals(0, hits.getFirst().priceAmount().compareTo(new BigDecimal("18.99")));
+        assertEquals(0, hits.getFirst().listPrice().compareTo(new BigDecimal("34.99")));
+    }
 }

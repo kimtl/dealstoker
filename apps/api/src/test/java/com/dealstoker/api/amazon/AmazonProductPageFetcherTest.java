@@ -106,6 +106,70 @@ class AmazonProductPageFetcherTest {
     }
 
     @Test
+    void treatsTypicalPriceAsListAndPriceToPayAsSale() {
+        String html = """
+                <html><body>
+                  <span id="productTitle">Wireless Earbuds</span>
+                  <div id="corePriceDisplay_desktop_feature_div">
+                    <span class="a-price aok-align-center reinventPricePriceToPayMargin priceToPay">
+                      <span class="a-offscreen">$24.99</span>
+                      <span aria-hidden="true">
+                        <span class="a-price-symbol">$</span>
+                        <span class="a-price-whole">24</span>
+                        <span class="a-price-fraction">99</span>
+                      </span>
+                    </span>
+                    <span class="aok-offscreen">Typical price: </span>
+                    <span class="a-size-small a-color-secondary aok-align-center basisPrice">
+                      Typical price:
+                      <span class="a-price a-text-price" data-a-strike="true">
+                        <span class="a-offscreen">$49.99</span>
+                      </span>
+                    </span>
+                  </div>
+                </body></html>
+                """;
+        AmazonProductPageFetcher.ScrapedProduct scraped = fetcher.parseHtml(html);
+        assertEquals(0, scraped.priceAmount().compareTo(new BigDecimal("24.99")));
+        assertEquals(0, scraped.listPrice().compareTo(new BigDecimal("49.99")));
+    }
+
+    @Test
+    void parsesTypicalPricePlainLabelWithoutStrikeClass() {
+        String html = """
+                <html><body>
+                  <span id="productTitle">Kitchen Scale</span>
+                  <div id="corePrice_feature_div">
+                    <span class="a-price priceToPay"><span class="a-offscreen">$15.99</span></span>
+                    <span class="a-size-base a-color-secondary">Typical price: $29.99</span>
+                  </div>
+                </body></html>
+                """;
+        AmazonProductPageFetcher.ScrapedProduct scraped = fetcher.parseHtml(html);
+        assertEquals(0, scraped.priceAmount().compareTo(new BigDecimal("15.99")));
+        assertEquals(0, scraped.listPrice().compareTo(new BigDecimal("29.99")));
+    }
+
+    @Test
+    void parsesTypicalPriceFromJsonDisplayString() {
+        String html = """
+                <html><body>
+                  <span id="productTitle">USB Hub</span>
+                  <span class="a-price priceToPay"><span class="a-offscreen">$12.49</span></span>
+                  <script>
+                    var pricing = {
+                      "priceToPay":{"priceAmount":12.49,"displayString":"$12.49"},
+                      "typicalPrice":{"displayString":"$19.99"}
+                    };
+                  </script>
+                </body></html>
+                """;
+        AmazonProductPageFetcher.ScrapedProduct scraped = fetcher.parseHtml(html);
+        assertEquals(0, scraped.priceAmount().compareTo(new BigDecimal("12.49")));
+        assertEquals(0, scraped.listPrice().compareTo(new BigDecimal("19.99")));
+    }
+
+    @Test
     void rejectsTinyCaptchaPagesAsBlockedViaFetchNotePath() {
         // parseHtml itself doesn't block; looksBlocked is used by fetch().
         // Ensure tiny pages aren't considered useful PDP content.
