@@ -43,7 +43,8 @@ public class Product {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(columnDefinition = "TEXT")
+    /** Editorial “why we recommend” blurb shown on the public product page. */
+    @Column(name = "recommendation", columnDefinition = "TEXT")
     private String recommendation;
 
     @Column(name = "image_url", columnDefinition = "TEXT")

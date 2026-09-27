@@ -30,7 +30,7 @@ export default function AdminEditProductPage() {
         <p className={styles.muted}>Loading…</p>
       ) : product ? (
         <div className={styles.card}>
-          <ProductForm product={product} />
+          <ProductForm product={product} onProductSaved={setProduct} />
         </div>
       ) : null}
     </div>

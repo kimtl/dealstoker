@@ -167,6 +167,10 @@ public final class ProductDtos {
             Integer featuredRank
     ) {}
 
+    public record RecommendationRequest(
+            String recommendation
+    ) {}
+
     public record PageResponse<T>(
             List<T> items,
             int page,
