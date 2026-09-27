@@ -101,6 +101,12 @@ export default function AdminProductsPage() {
         <Link className={styles.button} href="/admin/products/new">
           New product
         </Link>
+        <Link
+          className={styles.buttonSecondary}
+          href="/admin/products/keyword-import"
+        >
+          Keyword import
+        </Link>
         <button
           type="button"
           className={styles.buttonSecondary}

@@ -6,6 +6,8 @@ import type {
   AnalyticsSummary,
   Category,
   CategoryRequest,
+  KeywordRegisterResponse,
+  KeywordSearchResponse,
   PageResponse,
   ProductDetail,
   ProductRequest,
@@ -152,6 +154,32 @@ export async function adminImportAmazonProduct(body: {
   createAsDraft?: boolean;
 }): Promise<ProductDetail> {
   return adminFetch("/api/v1/admin/products/import", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function adminKeywordSearch(body: {
+  keywords: string[];
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  minDiscountPercent?: number | null;
+  minRating?: number | null;
+  minReviewCount?: number | null;
+  maxPerKeyword?: number;
+  includeSponsored?: boolean;
+  includeExisting?: boolean;
+}): Promise<KeywordSearchResponse> {
+  return adminFetch("/api/v1/admin/products/import/keyword-search", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function adminKeywordRegister(body: {
+  items: Array<{ asin: string; primaryCategoryId: number }>;
+}): Promise<KeywordRegisterResponse> {
+  return adminFetch("/api/v1/admin/products/import/keyword-register", {
     method: "POST",
     body: JSON.stringify(body),
   });

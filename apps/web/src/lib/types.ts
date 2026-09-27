@@ -171,3 +171,42 @@ export type AmazonImportPreview = {
   alreadyExists: boolean;
   existingProductId: number | null;
 };
+
+export type KeywordSearchHit = {
+  asin: string;
+  title: string;
+  imageUrl: string | null;
+  productUrl: string;
+  keyword: string;
+  priceAmount: number | string | null;
+  listPrice: number | string | null;
+  discountPercent: number | string | null;
+  rating: number | string | null;
+  reviewCount: number | null;
+  sponsored: boolean;
+  alreadyExists: boolean;
+  existingProductId: number | null;
+  suggestedCategoryId: number | null;
+  suggestedCategoryName: string | null;
+};
+
+export type KeywordSearchResponse = {
+  items: KeywordSearchHit[];
+  keywordCount: number;
+  rawHitCount: number;
+  matchedCount: number;
+  notes: string[];
+};
+
+export type KeywordRegisterResponse = {
+  attempted: number;
+  created: number;
+  failed: number;
+  results: Array<{
+    asin: string;
+    ok: boolean;
+    productId: number | null;
+    title: string | null;
+    error: string | null;
+  }>;
+};

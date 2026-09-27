@@ -3,10 +3,15 @@ package com.dealstoker.api.web;
 import com.dealstoker.api.domain.Product;
 import com.dealstoker.api.domain.ProductStatus;
 import com.dealstoker.api.service.AmazonImportService;
+import com.dealstoker.api.service.AmazonKeywordImportService;
 import com.dealstoker.api.service.CategoryService;
 import com.dealstoker.api.service.ProductService;
 import com.dealstoker.api.service.RecommendationGenerationService;
 import com.dealstoker.api.web.dto.AmazonImportDtos.ImportRequest;
+import com.dealstoker.api.web.dto.AmazonImportDtos.KeywordRegisterRequest;
+import com.dealstoker.api.web.dto.AmazonImportDtos.KeywordRegisterResponse;
+import com.dealstoker.api.web.dto.AmazonImportDtos.KeywordSearchRequest;
+import com.dealstoker.api.web.dto.AmazonImportDtos.KeywordSearchResponse;
 import com.dealstoker.api.web.dto.AmazonImportDtos.PreviewRequest;
 import com.dealstoker.api.web.dto.AmazonImportDtos.PreviewResponse;
 import com.dealstoker.api.web.dto.CategoryDtos.CategoryRequest;
@@ -40,17 +45,20 @@ public class AdminCatalogController {
     private final CategoryService categoryService;
     private final ProductService productService;
     private final AmazonImportService amazonImportService;
+    private final AmazonKeywordImportService amazonKeywordImportService;
     private final RecommendationGenerationService recommendationGenerationService;
 
     public AdminCatalogController(
             CategoryService categoryService,
             ProductService productService,
             AmazonImportService amazonImportService,
+            AmazonKeywordImportService amazonKeywordImportService,
             RecommendationGenerationService recommendationGenerationService
     ) {
         this.categoryService = categoryService;
         this.productService = productService;
         this.amazonImportService = amazonImportService;
+        this.amazonKeywordImportService = amazonKeywordImportService;
         this.recommendationGenerationService = recommendationGenerationService;
     }
 
@@ -107,6 +115,16 @@ public class AdminCatalogController {
     @PostMapping("/products/import")
     public ProductDetail importAmazonProduct(@Valid @RequestBody ImportRequest request) {
         return amazonImportService.importProduct(request);
+    }
+
+    @PostMapping("/products/import/keyword-search")
+    public KeywordSearchResponse keywordSearch(@Valid @RequestBody KeywordSearchRequest request) {
+        return amazonKeywordImportService.search(request);
+    }
+
+    @PostMapping("/products/import/keyword-register")
+    public KeywordRegisterResponse keywordRegister(@Valid @RequestBody KeywordRegisterRequest request) {
+        return amazonKeywordImportService.register(request);
     }
 
     @PutMapping("/products/{id}")
