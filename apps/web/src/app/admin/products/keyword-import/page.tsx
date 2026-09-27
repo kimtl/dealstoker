@@ -8,7 +8,7 @@ import {
   adminListCategories,
 } from "@/lib/admin-api";
 import type { Category, KeywordSearchHit } from "@/lib/types";
-import styles from "../admin.module.css";
+import styles from "../../admin.module.css";
 
 type RowState = KeywordSearchHit & {
   selected: boolean;
