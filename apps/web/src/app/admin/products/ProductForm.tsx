@@ -9,6 +9,7 @@ import {
   adminListCategories,
   adminPreviewAmazonImport,
   adminUpdateProduct,
+  adminUpdateRecommendation,
 } from "@/lib/admin-api";
 import type { Category, ProductDetail, ProductStatus } from "@/lib/types";
 import styles from "../admin.module.css";
@@ -81,9 +82,22 @@ function parseOptionalNumber(value: string): number | null | undefined {
 
 type Props = {
   product?: ProductDetail | null;
+  onProductSaved?: (product: ProductDetail) => void;
 };
 
-export function ProductForm({ product }: Props) {
+function recommendationPersisted(
+  saved: ProductDetail,
+  expected: string,
+): boolean {
+  if (!expected) return true;
+  // Old API builds omit the key entirely; treat that as a failed persist.
+  if (!Object.prototype.hasOwnProperty.call(saved, "recommendation")) {
+    return false;
+  }
+  return (saved.recommendation || "").trim() === expected;
+}
+
+export function ProductForm({ product, onProductSaved }: Props) {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState<FormState>(() => toForm(product));
@@ -207,10 +221,21 @@ export function ProductForm({ product }: Props) {
     setNote(null);
     try {
       const updated = await adminGenerateRecommendation(product.id, true);
+      if (!Object.prototype.hasOwnProperty.call(updated, "recommendation")) {
+        setError(
+          "API build is missing recommendation support. Redeploy the Railway API service on latest main, then retry.",
+        );
+        return;
+      }
+      if (!updated.recommendation?.trim()) {
+        setError("AI did not return recommendation text.");
+        return;
+      }
       setForm((prev) => ({
         ...prev,
         recommendation: updated.recommendation || "",
       }));
+      onProductSaved?.(updated);
       setNote("Recommendation generated from product signals and review themes.");
     } catch (err) {
       setError(
@@ -225,6 +250,9 @@ export function ProductForm({ product }: Props) {
     event.preventDefault();
     setSaving(true);
     setError(null);
+    setNote(null);
+
+    const recommendationText = form.recommendation.trim();
 
     const body = {
       externalId: form.externalId.trim(),
@@ -233,7 +261,8 @@ export function ProductForm({ product }: Props) {
       title: form.title.trim(),
       slug: form.slug.trim() || undefined,
       description: form.description.trim() || undefined,
-      recommendation: form.recommendation.trim() || undefined,
+      // Always send the field (including empty) so the API can clear/set it.
+      recommendation: recommendationText,
       imageUrl: form.imageUrl.trim() || undefined,
       priceAmount: parseOptionalNumber(form.priceAmount),
       currency: form.currency.trim() || undefined,
@@ -259,13 +288,53 @@ export function ProductForm({ product }: Props) {
 
     try {
       if (product) {
-        await adminUpdateProduct(product.id, body);
+        let updated = await adminUpdateProduct(product.id, body);
+        if (!recommendationPersisted(updated, recommendationText)) {
+          // Dedicated endpoint — works once the API build includes recommendation support.
+          updated = await adminUpdateRecommendation(
+            product.id,
+            recommendationText || null,
+          );
+        }
+        if (!recommendationPersisted(updated, recommendationText)) {
+          setError(
+            "추천사유가 API에 저장되지 않았습니다. Railway API 서비스를 최신 main으로 재배포한 뒤 다시 저장해 주세요. (확인: /api/v1/health 에 features: recommendation)",
+          );
+          return;
+        }
+        setForm(toForm(updated));
+        onProductSaved?.(updated);
+        setNote("Product saved. Recommendation is stored.");
       } else {
         const created = await adminCreateProduct(body);
+        if (
+          recommendationText &&
+          !recommendationPersisted(created, recommendationText)
+        ) {
+          try {
+            const patched = await adminUpdateRecommendation(
+              created.id,
+              recommendationText,
+            );
+            if (!recommendationPersisted(patched, recommendationText)) {
+              setError(
+                "상품은 생성됐지만 추천사유 저장에 실패했습니다. API 재배포 후 수정 화면에서 다시 저장해 주세요.",
+              );
+              router.replace(`/admin/products/${created.id}`);
+              return;
+            }
+            onProductSaved?.(patched);
+          } catch {
+            setError(
+              "상품은 생성됐지만 추천사유 저장에 실패했습니다. API 재배포 후 수정 화면에서 다시 저장해 주세요.",
+            );
+            router.replace(`/admin/products/${created.id}`);
+            return;
+          }
+        }
         router.replace(`/admin/products/${created.id}`);
         return;
       }
-      router.push("/admin/products");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed");
     } finally {

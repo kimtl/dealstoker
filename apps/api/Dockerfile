@@ -2,6 +2,10 @@
 FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /workspace
 
+# Bust Railway/Docker layer cache when recommendation persistence changes.
+ARG DEALSTOKER_API_BUILD=recommendation-v2
+ENV DEALSTOKER_API_BUILD=$DEALSTOKER_API_BUILD
+
 COPY gradlew settings.gradle build.gradle ./
 COPY gradle ./gradle
 RUN chmod +x gradlew && ./gradlew dependencies --no-daemon || true

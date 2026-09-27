@@ -29,8 +29,12 @@ public class PublicCatalogController {
     }
 
     @GetMapping("/health")
-    public Map<String, String> health() {
-        return Map.of("status", "ok", "service", "dealstoker-api");
+    public Map<String, Object> health() {
+        return Map.of(
+                "status", "ok",
+                "service", "dealstoker-api",
+                "features", List.of("recommendation")
+        );
     }
 
     @GetMapping("/categories")

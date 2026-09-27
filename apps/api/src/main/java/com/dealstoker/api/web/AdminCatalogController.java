@@ -16,6 +16,7 @@ import com.dealstoker.api.web.dto.ProductDtos.PageResponse;
 import com.dealstoker.api.web.dto.ProductDtos.ProductDetail;
 import com.dealstoker.api.web.dto.ProductDtos.ProductRequest;
 import com.dealstoker.api.web.dto.ProductDtos.ProductSummary;
+import com.dealstoker.api.web.dto.ProductDtos.RecommendationRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -130,6 +131,15 @@ public class AdminCatalogController {
             body = new FeatureRequest(true, body.featuredRank());
         }
         return productService.updateFeatured(id, body);
+    }
+
+    @PutMapping("/products/{id}/recommendation")
+    public ProductDetail updateRecommendation(
+            @PathVariable Long id,
+            @RequestBody(required = false) RecommendationRequest request
+    ) {
+        String text = request != null ? request.recommendation() : null;
+        return productService.saveRecommendation(id, text);
     }
 
     @PostMapping("/products/{id}/recommendation/generate")

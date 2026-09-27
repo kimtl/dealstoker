@@ -167,6 +167,16 @@ export async function adminUpdateProduct(
   });
 }
 
+export async function adminUpdateRecommendation(
+  id: number,
+  recommendation: string | null,
+): Promise<ProductDetail> {
+  return adminFetch(`/api/v1/admin/products/${id}/recommendation`, {
+    method: "PUT",
+    body: JSON.stringify({ recommendation }),
+  });
+}
+
 export async function adminPublishProduct(id: number): Promise<ProductDetail> {
   return adminFetch(`/api/v1/admin/products/${id}/publish`, { method: "POST" });
 }
