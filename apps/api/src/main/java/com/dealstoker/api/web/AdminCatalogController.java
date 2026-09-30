@@ -4,6 +4,7 @@ import com.dealstoker.api.domain.Product;
 import com.dealstoker.api.domain.ProductStatus;
 import com.dealstoker.api.service.AmazonImportService;
 import com.dealstoker.api.service.AmazonKeywordImportService;
+import com.dealstoker.api.service.BuyingGuideGenerationService;
 import com.dealstoker.api.service.CategoryService;
 import com.dealstoker.api.service.ProductService;
 import com.dealstoker.api.service.RecommendationGenerationService;
@@ -14,6 +15,8 @@ import com.dealstoker.api.web.dto.AmazonImportDtos.KeywordSearchRequest;
 import com.dealstoker.api.web.dto.AmazonImportDtos.KeywordSearchResponse;
 import com.dealstoker.api.web.dto.AmazonImportDtos.PreviewRequest;
 import com.dealstoker.api.web.dto.AmazonImportDtos.PreviewResponse;
+import com.dealstoker.api.web.dto.CategoryDtos.BuyingGuideGenerateRequest;
+import com.dealstoker.api.web.dto.CategoryDtos.BuyingGuideGenerateResponse;
 import com.dealstoker.api.web.dto.CategoryDtos.CategoryRequest;
 import com.dealstoker.api.web.dto.CategoryDtos.CategoryResponse;
 import com.dealstoker.api.web.dto.ProductDtos.FeatureRequest;
@@ -47,19 +50,22 @@ public class AdminCatalogController {
     private final AmazonImportService amazonImportService;
     private final AmazonKeywordImportService amazonKeywordImportService;
     private final RecommendationGenerationService recommendationGenerationService;
+    private final BuyingGuideGenerationService buyingGuideGenerationService;
 
     public AdminCatalogController(
             CategoryService categoryService,
             ProductService productService,
             AmazonImportService amazonImportService,
             AmazonKeywordImportService amazonKeywordImportService,
-            RecommendationGenerationService recommendationGenerationService
+            RecommendationGenerationService recommendationGenerationService,
+            BuyingGuideGenerationService buyingGuideGenerationService
     ) {
         this.categoryService = categoryService;
         this.productService = productService;
         this.amazonImportService = amazonImportService;
         this.amazonKeywordImportService = amazonKeywordImportService;
         this.recommendationGenerationService = recommendationGenerationService;
+        this.buyingGuideGenerationService = buyingGuideGenerationService;
     }
 
     @GetMapping("/me")
@@ -86,6 +92,21 @@ public class AdminCatalogController {
     public Map<String, Boolean> deleteCategory(@PathVariable Long id) {
         categoryService.delete(id);
         return Map.of("deleted", true);
+    }
+
+    @PostMapping("/categories/{id}/buying-guide/generate")
+    public BuyingGuideGenerateResponse generateBuyingGuide(
+            @PathVariable Long id,
+            @RequestBody(required = false) BuyingGuideGenerateRequest request
+    ) {
+        if (!buyingGuideGenerationService.isConfigured()) {
+            throw new IllegalArgumentException(
+                    "AI is not configured. Set OPENAI_API_KEY on the API service."
+            );
+        }
+        String prompt = request == null ? null : request.prompt();
+        String text = buyingGuideGenerationService.generate(categoryService.requireById(id), prompt);
+        return new BuyingGuideGenerateResponse(text);
     }
 
     @GetMapping("/products")

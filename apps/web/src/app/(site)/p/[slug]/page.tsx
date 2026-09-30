@@ -173,9 +173,7 @@ export default async function ProductPage({ params }: PageProps) {
                   Why we recommend it
                 </h2>
                 <div className={styles.recommendationBody}>
-                  {product.recommendation.split(/\n+/).map((para, index) => (
-                    <p key={`${index}-${para.slice(0, 24)}`}>{para}</p>
-                  ))}
+                  <p>{product.recommendation}</p>
                 </div>
               </section>
             ) : null}

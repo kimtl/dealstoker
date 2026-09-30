@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import {
   adminCreateCategory,
   adminDeleteCategory,
+  adminGenerateCategoryBuyingGuide,
   adminListCategories,
   adminUpdateCategory,
 } from "@/lib/admin-api";
@@ -14,6 +15,8 @@ const emptyForm = {
   name: "",
   slug: "",
   description: "",
+  buyingGuide: "",
+  aiPrompt: "",
   seoTitle: "",
   seoDescription: "",
   sortOrder: "0",
@@ -26,6 +29,7 @@ export default function AdminCategoriesPage() {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
 
   async function load() {
     const data = await adminListCategories();
@@ -44,6 +48,8 @@ export default function AdminCategoriesPage() {
       name: category.name,
       slug: category.slug,
       description: category.description || "",
+      buyingGuide: category.buyingGuide || "",
+      aiPrompt: "",
       seoTitle: category.seoTitle || "",
       seoDescription: category.seoDescription || "",
       sortOrder: String(category.sortOrder ?? 0),
@@ -66,6 +72,7 @@ export default function AdminCategoriesPage() {
       name: form.name.trim(),
       slug: form.slug.trim() || undefined,
       description: form.description.trim() || undefined,
+      buyingGuide: form.buyingGuide.trim() || null,
       seoTitle: form.seoTitle.trim() || undefined,
       seoDescription: form.seoDescription.trim() || undefined,
       sortOrder: Number(form.sortOrder) || 0,
@@ -83,6 +90,32 @@ export default function AdminCategoriesPage() {
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed");
+    }
+  }
+
+  async function onGenerateGuide() {
+    if (!editingId) {
+      setError("Save/create the category first, then generate a buying guide.");
+      return;
+    }
+    setGenerating(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const result = await adminGenerateCategoryBuyingGuide(
+        editingId,
+        form.aiPrompt,
+      );
+      if (!result.buyingGuide?.trim()) {
+        setError("AI did not return buying guide text.");
+        return;
+      }
+      setForm((prev) => ({ ...prev, buyingGuide: result.buyingGuide }));
+      setMessage("Buying guide drafted by AI — review and save.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "AI generate failed");
+    } finally {
+      setGenerating(false);
     }
   }
 
@@ -131,6 +164,41 @@ export default function AdminCategoriesPage() {
               }
             />
           </label>
+          <label>
+            Buying guide
+            <textarea
+              value={form.buyingGuide}
+              onChange={(e) =>
+                setForm({ ...form, buyingGuide: e.target.value })
+              }
+              rows={10}
+              placeholder="Shown in a modal from the category page when shoppers click Buying guide."
+            />
+          </label>
+          <label>
+            AI prompt (optional)
+            <textarea
+              value={form.aiPrompt}
+              onChange={(e) => setForm({ ...form, aiPrompt: e.target.value })}
+              rows={3}
+              placeholder="Extra instructions for ChatGPT, e.g. focus on first-time buyers / budget under $50"
+            />
+          </label>
+          <div className={styles.actions}>
+            <button
+              className={styles.buttonSecondary}
+              type="button"
+              onClick={onGenerateGuide}
+              disabled={generating || !editingId}
+            >
+              {generating ? "Generating…" : "Generate with AI"}
+            </button>
+            {!editingId ? (
+              <span className={styles.muted}>
+                Save the category once before AI generate.
+              </span>
+            ) : null}
+          </div>
           <div className={styles.row}>
             <label>
               SEO title
@@ -195,6 +263,7 @@ export default function AdminCategoriesPage() {
               <th>ID</th>
               <th>Name</th>
               <th>Slug</th>
+              <th>Guide</th>
               <th>Order</th>
               <th>Active</th>
               <th />
@@ -206,6 +275,7 @@ export default function AdminCategoriesPage() {
                 <td>{category.id}</td>
                 <td>{category.name}</td>
                 <td>{category.slug}</td>
+                <td>{category.buyingGuide?.trim() ? "Yes" : "—"}</td>
                 <td>{category.sortOrder}</td>
                 <td>{category.active ? "Yes" : "No"}</td>
                 <td>

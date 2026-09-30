@@ -96,9 +96,17 @@ public class CategoryService {
         category.setName(request.name().trim());
         category.setSlug(slug);
         category.setDescription(request.description());
+        category.setBuyingGuide(blankToNull(request.buyingGuide()));
         category.setSeoTitle(request.seoTitle());
         category.setSeoDescription(request.seoDescription());
         category.setSortOrder(request.sortOrder() != null ? request.sortOrder() : 0);
         category.setActive(request.active() == null || request.active());
+    }
+
+    private static String blankToNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
     }
 }

@@ -80,15 +80,22 @@ public class RecommendationGenerationService {
 
     private String buildUserPrompt(Product product, List<String> reviewSnippets) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Write a DealStoker editorial blurb: why we recommend this Amazon product.\n\n");
+        sb.append("Write a DealStoker product recommendation in EXACTLY this structure (plain text, US English):\n\n");
+        sb.append("One-line takeaway: <core reason in 20-40 characters worth of meaning; one punchy sentence>\n");
+        sb.append("Why we recommend:\n");
+        sb.append("- <strength #1 vs similar price/category — compare, numbers, or facts>\n");
+        sb.append("- <strength #2 — repeated praise themes from reviews when available>\n");
+        sb.append("- <optional strength #3 — e.g. price vs list / near historic low if signals support it>\n");
+        sb.append("Best for: <specific shopper situation>\n");
+        sb.append("Skip if / caveats: <at least one concrete downside or who should avoid it>\n");
+        sb.append("Price take: <short opinion on whether the shown price looks fair/good/steep>\n\n");
         sb.append("Rules:\n");
-        sb.append("- 2-4 short paragraphs OR 1 short intro + 3-5 bullet themes (plain text, no markdown headings).\n");
-        sb.append("- Synthesize common shopper themes from ratings, features, and any review snippets.\n");
-        sb.append("- Do NOT invent fake quotes, usernames, star counts, or specific testimonials.\n");
+        sb.append("- Follow the labels exactly as written above (including colons).\n");
+        sb.append("- 2-3 bullets under \"Why we recommend\" (no more than 3).\n");
+        sb.append("- Do NOT invent fake quotes, usernames, star counts, or testimonials.\n");
         sb.append("- Do NOT copy Amazon product description verbatim.\n");
-        sb.append("- Mention trade-offs briefly if obvious from the signals (e.g. polarizing size/noise).\n");
-        sb.append("- Keep under 900 characters. US English. Neutral, helpful tone.\n");
-        sb.append("- End without a CTA (the page already has View on Amazon).\n\n");
+        sb.append("- Prefer comparison/facts over hype. Keep under 1200 characters total.\n");
+        sb.append("- No markdown headings. No CTA (the page already has View on Amazon).\n\n");
 
         sb.append("Product title: ").append(product.getTitle().trim()).append('\n');
         if (product.getBrand() != null && !product.getBrand().isBlank()) {
@@ -106,6 +113,11 @@ public class RecommendationGenerationService {
         if (product.getPriceAmount() != null) {
             sb.append("Shown price: ").append(product.getCurrency() == null ? "USD" : product.getCurrency())
                     .append(' ').append(product.getPriceAmount()).append('\n');
+        }
+        if (product.getListPrice() != null) {
+            sb.append("List / typical price (if known): ")
+                    .append(product.getCurrency() == null ? "USD" : product.getCurrency())
+                    .append(' ').append(product.getListPrice()).append('\n');
         }
 
         List<String> features = parseFeatures(product.getFeaturesJson());
@@ -143,8 +155,9 @@ public class RecommendationGenerationService {
         messages.add(Map.of(
                 "role", "system",
                 "content",
-                "You write concise affiliate-friendly product recommendation blurbs for DealStoker. "
-                        + "You summarize review themes without fabricating testimonials. "
+                "You write structured affiliate-friendly product recommendations for DealStoker. "
+                        + "Always use the exact section labels requested by the user. "
+                        + "Summarize review themes without fabricating testimonials. "
                         + "Output plain text only."
         ));
         messages.add(Map.of("role", "user", "content", userPrompt));

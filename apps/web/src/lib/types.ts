@@ -11,6 +11,7 @@ export type Category = {
   name: string;
   slug: string;
   description: string | null;
+  buyingGuide?: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
   sortOrder: number;
@@ -120,6 +121,7 @@ export type CategoryRequest = {
   name: string;
   slug?: string;
   description?: string;
+  buyingGuide?: string | null;
   seoTitle?: string;
   seoDescription?: string;
   sortOrder?: number;

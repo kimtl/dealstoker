@@ -15,6 +15,7 @@ public final class CategoryDtos {
             String name,
             String slug,
             String description,
+            String buyingGuide,
             String seoTitle,
             String seoDescription,
             int sortOrder,
@@ -28,6 +29,7 @@ public final class CategoryDtos {
                     category.getName(),
                     category.getSlug(),
                     category.getDescription(),
+                    category.getBuyingGuide(),
                     category.getSeoTitle(),
                     category.getSeoDescription(),
                     category.getSortOrder(),
@@ -42,9 +44,18 @@ public final class CategoryDtos {
             @NotBlank @Size(max = 200) String name,
             @Size(max = 220) String slug,
             String description,
+            String buyingGuide,
             @Size(max = 255) String seoTitle,
             @Size(max = 500) String seoDescription,
             Integer sortOrder,
             Boolean active
+    ) {}
+
+    public record BuyingGuideGenerateRequest(
+            String prompt
+    ) {}
+
+    public record BuyingGuideGenerateResponse(
+            String buyingGuide
     ) {}
 }

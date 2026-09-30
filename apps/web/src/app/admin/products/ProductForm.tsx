@@ -544,11 +544,12 @@ export function ProductForm({ product, onProductSaved }: Props) {
           onChange={(e) =>
             setForm({ ...form, recommendation: e.target.value })
           }
-          rows={7}
+          rows={10}
+          placeholder={`One-line takeaway: …\nWhy we recommend:\n- …\nBest for: …\nSkip if / caveats: …\nPrice take: …`}
         />
         <span className={styles.hint}>
-          Editorial summary of shopper review themes — not a paste of the Amazon
-          description. Requires OPENAI_API_KEY on the API for AI generate.
+          Structured takeaway: one-line conclusion, 2–3 reasons, best for,
+          caveats, and price take. Requires OPENAI_API_KEY for AI generate.
         </span>
       </label>
       <div className={styles.importActions}>
