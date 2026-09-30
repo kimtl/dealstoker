@@ -35,6 +35,9 @@ public class Category {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "buying_guide", columnDefinition = "TEXT")
+    private String buyingGuide;
+
     @Column(name = "seo_title", length = 255)
     private String seoTitle;
 
@@ -99,6 +102,14 @@ public class Category {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getBuyingGuide() {
+        return buyingGuide;
+    }
+
+    public void setBuyingGuide(String buyingGuide) {
+        this.buyingGuide = buyingGuide;
     }
 
     public String getSeoTitle() {

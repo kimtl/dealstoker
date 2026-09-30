@@ -262,10 +262,13 @@ export function getProductFaqs(product: ProductDetail): FaqItem[] {
   ];
 
   if (product.recommendation?.trim()) {
-    faqs.push({
-      question: "Why does DealStoker recommend this product?",
-      answer: product.recommendation.trim().replace(/\s+/g, " "),
-    });
+    const recommendationFaq = recommendationFaqAnswer(product.recommendation);
+    if (recommendationFaq) {
+      faqs.push({
+        question: "Why does DealStoker recommend this product?",
+        answer: recommendationFaq,
+      });
+    }
   }
 
   if (product.features?.length) {
@@ -291,13 +294,27 @@ export function getProductFaqs(product: ProductDetail): FaqItem[] {
   return faqs.slice(0, 5);
 }
 
+function recommendationFaqAnswer(recommendation: string): string | null {
+  const text = recommendation.trim();
+  if (!text) return null;
+  const takeaway = text.match(
+    /(?:^|\n)\s*One-line takeaway:\s*(.+?)(?:\n|$)/i,
+  );
+  if (takeaway?.[1]?.trim()) {
+    return takeaway[1].trim();
+  }
+  const firstLine = text.split(/\n+/).map((line) => line.trim()).find(Boolean);
+  return firstLine ? firstLine.replace(/\s+/g, " ") : null;
+}
+
 /** Prefer editorial SEO / recommendation over raw Amazon paste. */
 export function buildIntentProductMetaDescription(product: ProductDetail): string {
   if (product.seoDescription?.trim()) {
     return product.seoDescription.trim();
   }
   if (product.recommendation?.trim()) {
-    return product.recommendation.trim().replace(/\s+/g, " ");
+    const takeaway = recommendationFaqAnswer(product.recommendation);
+    if (takeaway) return takeaway;
   }
   const price = formatMoney(product.priceAmount, product.currency);
   const rating = formatRating(product.rating);

@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
+import { BuyingGuideModalButton } from "@/components/BuyingGuideModalButton";
 import { DealList } from "@/components/DealList";
 import { FaqSection } from "@/components/FaqSection";
 import { JsonLd } from "@/components/JsonLd";
 import { getCategory, getCategoryProducts } from "@/lib/api";
-import { getCategoryFaqs, getCategoryGuide } from "@/lib/faq";
+import { getCategoryFaqs } from "@/lib/faq";
 import {
   buildBreadcrumbJsonLd,
   buildFaqJsonLd,
@@ -82,7 +83,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   ];
 
   const faqs = getCategoryFaqs(category);
-  const guide = getCategoryGuide(category.slug);
+  const buyingGuide = category.buyingGuide?.trim() || "";
   const faqJsonLd = buildFaqJsonLd(faqs);
   const jsonLd = [
     buildBreadcrumbJsonLd([
@@ -113,7 +114,12 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             {category.description ? (
               <p className={styles.lead}>{category.description}</p>
             ) : null}
-            {guide ? <p className={styles.guide}>{guide}</p> : null}
+            {buyingGuide ? (
+              <BuyingGuideModalButton
+                categoryName={category.name}
+                buyingGuide={buyingGuide}
+              />
+            ) : null}
           </div>
           <AffiliateDisclosure />
         </header>

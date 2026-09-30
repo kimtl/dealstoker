@@ -111,6 +111,16 @@ export async function adminDeleteCategory(id: number): Promise<void> {
   await adminFetch(`/api/v1/admin/categories/${id}`, { method: "DELETE" });
 }
 
+export async function adminGenerateCategoryBuyingGuide(
+  id: number,
+  prompt?: string,
+): Promise<{ buyingGuide: string }> {
+  return adminFetch(`/api/v1/admin/categories/${id}/buying-guide/generate`, {
+    method: "POST",
+    body: JSON.stringify({ prompt: prompt?.trim() || null }),
+  });
+}
+
 export async function adminListProducts(params?: {
   status?: ProductStatus;
   page?: number;

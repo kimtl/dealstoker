@@ -53,6 +53,9 @@ export function categoryMetaDescription(category: Category): string {
   if (category.seoDescription?.trim()) {
     return clampText(category.seoDescription.trim(), 160);
   }
+  if (category.buyingGuide?.trim()) {
+    return clampText(category.buyingGuide.trim(), 160);
+  }
   const base =
     category.description?.trim() ||
     `Browse curated ${category.name} deals on Amazon.com. ${SITE_NAME} lists price drops, top-rated picks, and featured deals for US shoppers.`;
