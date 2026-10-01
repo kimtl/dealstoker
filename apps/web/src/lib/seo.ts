@@ -45,7 +45,7 @@ export function productMetaDescription(product: ProductDetail): string {
 }
 
 export function homeMetaTitle(): string {
-  return `${SITE_NAME} — Amazon Deals, Price Drops & Featured Deals (US)`;
+  return `${SITE_NAME} — Amazon Deals & Price Drops (US)`;
 }
 
 export function homeMetaDescription(): string {
