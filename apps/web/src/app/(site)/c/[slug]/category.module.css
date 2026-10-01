@@ -44,6 +44,33 @@
   margin-top: 0.35rem;
 }
 
+.guideSection {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  animation: rise-in 420ms ease both;
+}
+
+.guideTitle {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 0.75rem;
+}
+
+.guideBody {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 46rem;
+}
+
+.guideBody p {
+  color: var(--text);
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;

@@ -44,9 +44,29 @@ export function productMetaDescription(product: ProductDetail): string {
   return clampText(buildIntentProductMetaDescription(product), 160);
 }
 
+export function homeMetaTitle(): string {
+  return `${SITE_NAME} — Amazon Deals & Price Drops (US)`;
+}
+
+export function homeMetaDescription(): string {
+  return clampText(
+    `Find today's best Amazon.com deals on ${SITE_NAME}. Featured deals, top buys, and curated home, electronics, and outdoor products with clear prices for US shoppers.`,
+    160,
+  );
+}
+
 export function categoryMetaTitle(category: Category): string {
-  if (category.seoTitle?.trim()) return category.seoTitle.trim();
-  return clampText(`${category.name} Deals & Sales on Amazon`, 60);
+  if (category.seoTitle?.trim()) {
+    return clampText(
+      category.seoTitle
+        .trim()
+        .replace(/\s*\|\s*DealStoker\s*$/i, "")
+        .replace(/\|\s*$/, "")
+        .trim() || `Best ${category.name} Deals on Amazon`,
+      60,
+    );
+  }
+  return clampText(`Best ${category.name} Deals on Amazon`, 60);
 }
 
 export function categoryMetaDescription(category: Category): string {
@@ -60,17 +80,6 @@ export function categoryMetaDescription(category: Category): string {
     category.description?.trim() ||
     `Browse curated ${category.name} deals on Amazon.com. ${SITE_NAME} lists price drops, top-rated picks, and featured deals for US shoppers.`;
   return clampText(base, 160);
-}
-
-export function homeMetaTitle(): string {
-  return `${SITE_NAME} — Amazon Deals, Price Drops & Featured Deals (US)`;
-}
-
-export function homeMetaDescription(): string {
-  return clampText(
-    `Find today's best Amazon.com deals on ${SITE_NAME}. Featured deals, top buys, and curated home, electronics, and outdoor products with clear prices for US shoppers.`,
-    160,
-  );
 }
 
 export function buildProductJsonLd(product: ProductDetail): Record<string, unknown> {

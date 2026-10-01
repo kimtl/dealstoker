@@ -85,10 +85,12 @@ export default async function HomePage() {
             <p id="hero-brand" className={styles.brand}>
               {SITE_NAME}
             </p>
-            <h1 className={styles.headline}>Frontpage deals</h1>
+            <h1 className={styles.headline}>
+              Amazon deals, price drops &amp; featured deals
+            </h1>
             <p className={styles.support}>
-              Curated Amazon.com picks in a clean deal list — price first, less
-              noise.
+              Curated Amazon.com deals for US shoppers — featured deals, clear
+              prices, and less noise.
             </p>
           </div>
           <div className={styles.ctaGroup}>
@@ -140,6 +142,19 @@ export default async function HomePage() {
         </aside>
 
         <div className={styles.feedStack}>
+          <section className={styles.intro} aria-label="About DealStoker deals">
+            <p>
+              {SITE_NAME} tracks Amazon deals and price drops across home,
+              electronics, outdoor, and everyday categories so US shoppers can
+              compare featured deals without hunting through noisy marketplaces.
+            </p>
+            <p>
+              Each listing highlights the current Amazon.com price first, then
+              adds rating signals and our short editorial notes when a product
+              earns a featured deals slot or climbs the top-buys ranking.
+            </p>
+          </section>
+
           <section
             id="featured"
             className={styles.feed}

@@ -153,6 +153,20 @@
   min-width: 0;
 }
 
+.intro {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.1rem 0.05rem 0.2rem;
+  animation: rise-in 420ms ease both;
+}
+
+.intro p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 46rem;
+}
+
 .feedHeader {
   display: flex;
   align-items: end;

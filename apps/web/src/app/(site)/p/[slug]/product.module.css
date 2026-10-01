@@ -78,6 +78,13 @@
   color: var(--ink);
 }
 
+.intro {
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-size: 0.95rem;
+  max-width: 40rem;
+}
+
 .meta {
   display: flex;
   flex-wrap: wrap;

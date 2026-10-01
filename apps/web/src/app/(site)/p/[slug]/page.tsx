@@ -22,6 +22,7 @@ import {
   productMetaTitle,
 } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
+import { splitIntoParagraphs } from "@/lib/text";
 import styles from "./product.module.css";
 
 type PageProps = {
@@ -88,6 +89,22 @@ export default async function ProductPage({ params }: PageProps) {
   ];
   const faqs = getProductFaqs(product);
   const faqJsonLd = buildFaqJsonLd(faqs);
+  const recommendationParagraphs = splitIntoParagraphs(product.recommendation);
+  const categoryLabel = product.categoryName?.trim();
+  const intro = [
+    `${product.title} is a curated Amazon.com deal on ${SITE_NAME}`,
+    categoryLabel ? ` in ${categoryLabel}` : "",
+    price ? `. The currently shown price is ${price}` : "",
+    listPrice && listPrice !== price
+      ? `. The listed comparison price is ${listPrice}`
+      : "",
+    rating
+      ? `. Shopper rating signals show ${rating} stars${
+          reviews ? ` from about ${reviews}` : ""
+        }`
+      : "",
+    ".",
+  ].join("");
 
   return (
     <main className={styles.main}>
@@ -164,7 +181,8 @@ export default async function ProductPage({ params }: PageProps) {
                 </span>
               ) : null}
             </div>
-            {product.recommendation ? (
+            <p className={styles.intro}>{intro}</p>
+            {recommendationParagraphs.length > 0 ? (
               <section
                 className={styles.recommendation}
                 aria-labelledby="why-recommend"
@@ -173,7 +191,11 @@ export default async function ProductPage({ params }: PageProps) {
                   Why we recommend it
                 </h2>
                 <div className={styles.recommendationBody}>
-                  <p>{product.recommendation}</p>
+                  {recommendationParagraphs.map((paragraph, index) => (
+                    <p key={`${index}-${paragraph.slice(0, 24)}`}>
+                      {paragraph}
+                    </p>
+                  ))}
                 </div>
               </section>
             ) : null}
