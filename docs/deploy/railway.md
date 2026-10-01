@@ -5,20 +5,27 @@ Spaceship keeps the **domain + DNS (+ email)**. Railway runs **web + API + Postg
 ## Architecture
 
 ```text
-dealstoker.com  (Spaceship DNS)
-       │
-       ▼
-  Railway Web  (Next.js)  ──API_BASE_URL──►  Railway API  (Spring Boot)
-                                                    │
-                                                    ▼
-                                              Railway Postgres
+dealstoker.com ──301──► www.dealstoker.com  (canonical)
+                              │
+                              ▼
+                        Railway Web (Next.js)
+                              │ API_BASE_URL
+                              ▼
+                        Railway API (Spring Boot)
+                              │
+                              ▼
+                        Railway Postgres
 ```
+
+**Canonical host:** `https://www.dealstoker.com`  
+Spaceship currently 301-redirects apex → www. Sitemap, robots `Host`, and `<link rel="canonical">` must all use **www** (not apex). Mixing www and non-www causes duplicate-content SEO warnings.
 
 Recommended public hostnames:
 
 | Host | Points to |
 |------|-----------|
-| `dealstoker.com` / `www` | Railway **web** service |
+| `www.dealstoker.com` (canonical) | Railway **web** service |
+| `dealstoker.com` (apex) | 301 → `www` (Spaceship URL redirect or Railway) |
 | `api.dealstoker.com` (optional) | Railway **api** service |
 
 If you skip `api.` subdomain, use the Railway-generated API URL (`*.up.railway.app`) as `API_BASE_URL`.
@@ -43,7 +50,7 @@ If you skip `api.` subdomain, use the Railway-generated API URL (`*.up.railway.a
 | Variable | Value |
 |----------|--------|
 | `DATABASE_URL` | Reference Postgres `${{Postgres.DATABASE_URL}}` |
-| `APP_BASE_URL` | `https://dealstoker.com` |
+| `APP_BASE_URL` | `https://www.dealstoker.com` (**www** — used for API sitemap loc URLs) |
 | `CORS_ALLOWED_ORIGINS` | `https://dealstoker.com,https://www.dealstoker.com` |
 | `ADMIN_USERNAME` | strong username |
 | `ADMIN_PASSWORD` | strong password |
@@ -69,13 +76,13 @@ If the API fails with `'url' must start with "jdbc"`, redeploy the latest API im
 | Variable | Value |
 |----------|--------|
 | `API_BASE_URL` | Public API URL, e.g. `https://api.dealstoker.com` or `https://<api>.up.railway.app` (**runtime** variable — required) |
-| `NEXT_PUBLIC_SITE_URL` | `https://dealstoker.com` (**build** arg / variable) |
+| `NEXT_PUBLIC_SITE_URL` | `https://www.dealstoker.com` (**build** arg / variable — **www**, not apex) |
 
 `/api/backend/*` and `/go/*` are **runtime proxies** (not build-time rewrites). Set `API_BASE_URL` on the Web service and redeploy; no rebuild-arg needed for the API host.
 
 If Admin login hits `/api/backend/api/v1/admin/me` → 404/502, `API_BASE_URL` is missing or wrong on the **web** service.
 
-4. Generate a public domain for web (or attach `dealstoker.com` / `www`).
+4. Generate a public domain for web (or attach `www.dealstoker.com`). Keep apex as 301 → www.
 
 ## 5. Spaceship DNS
 
@@ -84,19 +91,21 @@ At Spaceship Advanced DNS:
 | Type | Name | Value |
 |------|------|--------|
 | CNAME | `www` | Railway web domain (`xxxx.up.railway.app`) |
-| CNAME or ALIAS | `@` | Railway web domain (use Railway custom domain instructions if apex ALIAS unsupported) |
+| URL redirect / 301 | `@` (apex) | `https://www.dealstoker.com` (keep this — do not serve duplicate content on apex) |
 | CNAME | `api` | Railway API domain (optional) |
 
-Then in Railway → each service → **Custom Domain** → add `dealstoker.com` / `www` / `api` and wait for SSL.
+Then in Railway → web service → **Custom Domain** → add `www.dealstoker.com` (and apex only if you also 301 inside the app). Wait for SSL.
 
 ## 6. Smoke checklist
 
-- [ ] `https://dealstoker.com/` loads Featured deals / Top buys / Latest
-- [ ] `https://dealstoker.com/api/backend/api/v1/health` (or API host `/actuator/health`) OK
+- [ ] `https://www.dealstoker.com/` loads Featured deals / Top buys / Latest
+- [ ] `https://dealstoker.com/` **301** → `https://www.dealstoker.com/`
+- [ ] Canonical / og:url / sitemap `<loc>` all use `https://www.dealstoker.com/...`
+- [ ] `https://www.dealstoker.com/api/backend/api/v1/health` (or API host `/actuator/health`) OK
 - [ ] Product page + `/go/{slug}` redirect works
-- [ ] `/sitemap.xml` and `/robots.txt` reachable on the **site** host
+- [ ] `/sitemap.xml` and `/robots.txt` reachable on **www**
 - [ ] Sitemap entries include product `lastmod` and image URLs when available
-- [ ] Submit `https://dealstoker.com/sitemap.xml` in Google Search Console
+- [ ] Submit **`https://www.dealstoker.com/sitemap.xml`** in Google Search Console (property = www)
 - [ ] Admin login at `/admin/login`
 - [ ] Search Console URL Inspection shows SSR HTML
 

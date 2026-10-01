@@ -42,14 +42,24 @@ public class SeoController {
     @GetMapping(value = "/robots.txt", produces = MediaType.TEXT_PLAIN_VALUE)
     public String robots() {
         String base = trimSlash(properties.appBaseUrl());
+        String host;
+        try {
+            host = java.net.URI.create(base).getHost();
+        } catch (Exception ex) {
+            host = "www.dealstoker.com";
+        }
+        if (host == null || host.isBlank()) {
+            host = "www.dealstoker.com";
+        }
         return """
                 User-agent: *
                 Allow: /
                 Disallow: /admin
                 Disallow: /api/v1/admin
 
+                Host: %s
                 Sitemap: %s/sitemap.xml
-                """.formatted(base);
+                """.formatted(host, base);
     }
 
     @GetMapping(value = {"/sitemap.xml", "/api/v1/sitemap.xml"}, produces = MediaType.APPLICATION_XML_VALUE)
@@ -143,8 +153,14 @@ public class SeoController {
 
     private String trimSlash(String value) {
         if (value == null || value.isBlank()) {
-            return "https://dealstoker.com";
+            return "https://www.dealstoker.com";
         }
-        return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
+        String base = value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
+        // Prefer www to match live DNS (apex → www) and avoid duplicate-host SEO.
+        if (base.equalsIgnoreCase("https://dealstoker.com")
+                || base.equalsIgnoreCase("http://dealstoker.com")) {
+            return "https://www.dealstoker.com";
+        }
+        return base;
     }
 }

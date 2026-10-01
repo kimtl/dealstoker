@@ -2,7 +2,7 @@
 
 | Item | Value |
 |------|-------|
-| Site | https://dealstoker.com |
+| Site | https://www.dealstoker.com (canonical; apex 301 → www) |
 | Brand | DealStoker |
 | Marketplace | Amazon.com (US) / en-US / USD |
 | Status | **Associates approved** → activate partner tag in Railway |
@@ -18,7 +18,7 @@
 
 | Requirement | DealStoker status | Evidence |
 |-------------|-------------------|----------|
-| Public live site | Pass | `https://dealstoker.com` → 200 |
+| Public live site | Pass | `https://www.dealstoker.com` → 200; `https://dealstoker.com` → 301 www |
 | Original / curated catalog | Pass (MVP) | 3 active categories, **12** published products |
 | Policy: Affiliate Disclosure | Pass | `/disclosure` → 200 |
 | Policy: Privacy | Pass | `/privacy` → 200 (not directed to children under 13) |

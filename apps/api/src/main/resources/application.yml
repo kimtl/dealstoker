@@ -29,7 +29,8 @@ management:
         include: health,info
 
 dealstoker:
-  app-base-url: ${APP_BASE_URL:https://dealstoker.com}
+  # Canonical public site URL (must match www — apex redirects to www).
+  app-base-url: ${APP_BASE_URL:https://www.dealstoker.com}
   amazon:
     marketplace: ${AMAZON_MARKETPLACE:www.amazon.com}
     partner-tag: ${AMAZON_PARTNER_TAG:dealstoker01-20}
