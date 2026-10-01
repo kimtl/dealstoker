@@ -82,7 +82,7 @@ If the API fails with `'url' must start with "jdbc"`, redeploy the latest API im
 
 If Admin login hits `/api/backend/api/v1/admin/me` → 404/502, `API_BASE_URL` is missing or wrong on the **web** service.
 
-4. Generate a public domain for web (or attach `www.dealstoker.com`). Keep apex as 301 → www.
+4. Generate a public domain for web, then attach **both** `www.dealstoker.com` and `dealstoker.com` (apex) as Railway custom domains. Apex → www 301 (path + query preserved) is handled by Next.js `middleware.ts`.
 
 ## 5. Spaceship DNS
 
@@ -91,15 +91,20 @@ At Spaceship Advanced DNS:
 | Type | Name | Value |
 |------|------|--------|
 | CNAME | `www` | Railway web domain (`xxxx.up.railway.app`) |
-| URL redirect / 301 | `@` (apex) | `https://www.dealstoker.com` (keep this — do not serve duplicate content on apex) |
+| ALIAS / A / CNAME (apex `@`) | `@` | Railway web target for custom domain `dealstoker.com` (use the records Railway shows) |
 | CNAME | `api` | Railway API domain (optional) |
 
-Then in Railway → web service → **Custom Domain** → add `www.dealstoker.com` (and apex only if you also 301 inside the app). Wait for SSL.
+**Do not** use Spaceship’s naked “URL redirect” from `@` → `https://www.dealstoker.com`. That redirect currently drops path and query (`/c/electronics?sort=newest` → `https://www.dealstoker.com`). Point apex DNS at Railway instead; the app issues:
+
+`https://dealstoker.com/path?x=1` → **301** → `https://www.dealstoker.com/path?x=1`
+
+Then in Railway → web service → **Custom Domain** → add `www.dealstoker.com` **and** `dealstoker.com`. Wait for SSL.
 
 ## 6. Smoke checklist
 
 - [ ] `https://www.dealstoker.com/` loads Featured deals / Top buys / Latest
 - [ ] `https://dealstoker.com/` **301** → `https://www.dealstoker.com/`
+- [ ] `https://dealstoker.com/c/electronics?sort=newest` **301** → `https://www.dealstoker.com/c/electronics?sort=newest` (path + query preserved)
 - [ ] Canonical / og:url / sitemap `<loc>` all use `https://www.dealstoker.com/...`
 - [ ] `https://www.dealstoker.com/api/backend/api/v1/health` (or API host `/actuator/health`) OK
 - [ ] Product page + `/go/{slug}` redirect works
