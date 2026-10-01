@@ -87,9 +87,13 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   const faqs = getCategoryFaqs(category);
   const buyingGuide = category.buyingGuide?.trim() || "";
   const guideParagraphs = splitIntoParagraphs(buyingGuide);
-  const lead =
-    category.description?.trim() ||
-    `Browse the best ${category.name} deals on Amazon.com. ${SITE_NAME} lists current prices, price drops, and featured picks for US shoppers.`;
+  const seoLead = `Browse the best ${category.name} deals on Amazon.com. ${SITE_NAME} lists current prices, price drops, and featured picks for US shoppers.`;
+  const description = category.description?.trim() || "";
+  const leadParagraphs = description
+    ? description.toLowerCase().includes("deal")
+      ? [description]
+      : [seoLead, description]
+    : [seoLead];
   const faqJsonLd = buildFaqJsonLd(faqs);
   const jsonLd = [
     buildBreadcrumbJsonLd([
@@ -117,7 +121,11 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
         <header className={styles.header}>
           <div>
             <h1 className={styles.title}>{category.name}</h1>
-            <p className={styles.lead}>{lead}</p>
+            {leadParagraphs.map((paragraph, index) => (
+              <p key={`lead-${index}`} className={styles.lead}>
+                {paragraph}
+              </p>
+            ))}
             {buyingGuide ? (
               <BuyingGuideModalButton
                 categoryName={category.name}
