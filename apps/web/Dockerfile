@@ -10,7 +10,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # NEXT_PUBLIC_* is inlined at build time; API_BASE_URL is runtime (route proxy).
-ARG NEXT_PUBLIC_SITE_URL=https://dealstoker.com
+# Canonical host is www (apex 301s to www). Override only for local/preview builds.
+ARG NEXT_PUBLIC_SITE_URL=https://www.dealstoker.com
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 
 RUN npm run build

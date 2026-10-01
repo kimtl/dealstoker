@@ -1,9 +1,46 @@
 export const SITE_NAME = "DealStoker";
+/** Bare domain for display (footer, about copy). */
 export const SITE_DOMAIN = "dealstoker.com";
+/** Preferred public host — must match live DNS (apex 301 → www). */
+export const SITE_CANONICAL_HOST = "www.dealstoker.com";
+export const SITE_CANONICAL_URL = `https://${SITE_CANONICAL_HOST}`;
+
+/**
+ * Normalize production site URL to https://www.dealstoker.com.
+ * Localhost and Railway preview hosts are left unchanged.
+ */
+export function canonicalizeSiteUrl(raw: string): string {
+  const trimmed = (raw || "").trim().replace(/\/$/, "");
+  if (!trimmed) {
+    return SITE_CANONICAL_URL;
+  }
+  try {
+    const withProtocol = trimmed.includes("://") ? trimmed : `https://${trimmed}`;
+    const url = new URL(withProtocol);
+    const host = url.hostname.toLowerCase();
+
+    if (
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host.endsWith(".localhost") ||
+      host.endsWith(".railway.app")
+    ) {
+      return `${url.protocol}//${url.host}`.replace(/\/$/, "");
+    }
+
+    if (host === "dealstoker.com" || host === "www.dealstoker.com") {
+      return SITE_CANONICAL_URL;
+    }
+
+    return `${url.protocol}//${url.host}`.replace(/\/$/, "");
+  } catch {
+    return SITE_CANONICAL_URL;
+  }
+}
 
 export function getSiteUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL || `https://${SITE_DOMAIN}`;
-  return raw.replace(/\/$/, "");
+  const raw = process.env.NEXT_PUBLIC_SITE_URL || SITE_CANONICAL_URL;
+  return canonicalizeSiteUrl(raw);
 }
 
 export function getApiBaseUrl(): string {

@@ -10,7 +10,7 @@
 | ID | Topic | Decision |
 |----|-------|----------|
 | D-001 | Brand / site name | **DealStoker** |
-| D-002 | Primary domain | **dealstoker.com** (`https://dealstoker.com`) |
+| D-002 | Primary domain | **dealstoker.com** — canonical URL **`https://www.dealstoker.com`** (apex 301 → www) |
 | D-003 | Target market | **United States** |
 | D-004 | Language / locale | **en-US** |
 | D-005 | Currency | **USD** |
