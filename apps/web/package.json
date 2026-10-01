@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:unit": "node --experimental-strip-types --test src/lib/site.test.mts"
+    "test:unit": "node --experimental-strip-types --test src/lib/site.test.mts src/lib/text.test.mts"
   },
   "dependencies": {
     "next": "^16.3.0",

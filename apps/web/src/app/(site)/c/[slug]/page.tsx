@@ -16,6 +16,7 @@ import {
   categoryMetaTitle,
 } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
+import { splitIntoParagraphs } from "@/lib/text";
 import styles from "./category.module.css";
 
 type PageProps = {
@@ -33,10 +34,11 @@ export async function generateMetadata({ params }: PageProps) {
       path: `/c/${slug}`,
       keywords: [
         category.name,
+        `best ${category.name} deals`,
         `${category.name} deals`,
         `${category.name} Amazon`,
         "Amazon deals",
-        "price drop",
+        "price drops",
         SITE_NAME,
       ],
     });
@@ -84,6 +86,10 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
   const faqs = getCategoryFaqs(category);
   const buyingGuide = category.buyingGuide?.trim() || "";
+  const guideParagraphs = splitIntoParagraphs(buyingGuide);
+  const lead =
+    category.description?.trim() ||
+    `Browse the best ${category.name} deals on Amazon.com. ${SITE_NAME} lists current prices, price drops, and featured picks for US shoppers.`;
   const faqJsonLd = buildFaqJsonLd(faqs);
   const jsonLd = [
     buildBreadcrumbJsonLd([
@@ -111,9 +117,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
         <header className={styles.header}>
           <div>
             <h1 className={styles.title}>{category.name}</h1>
-            {category.description ? (
-              <p className={styles.lead}>{category.description}</p>
-            ) : null}
+            <p className={styles.lead}>{lead}</p>
             {buyingGuide ? (
               <BuyingGuideModalButton
                 categoryName={category.name}
@@ -169,6 +173,23 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
               <span />
             )}
           </nav>
+        ) : null}
+
+        {guideParagraphs.length > 0 ? (
+          <section
+            id="buying-guide"
+            className={styles.guideSection}
+            aria-labelledby="buying-guide-heading"
+          >
+            <h2 id="buying-guide-heading" className={styles.guideTitle}>
+              {category.name} buying guide
+            </h2>
+            <div className={styles.guideBody}>
+              {guideParagraphs.map((paragraph, index) => (
+                <p key={`${index}-${paragraph.slice(0, 24)}`}>{paragraph}</p>
+              ))}
+            </div>
+          </section>
         ) : null}
 
         <FaqSection items={faqs} />

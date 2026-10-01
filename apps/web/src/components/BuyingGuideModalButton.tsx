@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import { splitIntoParagraphs } from "@/lib/text";
 import styles from "./BuyingGuideModal.module.css";
 
 type Props = {
@@ -12,6 +13,7 @@ export function BuyingGuideModalButton({ categoryName, buyingGuide }: Props) {
   const [open, setOpen] = useState(false);
   const titleId = useId();
   const guide = buyingGuide.trim();
+  const paragraphs = splitIntoParagraphs(guide);
 
   useEffect(() => {
     if (!open) return;
@@ -64,7 +66,11 @@ export function BuyingGuideModalButton({ categoryName, buyingGuide }: Props) {
                 ×
               </button>
             </div>
-            <div className={styles.dialogBody}>{guide}</div>
+            <div className={styles.dialogBody}>
+              {paragraphs.map((paragraph, index) => (
+                <p key={`${index}-${paragraph.slice(0, 24)}`}>{paragraph}</p>
+              ))}
+            </div>
           </div>
         </div>
       ) : null}
