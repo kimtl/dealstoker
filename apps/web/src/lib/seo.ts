@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import type { FaqItem } from "./faq";
 import { buildIntentProductMetaDescription } from "./faq";
-import { formatMoney } from "./format";
 import { getSiteUrl, SITE_NAME } from "./site";
+import { clampText, sanitizeMetaCopy } from "./text";
 import type { Category, ProductDetail, ProductSummary } from "./types";
 
 function asNumber(value: number | string | null | undefined): number | null {
@@ -11,10 +11,36 @@ function asNumber(value: number | string | null | undefined): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function clampText(text: string, max: number): string {
-  const cleaned = text.replace(/\s+/g, " ").trim();
-  if (cleaned.length <= max) return cleaned;
-  return `${cleaned.slice(0, max - 1).trimEnd()}…`;
+export { clampText, sanitizeMetaCopy, truncateAtWord } from "./text";
+
+/** Prefer a complete product title over a mid-word-truncated seoTitle. */
+function resolveProductTitleCore(product: ProductDetail): string {
+  const title = sanitizeMetaCopy(product.title?.trim() || "Amazon Deal");
+  const seo = product.seoTitle?.trim();
+  if (!seo) return title;
+
+  const cleanedSeo = sanitizeMetaCopy(seo);
+  if (title.startsWith(cleanedSeo) && title.length > cleanedSeo.length) {
+    const next = title.charAt(cleanedSeo.length);
+    if (/[A-Za-z0-9]/.test(next)) {
+      // seoTitle was hard-sliced mid-word during import
+      return title;
+    }
+  }
+  return cleanedSeo || title;
+}
+
+function finalizePageTitle(title: string): string {
+  const cleaned = sanitizeMetaCopy(title).replace(
+    new RegExp(`\\s*[|—–-]\\s*${SITE_NAME}\\s*$`, "i"),
+    "",
+  );
+  if (cleaned.includes(SITE_NAME)) {
+    return clampText(cleaned, 60);
+  }
+  const suffix = ` | ${SITE_NAME}`;
+  const coreMax = Math.max(24, 60 - suffix.length);
+  return `${clampText(cleaned, coreMax)}${suffix}`;
 }
 
 /** P0: descriptive alt text from product name (+ brand when useful). */
@@ -30,14 +56,7 @@ export function productImageAlt(
 }
 
 export function productMetaTitle(product: ProductDetail): string {
-  if (product.seoTitle?.trim()) return product.seoTitle.trim();
-  const price = formatMoney(product.priceAmount, product.currency);
-  const category = product.categoryName?.trim();
-  const bits = [product.title.trim()];
-  if (price) bits.push(`Deal ${price}`);
-  else bits.push("Amazon Deal");
-  if (category) bits.push(category);
-  return clampText(bits.join(" | "), 60);
+  return resolveProductTitleCore(product);
 }
 
 export function productMetaDescription(product: ProductDetail): string {
@@ -57,29 +76,28 @@ export function homeMetaDescription(): string {
 
 export function categoryMetaTitle(category: Category): string {
   if (category.seoTitle?.trim()) {
-    return clampText(
+    return sanitizeMetaCopy(
       category.seoTitle
         .trim()
         .replace(/\s*\|\s*DealStoker\s*$/i, "")
         .replace(/\|\s*$/, "")
         .trim() || `Best ${category.name} Deals on Amazon`,
-      60,
     );
   }
-  return clampText(`Best ${category.name} Deals on Amazon`, 60);
+  return `Best ${category.name} Deals on Amazon`;
 }
 
 export function categoryMetaDescription(category: Category): string {
   if (category.seoDescription?.trim()) {
-    return clampText(category.seoDescription.trim(), 160);
+    return clampText(sanitizeMetaCopy(category.seoDescription), 160);
   }
   if (category.buyingGuide?.trim()) {
-    return clampText(category.buyingGuide.trim(), 160);
+    return clampText(sanitizeMetaCopy(category.buyingGuide), 160);
   }
   const base =
     category.description?.trim() ||
     `Browse curated ${category.name} deals on Amazon.com. ${SITE_NAME} lists price drops, top-rated picks, and featured deals for US shoppers.`;
-  return clampText(base, 160);
+  return clampText(sanitizeMetaCopy(base), 160);
 }
 
 export function buildProductJsonLd(product: ProductDetail): Record<string, unknown> {
@@ -291,10 +309,8 @@ export function buildPageMetadata({
 }: BuildMetaInput): Metadata {
   const siteUrl = getSiteUrl();
   const url = `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`;
-  const fullTitle = title.includes(SITE_NAME)
-    ? title
-    : `${title} | ${SITE_NAME}`;
-  const safeDescription = clampText(description, 160);
+  const fullTitle = finalizePageTitle(title);
+  const safeDescription = clampText(sanitizeMetaCopy(description), 160);
 
   return {
     title: fullTitle,

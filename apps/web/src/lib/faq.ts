@@ -309,8 +309,9 @@ function recommendationFaqAnswer(recommendation: string): string | null {
 
 /** Prefer editorial SEO / recommendation over raw Amazon paste. */
 export function buildIntentProductMetaDescription(product: ProductDetail): string {
-  if (product.seoDescription?.trim()) {
-    return product.seoDescription.trim();
+  const rawSeo = product.seoDescription?.trim() || "";
+  if (rawSeo && !looksLikeAmazonDump(rawSeo, product.title)) {
+    return sanitizeAmazonPrefix(rawSeo);
   }
   if (product.recommendation?.trim()) {
     const takeaway = recommendationFaqAnswer(product.recommendation);
@@ -328,4 +329,24 @@ export function buildIntentProductMetaDescription(product: ProductDetail): strin
     "Compare price and features, then view it on Amazon.com.",
   ].filter(Boolean);
   return bits.join(" ");
+}
+
+function sanitizeAmazonPrefix(text: string): string {
+  return text
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^Amazon\.com\s*:\s*/i, "")
+    .replace(/^Amazon\s*:\s*/i, "");
+}
+
+function looksLikeAmazonDump(text: string, productTitle?: string | null): boolean {
+  const raw = text.trim();
+  if (!raw) return false;
+  if (/^Amazon\.com\s*:/i.test(raw) || /^Amazon\s*:/i.test(raw)) return true;
+  const cleaned = sanitizeAmazonPrefix(raw);
+  const title = productTitle?.trim();
+  if (title && cleaned.toLowerCase().startsWith(title.toLowerCase().slice(0, 36))) {
+    return true;
+  }
+  return false;
 }
