@@ -13,6 +13,7 @@ import {
   adminUpdateRecommendation,
 } from "@/lib/admin-api";
 import type { Category, ProductDetail, ProductStatus } from "@/lib/types";
+import { sanitizeMetaCopy, truncateAtWord } from "@/lib/text";
 import styles from "../admin.module.css";
 
 type FormState = {
@@ -156,10 +157,10 @@ export function ProductForm({ product, onProductSaved }: Props) {
           : prev.features,
       status: prev.status || "DRAFT",
       seoTitle: preview.title
-        ? preview.title.slice(0, 60)
+        ? truncateAtWord(sanitizeMetaCopy(preview.title), 50)
         : prev.seoTitle,
       seoDescription: preview.description
-        ? preview.description.slice(0, 155)
+        ? truncateAtWord(sanitizeMetaCopy(preview.description), 155)
         : prev.seoDescription,
     }));
     setNote(

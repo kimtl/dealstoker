@@ -202,6 +202,11 @@ public class AmazonProductPageFetcher {
                 meta(doc, "og:description"),
                 metaName(doc, "description")
         );
+        if (description != null) {
+            description = description.replaceFirst("(?i)^Amazon\\.com\\s*:\\s*", "");
+            description = description.replaceFirst("(?i)^Amazon\\s*:\\s*", "");
+            description = normalizeSpace(description);
+        }
         if (description != null && description.length() > 4000) {
             description = description.substring(0, 4000);
         }

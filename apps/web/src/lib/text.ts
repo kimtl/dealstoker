@@ -23,3 +23,31 @@ export function splitIntoParagraphs(text: string | null | undefined): string[] {
       return lines;
     });
 }
+
+/** Hard truncate at a word boundary without an ellipsis (for stored SEO fields). */
+export function truncateAtWord(text: string, max: number): string {
+  const cleaned = text.replace(/\s+/g, " ").trim();
+  if (cleaned.length <= max) return cleaned;
+  let slice = cleaned.slice(0, max);
+  const lastSpace = slice.lastIndexOf(" ");
+  if (lastSpace >= Math.floor(max * 0.55)) {
+    slice = slice.slice(0, lastSpace);
+  }
+  return slice.trimEnd();
+}
+
+/** Truncate on a word boundary when possible (avoids "Intel Co…"). */
+export function clampText(text: string, max: number): string {
+  const cleaned = text.replace(/\s+/g, " ").trim();
+  if (cleaned.length <= max) return cleaned;
+  return `${truncateAtWord(cleaned, Math.max(1, max - 1))}…`;
+}
+
+/** Strip Amazon marketplace prefixes that leak into scraped meta. */
+export function sanitizeMetaCopy(text: string): string {
+  return text
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^Amazon\.com\s*:\s*/i, "")
+    .replace(/^Amazon\s*:\s*/i, "");
+}
