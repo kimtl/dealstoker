@@ -20,11 +20,22 @@ function requestHost(request: NextRequest): string {
  * middleware runs — remove that naked redirect and point apex at Railway.
  */
 export function middleware(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+
+  // Bare /sitemap is a Next HTML 404 — send crawlers to the XML endpoint.
+  if (pathname === "/sitemap" || pathname === "/sitemap/") {
+    const host = requestHost(request);
+    const base =
+      host === "dealstoker.com" || host === "www.dealstoker.com"
+        ? `https://${CANONICAL_HOST}`
+        : request.nextUrl.origin;
+    return NextResponse.redirect(`${base}/sitemap.xml${search}`, 301);
+  }
+
   if (requestHost(request) !== "dealstoker.com") {
     return NextResponse.next();
   }
 
-  const { pathname, search } = request.nextUrl;
   const destination = `https://${CANONICAL_HOST}${pathname}${search}`;
   return NextResponse.redirect(destination, 301);
 }

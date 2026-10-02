@@ -42,7 +42,12 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                        .requestMatchers("/robots.txt", "/sitemap.xml", "/go/**").permitAll()
+                        .requestMatchers(
+                                "/robots.txt",
+                                "/sitemap.xml",
+                                "/api/v1/sitemap.xml",
+                                "/go/**"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/analytics/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/**").permitAll()

@@ -122,12 +122,18 @@ export async function getRelatedProducts(
 
 export async function getSitemapXml(): Promise<string | null> {
   try {
-    const res = await fetch(`${getApiBaseUrl()}/api/v1/sitemap.xml`, {
+    // Prefer root /sitemap.xml — Spring permits it for GET/HEAD.
+    // /api/v1/sitemap.xml historically 401'd on HEAD and confused crawlers.
+    const res = await fetch(`${getApiBaseUrl()}/sitemap.xml`, {
       next: { revalidate: 300 },
       headers: { Accept: "application/xml,text/xml,*/*" },
     });
     if (!res.ok) return null;
-    return res.text();
+    const text = await res.text();
+    if (!text || text.includes("<html") || text.includes("<!DOCTYPE")) {
+      return null;
+    }
+    return text;
   } catch {
     return null;
   }

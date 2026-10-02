@@ -108,7 +108,7 @@ Then in Railway → web service → **Custom Domain** → add `www.dealstoker.co
 - [ ] Canonical / og:url / sitemap `<loc>` all use `https://www.dealstoker.com/...`
 - [ ] `https://www.dealstoker.com/api/backend/api/v1/health` (or API host `/actuator/health`) OK
 - [ ] Product page + `/go/{slug}` redirect works
-- [ ] `/sitemap.xml` and `/robots.txt` reachable on **www**
+- [ ] `/sitemap.xml` returns `Content-Type: application/xml` (not HTML) and `/sitemap` 301 → `/sitemap.xml`
 - [ ] Sitemap entries include product `lastmod` and image URLs when available
 - [ ] Submit **`https://www.dealstoker.com/sitemap.xml`** in Google Search Console (property = www)
 - [ ] Admin login at `/admin/login`
