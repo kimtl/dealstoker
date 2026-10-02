@@ -52,9 +52,9 @@ export function middleware(request: NextRequest) {
   });
   response.headers.set(LOCALE_HEADER, locale);
 
-  // Persist detected locale only when user has not chosen one yet,
-  // so Korean Accept-Language visitors keep seeing Korean on return visits.
-  if (!isLocale(cookieLocale)) {
+  // Persist detected locale only when user has not chosen one yet.
+  // Skip /api/locale — that route sets the cookie itself on language switch.
+  if (!isLocale(cookieLocale) && pathname !== "/api/locale") {
     response.cookies.set(LOCALE_COOKIE, locale, {
       path: "/",
       maxAge: 60 * 60 * 24 * 365,
