@@ -3,6 +3,7 @@ import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { DealList } from "@/components/DealList";
 import { JsonLd } from "@/components/JsonLd";
 import { getHome, getProducts } from "@/lib/api";
+import { formatMessage, getI18n, localizeCategoryName } from "@/lib/i18n";
 import {
   buildItemListJsonLd,
   buildOrganizationJsonLd,
@@ -30,6 +31,7 @@ export const metadata = buildPageMetadata({
 });
 
 export default async function HomePage() {
+  const { locale, t } = await getI18n();
   let categories: Awaited<ReturnType<typeof getHome>>["categories"] = [];
   let recommended: ProductSummary[] = [];
   let topViews: ProductSummary[] = [];
@@ -66,6 +68,12 @@ export default async function HomePage() {
     ),
   ].slice(0, 20);
 
+  const fallbackCategories = [
+    { id: 1, slug: "home-kitchen", name: "Home & Kitchen" },
+    { id: 2, slug: "electronics", name: "Electronics" },
+    { id: 3, slug: "outdoor-sports", name: "Outdoor & Sports" },
+  ];
+
   return (
     <main className={styles.main}>
       <JsonLd data={buildOrganizationJsonLd()} />
@@ -85,74 +93,46 @@ export default async function HomePage() {
             <p id="hero-brand" className={styles.brand}>
               {SITE_NAME}
             </p>
-            <h1 className={styles.headline}>
-              Amazon deals, price drops &amp; featured deals
-            </h1>
-            <p className={styles.support}>
-              Curated Amazon.com deals for US shoppers — featured deals, clear
-              prices, and less noise.
-            </p>
+            <h1 className={styles.headline}>{t.homeHeadline}</h1>
+            <p className={styles.support}>{t.homeSupport}</p>
           </div>
           <div className={styles.ctaGroup}>
             <Link href="#featured" className={styles.ctaPrimary}>
-              Featured deals
+              {t.featuredDeals}
             </Link>
             <Link href="#deal-feed" className={styles.ctaSecondary}>
-              All deals
+              {t.allDeals}
             </Link>
           </div>
         </div>
       </section>
 
       <div className={styles.shell}>
-        <aside className={styles.sidebar} aria-label="Categories">
-          <h2 className={styles.sideTitle}>Categories</h2>
+        <aside className={styles.sidebar} aria-label={t.categories}>
+          <h2 className={styles.sideTitle}>{t.categories}</h2>
           <ul className={styles.catList}>
-            {(categories.length > 0
-              ? categories
-              : [
-                  {
-                    id: 1,
-                    slug: "home-kitchen",
-                    name: "Home & Kitchen",
-                  },
-                  {
-                    id: 2,
-                    slug: "electronics",
-                    name: "Electronics",
-                  },
-                  {
-                    id: 3,
-                    slug: "outdoor-sports",
-                    name: "Outdoor & Sports",
-                  },
-                ]
-            ).map((category) => (
-              <li key={category.id}>
-                <Link href={`/c/${category.slug}`}>{category.name}</Link>
-              </li>
-            ))}
+            {(categories.length > 0 ? categories : fallbackCategories).map(
+              (category) => (
+                <li key={category.id}>
+                  <Link href={`/c/${category.slug}`}>
+                    {localizeCategoryName(category.name, locale)}
+                  </Link>
+                </li>
+              ),
+            )}
           </ul>
-          <nav className={styles.jumpNav} aria-label="Frontpage sections">
-            <a href="#featured">Featured</a>
-            <a href="#top-views">Top views</a>
-            <a href="#deal-feed">Latest</a>
+          <nav className={styles.jumpNav} aria-label={t.frontpageSections}>
+            <a href="#featured">{t.featured}</a>
+            <a href="#top-views">{t.topViews}</a>
+            <a href="#deal-feed">{t.latestDeals}</a>
           </nav>
           <AffiliateDisclosure className={styles.sideDisclosure} />
         </aside>
 
         <div className={styles.feedStack}>
-          <section className={styles.intro} aria-label="About DealStoker deals">
-            <p>
-              {SITE_NAME} tracks Amazon deals and price drops across home,
-              electronics, outdoor, and everyday categories so US shoppers can
-              compare featured deals without hunting through noisy marketplaces.
-            </p>
-            <p>
-              Each listing highlights the current Amazon.com price first, then
-              adds rating signals and our short editorial notes when a product
-              earns a featured deals slot or climbs the top-views ranking.
-            </p>
+          <section className={styles.intro} aria-label={t.about}>
+            <p>{formatMessage(t.homeIntro1, { site: SITE_NAME })}</p>
+            <p>{t.homeIntro2}</p>
           </section>
 
           <section
@@ -163,18 +143,16 @@ export default async function HomePage() {
             <div className={styles.feedHeader}>
               <div>
                 <h2 id="featured-heading" className={styles.feedTitle}>
-                  Featured deals
+                  {t.featuredDeals}
                 </h2>
-                <p className={styles.feedMeta}>
-                  Featured by DealStoker · up to 5 deals
-                </p>
+                <p className={styles.feedMeta}>{t.featuredMeta}</p>
               </div>
-              <span className={styles.pill}>Featured</span>
+              <span className={styles.pill}>{t.featured}</span>
             </div>
             <DealList
               products={recommended}
               showNewBadge={false}
-              emptyMessage="No featured deals yet. Mark products as featured in Admin."
+              emptyMessage={t.emptyFeatured}
             />
           </section>
 
@@ -186,19 +164,17 @@ export default async function HomePage() {
             <div className={styles.feedHeader}>
               <div>
                 <h2 id="top-views-heading" className={styles.feedTitle}>
-                  Top views
+                  {t.topViews}
                 </h2>
-                <p className={styles.feedMeta}>
-                  Most-viewed product pages · top 5
-                </p>
+                <p className={styles.feedMeta}>{t.topViewsMeta}</p>
               </div>
-              <span className={styles.pillHot}>Trending</span>
+              <span className={styles.pillHot}>{t.trending}</span>
             </div>
             <DealList
               products={topViews}
               showNewBadge={false}
               showViewRank
-              emptyMessage="No product views yet. Rankings appear as shoppers browse deals."
+              emptyMessage={t.emptyTopViews}
             />
           </section>
 
@@ -210,21 +186,21 @@ export default async function HomePage() {
             <div className={styles.feedHeader}>
               <div>
                 <h2 id="feed-heading" className={styles.feedTitle}>
-                  Latest deals
+                  {t.latestDeals}
                 </h2>
                 <p className={styles.feedMeta}>
-                  {deals.length} live pick{deals.length === 1 ? "" : "s"} · Amazon
+                  {formatMessage(t.latestMeta, {
+                    count: deals.length,
+                    suffix: deals.length === 1 ? t.livePick : t.livePicks,
+                  })}
                 </p>
               </div>
               <span className={styles.live}>
                 <span className={styles.liveDot} aria-hidden />
-                Updated
+                {t.updated}
               </span>
             </div>
-            <DealList
-              products={deals}
-              emptyMessage="No published deals yet. Check back soon."
-            />
+            <DealList products={deals} emptyMessage={t.emptyLatest} />
           </section>
         </div>
       </div>

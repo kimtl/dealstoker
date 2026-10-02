@@ -6,6 +6,7 @@ import {
   formatReviewCount,
   formatUpdatedAt,
 } from "@/lib/format";
+import { getI18n, localizeCategoryName } from "@/lib/i18n";
 import { productImageAlt } from "@/lib/seo";
 import type { ProductSummary } from "@/lib/types";
 import styles from "./DealListItem.module.css";
@@ -18,18 +19,19 @@ type Props = {
   showViewCount?: boolean;
 };
 
-export function DealListItem({
+export async function DealListItem({
   product,
   index = 0,
   showNewBadge = true,
   viewRank,
   showViewCount = false,
 }: Props) {
-  const price = formatMoney(product.priceAmount, product.currency);
-  const listPrice = formatMoney(product.listPrice, product.currency);
+  const { locale, t } = await getI18n();
+  const price = formatMoney(product.priceAmount, product.currency, locale);
+  const listPrice = formatMoney(product.listPrice, product.currency, locale);
   const rating = formatRating(product.rating);
-  const reviews = formatReviewCount(product.reviewCount);
-  const updated = formatUpdatedAt(product.updatedAt);
+  const reviews = formatReviewCount(product.reviewCount, locale);
+  const updated = formatUpdatedAt(product.updatedAt, locale);
   const delay = Math.min(index, 12) * 35;
   const alt = productImageAlt(product);
   const showList =
@@ -37,6 +39,9 @@ export function DealListItem({
     price &&
     listPrice !== price &&
     Number(product.listPrice) > Number(product.priceAmount);
+  const categoryName = product.categoryName
+    ? localizeCategoryName(product.categoryName, locale)
+    : null;
 
   return (
     <article
@@ -50,7 +55,7 @@ export function DealListItem({
         rel="noopener noreferrer"
       >
         {viewRank ? (
-          <span className={styles.rank} aria-label={`Rank ${viewRank}`}>
+          <span className={styles.rank} aria-label={`#${viewRank}`}>
             #{viewRank}
           </span>
         ) : null}
@@ -71,9 +76,11 @@ export function DealListItem({
 
         <div className={styles.main}>
           <div className={styles.titleRow}>
-            {showNewBadge ? <span className={styles.badge}>New</span> : null}
+            {showNewBadge ? (
+              <span className={styles.badge}>{t.newBadge}</span>
+            ) : null}
             {product.featured ? (
-              <span className={styles.badgeFeatured}>Featured</span>
+              <span className={styles.badgeFeatured}>{t.featuredBadge}</span>
             ) : null}
             <h3 className={styles.title}>{product.title}</h3>
           </div>
@@ -90,17 +97,21 @@ export function DealListItem({
             ) : null}
             {showViewCount && product.viewCount != null ? (
               <span className={styles.buys}>
-                {product.viewCount.toLocaleString("en-US")} view
-                {product.viewCount === 1 ? "" : "s"}
+                {product.viewCount.toLocaleString(
+                  locale === "ko" ? "ko-KR" : "en-US",
+                )}{" "}
+                {product.viewCount === 1 ? t.view : t.views}
               </span>
             ) : null}
           </div>
 
-          {product.categoryName ? (
-            <p className={styles.category}>{product.categoryName}</p>
+          {categoryName ? (
+            <p className={styles.category}>{categoryName}</p>
           ) : null}
           {updated ? (
-            <p className={styles.updated}>Updated {updated}</p>
+            <p className={styles.updated}>
+              {t.updated} {updated}
+            </p>
           ) : null}
         </div>
 

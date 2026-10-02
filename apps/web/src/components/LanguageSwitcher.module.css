@@ -1,0 +1,43 @@
+.wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  margin-top: 0.35rem;
+}
+
+.label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.button,
+.active {
+  min-height: 1.7rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.active {
+  background: var(--accent-soft);
+  border-color: rgba(31, 111, 235, 0.35);
+  color: var(--accent-deep);
+}
+
+.button:hover {
+  color: var(--ink);
+}

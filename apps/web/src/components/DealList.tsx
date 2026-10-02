@@ -1,4 +1,5 @@
 import type { ProductSummary } from "@/lib/types";
+import { getMessages } from "@/lib/i18n";
 import { DealListItem } from "./DealListItem";
 import styles from "./DealList.module.css";
 
@@ -9,14 +10,15 @@ type Props = {
   showViewRank?: boolean;
 };
 
-export function DealList({
+export async function DealList({
   products,
-  emptyMessage = "No deals yet.",
+  emptyMessage,
   showNewBadge = true,
   showViewRank = false,
 }: Props) {
+  const t = await getMessages();
   if (products.length === 0) {
-    return <p className={styles.empty}>{emptyMessage}</p>;
+    return <p className={styles.empty}>{emptyMessage || t.noDealsYet}</p>;
   }
 
   return (

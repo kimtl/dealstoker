@@ -1,6 +1,13 @@
+import type { Locale } from "@/lib/i18n/locale";
+
+function intlLocale(locale?: Locale | null): string {
+  return locale === "ko" ? "ko-KR" : "en-US";
+}
+
 export function formatMoney(
   amount: number | string | null | undefined,
   currency: string | null | undefined = "USD",
+  locale?: Locale | null,
 ): string | null {
   if (amount === null || amount === undefined || amount === "") {
     return null;
@@ -10,7 +17,7 @@ export function formatMoney(
     return null;
   }
   try {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat(intlLocale(locale), {
       style: "currency",
       currency: currency || "USD",
       maximumFractionDigits: 2,
@@ -33,22 +40,26 @@ export function formatRating(
   return value.toFixed(1);
 }
 
-export function formatReviewCount(count: number | null | undefined): string {
+export function formatReviewCount(
+  count: number | null | undefined,
+  locale?: Locale | null,
+): string {
   if (count === null || count === undefined) {
     return "";
   }
-  return new Intl.NumberFormat("en-US").format(count);
+  return new Intl.NumberFormat(intlLocale(locale)).format(count);
 }
 
-/** e.g. "Oct 2, 2026, 10:30 PM UTC" */
+/** e.g. "Oct 2, 2026, 10:30 PM UTC" / "2026. 10. 2. 오후 10:30 UTC" */
 export function formatUpdatedAt(
   value: string | null | undefined,
+  locale?: Locale | null,
 ): string | null {
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
   try {
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat(intlLocale(locale), {
       month: "short",
       day: "numeric",
       year: "numeric",

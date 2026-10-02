@@ -30,6 +30,12 @@
   --font-body: var(--font-manrope), "Segoe UI", sans-serif;
 }
 
+html.locale-ko body,
+body.locale-ko {
+  --font-display: var(--font-noto-kr), var(--font-fraunces), sans-serif;
+  --font-body: var(--font-noto-kr), var(--font-manrope), sans-serif;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

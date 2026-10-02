@@ -1,6 +1,7 @@
 import { FaqSection } from "@/components/FaqSection";
 import { JsonLd } from "@/components/JsonLd";
 import { getAboutFaqs } from "@/lib/faq";
+import { formatMessage, getI18n } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
 import { buildFaqJsonLd } from "@/lib/seo";
 import { SITE_DOMAIN, SITE_NAME } from "@/lib/site";
@@ -21,79 +22,47 @@ export const metadata = buildMetadata({
   ],
 });
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const { t } = await getI18n();
   const faqs = getAboutFaqs();
   const faqJsonLd = buildFaqJsonLd(faqs);
+  const vars = { site: SITE_NAME, domain: SITE_DOMAIN };
 
   return (
     <main className={styles.main}>
       {faqJsonLd ? <JsonLd data={faqJsonLd} /> : null}
       <article className={styles.inner}>
-        <h1 className={styles.title}>About {SITE_NAME}</h1>
-        <p className={styles.updated}>
-          Amazon deal curation for online shoppers in the United States.
-        </p>
+        <h1 className={styles.title}>
+          {formatMessage(t.aboutTitle, vars)}
+        </h1>
+        <p className={styles.updated}>{t.aboutLead}</p>
+        <p>{formatMessage(t.aboutP1, vars)}</p>
 
-        <p>
-          {SITE_NAME} ({SITE_DOMAIN}) is an Amazon deal curation site built for
-          US online shoppers. Since 2026, we have helped shoppers find practical
-          products faster — and thousands of people visit {SITE_NAME} every day
-          looking for the best deals.
-        </p>
+        <h2>{t.aboutMissionTitle}</h2>
+        <p>{formatMessage(t.aboutMission, vars)}</p>
 
-        <h2>Our mission</h2>
-        <p>
-          Cut the noise. Show shoppers only the deals worth their time. Amazon
-          is full of options; {SITE_NAME} focuses on clear prices, useful
-          context, and products that make sense for everyday US buyers.
-        </p>
-
-        <h2>What you will find</h2>
+        <h2>{t.aboutFindTitle}</h2>
         <ul>
-          <li>
-            <strong>Featured deals</strong> — editor-selected products we think
-            are worth a look right now.
-          </li>
-          <li>
-            <strong>Top views</strong> — deals shoppers browse most often on
-            product pages.
-          </li>
-          <li>
-            <strong>Category pages</strong> — curated lists across Home &amp;
-            Kitchen, Electronics, Outdoor &amp; Sports, Health &amp; Household,
-            Pets, and more.
-          </li>
-          <li>
-            <strong>Product pages</strong> — why we recommend the pick (from
-            review themes), key features when available, and a clear path to
-            view the item on Amazon.com.
-          </li>
+          <li>{t.aboutFeaturedItem}</li>
+          <li>{t.aboutTopViewsItem}</li>
+          <li>{t.aboutCategoryItem}</li>
+          <li>{t.aboutProductItem}</li>
         </ul>
 
-        <h2>How we choose products</h2>
-        <p>
-          Editors review ratings, review volume, usefulness, and price
-          positioning before a product is published. We favor clear use cases
-          over hype. Listings can be updated or unpublished when availability or
-          quality signals change. Prices shown on {SITE_NAME} may differ from
-          the live price on Amazon.com at the moment you buy.
-        </p>
+        <h2>{t.aboutChooseTitle}</h2>
+        <p>{formatMessage(t.aboutChoose, vars)}</p>
 
-        <h2>Amazon Associates</h2>
+        <h2>{t.aboutAffiliateTitle}</h2>
         <p>
-          {SITE_NAME} is a participant in the Amazon Services LLC Associates
-          Program. As an Amazon Associate, we may earn a commission when you buy
-          through our links — at no extra cost to you. That support helps us keep
-          researching, curating, and maintaining the site. See our{" "}
-          <a href="/disclosure">affiliate disclosure</a> for full details.
+          {formatMessage(t.aboutAffiliate, vars)}{" "}
+          <a href="/disclosure">{t.disclosure}</a>
         </p>
 
         <FaqSection items={faqs} />
 
-        <h2>Contact</h2>
+        <h2>{t.contact}</h2>
         <p>
-          Questions about a listing or the site? Visit our{" "}
-          <a href="/contact">contact page</a>.
+          <a href="/contact">{t.contact}</a>
         </p>
       </article>
     </main>
