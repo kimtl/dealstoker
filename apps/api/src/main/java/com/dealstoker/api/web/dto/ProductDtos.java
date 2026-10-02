@@ -99,6 +99,7 @@ public final class ProductDtos {
             String categoryName,
             Instant publishedAt,
             Instant lastSyncedAt,
+            Instant updatedAt,
             boolean featured,
             int featuredRank
     ) {
@@ -130,6 +131,7 @@ public final class ProductDtos {
                     product.getPrimaryCategory() != null ? product.getPrimaryCategory().getName() : null,
                     product.getPublishedAt(),
                     product.getLastSyncedAt(),
+                    product.getUpdatedAt(),
                     product.isFeatured(),
                     product.getFeaturedRank()
             );

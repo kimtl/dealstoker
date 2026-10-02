@@ -55,7 +55,8 @@ export default function AboutPage() {
             are worth a look right now.
           </li>
           <li>
-            <strong>Top buys</strong> — deals shoppers click through most often.
+            <strong>Top views</strong> — deals shoppers browse most often on
+            product pages.
           </li>
           <li>
             <strong>Category pages</strong> — curated lists across Home &amp;

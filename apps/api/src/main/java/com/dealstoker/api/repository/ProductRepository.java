@@ -68,6 +68,17 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             """, nativeQuery = true)
     List<Product> findTopByBuyClicks(@Param("status") String status, @Param("limit") int limit);
 
+    @Query(value = """
+            SELECT p.*
+            FROM products p
+            LEFT JOIN page_view_events v ON v.product_id = p.id
+            WHERE p.status = :status
+            GROUP BY p.id
+            ORDER BY COUNT(v.id) DESC, p.published_at DESC NULLS LAST
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<Product> findTopByPageViews(@Param("status") String status, @Param("limit") int limit);
+
     long countByStatus(ProductStatus status);
 
     @Query("""

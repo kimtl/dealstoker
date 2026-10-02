@@ -102,7 +102,7 @@ Then in Railway → web service → **Custom Domain** → add `www.dealstoker.co
 
 ## 6. Smoke checklist
 
-- [ ] `https://www.dealstoker.com/` loads Featured deals / Top buys / Latest
+- [ ] `https://www.dealstoker.com/` loads Featured deals / Top views / Latest
 - [ ] `https://dealstoker.com/` **301** → `https://www.dealstoker.com/`
 - [ ] `https://dealstoker.com/c/electronics?sort=newest` **301** → `https://www.dealstoker.com/c/electronics?sort=newest` (path + query preserved)
 - [ ] Canonical / og:url / sitemap `<loc>` all use `https://www.dealstoker.com/...`

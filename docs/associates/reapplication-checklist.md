@@ -34,7 +34,7 @@
 
 - Active categories: **3** (Home & Kitchen, Electronics, Outdoor & Sports)
 - Published products: **12**
-- Featured deals + Top buys + Latest feed on homepage
+- Featured deals + Top views + Latest feed on homepage
 
 ### Gaps to improve (optional before / during review)
 

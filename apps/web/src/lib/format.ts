@@ -39,3 +39,25 @@ export function formatReviewCount(count: number | null | undefined): string {
   }
   return new Intl.NumberFormat("en-US").format(count);
 }
+
+/** e.g. "Oct 2, 2026, 10:30 PM UTC" */
+export function formatUpdatedAt(
+  value: string | null | undefined,
+): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  try {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      timeZone: "UTC",
+      timeZoneName: "short",
+    }).format(date);
+  } catch {
+    return date.toISOString();
+  }
+}

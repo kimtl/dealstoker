@@ -82,6 +82,7 @@ class ProductRequestJacksonTest {
                 null,
                 null,
                 null,
+                null,
                 false,
                 0
         );
