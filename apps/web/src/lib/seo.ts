@@ -69,7 +69,7 @@ export function homeMetaTitle(): string {
 
 export function homeMetaDescription(): string {
   return clampText(
-    `Find today's best Amazon.com deals on ${SITE_NAME}. Featured deals, top buys, and curated home, electronics, and outdoor products with clear prices for US shoppers.`,
+    `Find today's best Amazon.com deals on ${SITE_NAME}. Featured deals, top views, and curated home, electronics, and outdoor products with clear prices for US shoppers.`,
     160,
   );
 }

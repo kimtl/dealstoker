@@ -11,6 +11,7 @@ import {
   formatMoney,
   formatRating,
   formatReviewCount,
+  formatUpdatedAt,
 } from "@/lib/format";
 import {
   buildBreadcrumbJsonLd,
@@ -91,6 +92,9 @@ export default async function ProductPage({ params }: PageProps) {
   const faqJsonLd = buildFaqJsonLd(faqs);
   const recommendationParagraphs = splitIntoParagraphs(product.recommendation);
   const categoryLabel = product.categoryName?.trim();
+  const updatedLabel = formatUpdatedAt(
+    product.updatedAt || product.lastSyncedAt || product.publishedAt,
+  );
   const intro = [
     `${product.title} is a curated Amazon.com deal on ${SITE_NAME}`,
     categoryLabel ? ` in ${categoryLabel}` : "",
@@ -181,6 +185,9 @@ export default async function ProductPage({ params }: PageProps) {
                 </span>
               ) : null}
             </div>
+            {updatedLabel ? (
+              <p className={styles.updated}>Updated {updatedLabel}</p>
+            ) : null}
             <p className={styles.intro}>{intro}</p>
             {recommendationParagraphs.length > 0 ? (
               <section
@@ -190,6 +197,9 @@ export default async function ProductPage({ params }: PageProps) {
                 <h2 id="why-recommend" className={styles.recommendationTitle}>
                   Why we recommend it
                 </h2>
+                <p className={styles.recommendationByline}>
+                  by {SITE_NAME} curation team
+                </p>
                 <div className={styles.recommendationBody}>
                   {recommendationParagraphs.map((paragraph, index) => (
                     <p key={`${index}-${paragraph.slice(0, 24)}`}>

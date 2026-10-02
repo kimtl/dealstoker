@@ -96,6 +96,7 @@ export type ProductDetail = {
   categoryName: string | null;
   publishedAt: string | null;
   lastSyncedAt: string | null;
+  updatedAt?: string | null;
   featured?: boolean;
   featuredRank?: number;
 };
@@ -111,6 +112,8 @@ export type PageResponse<T> = {
 export type HomeResponse = {
   categories: Category[];
   recommendedDeals?: ProductSummary[];
+  topViewDeals?: ProductSummary[];
+  /** @deprecated Prefer topViewDeals */
   topBuyDeals?: ProductSummary[];
   latestDeals?: ProductSummary[];
   featuredProducts: ProductSummary[];

@@ -32,7 +32,7 @@ export const metadata = buildPageMetadata({
 export default async function HomePage() {
   let categories: Awaited<ReturnType<typeof getHome>>["categories"] = [];
   let recommended: ProductSummary[] = [];
-  let topBuys: ProductSummary[] = [];
+  let topViews: ProductSummary[] = [];
   let deals: ProductSummary[] = [];
 
   try {
@@ -42,14 +42,14 @@ export default async function HomePage() {
     ]);
     categories = home.categories ?? [];
     recommended = home.recommendedDeals ?? [];
-    topBuys = home.topBuyDeals ?? [];
+    topViews = home.topViewDeals ?? home.topBuyDeals ?? [];
     deals = home.latestDeals ?? products.items ?? home.featuredProducts ?? [];
   } catch {
     try {
       const home = await getHome();
       categories = home.categories ?? [];
       recommended = home.recommendedDeals ?? [];
-      topBuys = home.topBuyDeals ?? [];
+      topViews = home.topViewDeals ?? home.topBuyDeals ?? [];
       deals = home.latestDeals ?? home.featuredProducts ?? [];
     } catch {
       // API may be offline during build/preview.
@@ -58,11 +58,11 @@ export default async function HomePage() {
 
   const listedForSchema = [
     ...recommended,
-    ...topBuys.filter((p) => !recommended.some((r) => r.id === p.id)),
+    ...topViews.filter((p) => !recommended.some((r) => r.id === p.id)),
     ...deals.filter(
       (p) =>
         !recommended.some((r) => r.id === p.id) &&
-        !topBuys.some((t) => t.id === p.id),
+        !topViews.some((t) => t.id === p.id),
     ),
   ].slice(0, 20);
 
@@ -135,7 +135,7 @@ export default async function HomePage() {
           </ul>
           <nav className={styles.jumpNav} aria-label="Frontpage sections">
             <a href="#featured">Featured</a>
-            <a href="#top-buys">Top buys</a>
+            <a href="#top-views">Top views</a>
             <a href="#deal-feed">Latest</a>
           </nav>
           <AffiliateDisclosure className={styles.sideDisclosure} />
@@ -151,7 +151,7 @@ export default async function HomePage() {
             <p>
               Each listing highlights the current Amazon.com price first, then
               adds rating signals and our short editorial notes when a product
-              earns a featured deals slot or climbs the top-buys ranking.
+              earns a featured deals slot or climbs the top-views ranking.
             </p>
           </section>
 
@@ -179,26 +179,26 @@ export default async function HomePage() {
           </section>
 
           <section
-            id="top-buys"
+            id="top-views"
             className={styles.feed}
-            aria-labelledby="top-buys-heading"
+            aria-labelledby="top-views-heading"
           >
             <div className={styles.feedHeader}>
               <div>
-                <h2 id="top-buys-heading" className={styles.feedTitle}>
-                  Top buys
+                <h2 id="top-views-heading" className={styles.feedTitle}>
+                  Top views
                 </h2>
                 <p className={styles.feedMeta}>
-                  Most /go click-throughs · top 5
+                  Most-viewed product pages · top 5
                 </p>
               </div>
               <span className={styles.pillHot}>Trending</span>
             </div>
             <DealList
-              products={topBuys}
+              products={topViews}
               showNewBadge={false}
-              showBuyRank
-              emptyMessage="No buy clicks yet. Rankings appear after shoppers use View on Amazon."
+              showViewRank
+              emptyMessage="No product views yet. Rankings appear as shoppers browse deals."
             />
           </section>
 

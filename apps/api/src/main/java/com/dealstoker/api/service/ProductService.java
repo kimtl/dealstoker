@@ -162,8 +162,8 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductSummary> topBuyPublished(int limit) {
-        List<Product> products = productRepository.findTopByBuyClicks(
+    public List<ProductSummary> topViewPublished(int limit) {
+        List<Product> products = productRepository.findTopByPageViews(
                 ProductStatus.PUBLISHED.name(),
                 Math.max(1, Math.min(limit, 20))
         );
@@ -171,13 +171,19 @@ public class ProductService {
             return List.of();
         }
         List<Long> ids = products.stream().map(Product::getId).toList();
-        Map<Long, Long> counts = clickEventRepository.countByProductIds(ids).stream()
+        Map<Long, Long> counts = pageViewEventRepository
+                .countByProductIdsSince(ids, Instant.EPOCH)
+                .stream()
                 .collect(Collectors.toMap(
                         row -> ((Number) row[0]).longValue(),
                         row -> ((Number) row[1]).longValue()
                 ));
         return products.stream()
-                .map(product -> ProductSummary.from(product, counts.getOrDefault(product.getId(), 0L)))
+                .map(product -> ProductSummary.from(
+                        product,
+                        null,
+                        counts.getOrDefault(product.getId(), 0L)
+                ))
                 .toList();
     }
 
