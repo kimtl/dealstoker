@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
       // Serve pure application/xml — avoid Next MetadataRoute HTML edge cases
       // that trigger Google "Sitemap appears to be an HTML page".
       { source: "/sitemap.xml", destination: "/api/sitemap" },
+      // Same for robots.txt — always plain text for Search Console / Naver.
+      { source: "/robots.txt", destination: "/api/robots" },
     ];
   },
   images: {
