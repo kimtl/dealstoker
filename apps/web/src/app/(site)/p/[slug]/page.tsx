@@ -24,7 +24,7 @@ import {
 } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 import { splitIntoParagraphs } from "@/lib/text";
-import { formatMessage, getI18n, localizeCategoryName } from "@/lib/i18n";
+import { formatMessage, getI18n, getLocale, localizeCategoryName } from "@/lib/i18n";
 import styles from "./product.module.css";
 
 type PageProps = {
@@ -33,27 +33,35 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
+  const locale = await getLocale();
   try {
     const product = await getProduct(slug);
     return buildPageMetadata({
-      title: productMetaTitle(product),
-      description: productMetaDescription(product),
+      title: productMetaTitle(product, locale),
+      description: productMetaDescription(product, locale),
       path: `/p/${slug}`,
       image: product.imageUrl,
+      locale,
       keywords: [
         product.title,
         product.brand,
-        product.categoryName,
-        "Amazon deal",
-        "price drop",
+        product.categoryName
+          ? localizeCategoryName(product.categoryName, locale)
+          : null,
+        locale === "ko" ? "아마존 딜" : "Amazon deal",
+        locale === "ko" ? "할인" : "price drop",
         SITE_NAME,
       ].filter(Boolean) as string[],
     });
   } catch {
     return buildPageMetadata({
-      title: "Amazon Product Deal",
-      description: `Browse curated Amazon.com product deals and prices on ${SITE_NAME}.`,
+      title: locale === "ko" ? "아마존 상품 딜" : "Amazon Product Deal",
+      description:
+        locale === "ko"
+          ? `${SITE_NAME}에서 Amazon.com 상품 딜과 가격을 확인하세요.`
+          : `Browse curated Amazon.com product deals and prices on ${SITE_NAME}.`,
       path: `/p/${slug}`,
+      locale,
     });
   }
 }

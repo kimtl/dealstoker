@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import type { FaqItem } from "./faq";
 import { buildIntentProductMetaDescription } from "./faq";
+import {
+  localizedAbsoluteUrl,
+  ogLocale,
+  schemaLanguage,
+  type Locale,
+} from "./i18n/locale";
+import { localizeCategoryName } from "./i18n/messages";
 import { getSiteUrl, SITE_NAME } from "./site";
 import { clampText, sanitizeMetaCopy } from "./text";
 import type { Category, ProductDetail, ProductSummary } from "./types";
@@ -55,26 +62,90 @@ export function productImageAlt(
   return title;
 }
 
-export function productMetaTitle(product: ProductDetail): string {
-  return resolveProductTitleCore(product);
+export function productMetaTitle(
+  product: ProductDetail,
+  locale: Locale = "en",
+): string {
+  const core = resolveProductTitleCore(product);
+  if (locale !== "ko") return core;
+  const cat = product.categoryName
+    ? localizeCategoryName(product.categoryName, "ko")
+    : "";
+  return cat ? `${core} — ${cat} 아마존 딜` : `${core} — 아마존 딜`;
 }
 
-export function productMetaDescription(product: ProductDetail): string {
+export function productMetaDescription(
+  product: ProductDetail,
+  locale: Locale = "en",
+): string {
+  if (locale === "ko") {
+    const cat = product.categoryName
+      ? localizeCategoryName(product.categoryName, "ko")
+      : "아마존";
+    const price = asNumber(product.priceAmount);
+    const priceBit =
+      price != null
+        ? ` 현재가 $${price.toFixed(price % 1 === 0 ? 0 : 2)}.`
+        : "";
+    return clampText(
+      sanitizeMetaCopy(
+        `${product.title} ${cat} 딜을 ${SITE_NAME}에서 확인하세요.${priceBit} 미국 Amazon.com 큐레이션 추천.`,
+      ),
+      160,
+    );
+  }
   return clampText(buildIntentProductMetaDescription(product), 160);
 }
 
-export function homeMetaTitle(): string {
+export function homeMetaTitle(locale: Locale = "en"): string {
+  if (locale === "ko") {
+    return `${SITE_NAME} — 아마존 딜 & 할인 (미국)`;
+  }
   return `${SITE_NAME} — Amazon Deals & Price Drops (US)`;
 }
 
-export function homeMetaDescription(): string {
+export function homeMetaDescription(locale: Locale = "en"): string {
+  if (locale === "ko") {
+    return clampText(
+      `${SITE_NAME}에서 오늘의 Amazon.com 추천 딜·할인·인기 조회를 확인하세요. 홈·전자·아웃도어 등 미국 쇼핑객을 위한 큐레이션.`,
+      160,
+    );
+  }
   return clampText(
     `Find today's best Amazon.com deals on ${SITE_NAME}. Featured deals, top views, and curated home, electronics, and outdoor products with clear prices for US shoppers.`,
     160,
   );
 }
 
-export function categoryMetaTitle(category: Category): string {
+export function homeMetaKeywords(locale: Locale = "en"): string[] {
+  if (locale === "ko") {
+    return [
+      "아마존 딜",
+      "아마존 할인",
+      "추천 딜",
+      "미국 아마존",
+      "Amazon deals",
+      SITE_NAME,
+    ];
+  }
+  return [
+    "Amazon deals",
+    "best Amazon deals today",
+    "Amazon price drops",
+    "US Amazon discounts",
+    "featured deals",
+    SITE_NAME,
+  ];
+}
+
+export function categoryMetaTitle(
+  category: Category,
+  locale: Locale = "en",
+): string {
+  const name = localizeCategoryName(category.name, locale);
+  if (locale === "ko") {
+    return `아마존 ${name} 딜 추천`;
+  }
   if (category.seoTitle?.trim()) {
     return sanitizeMetaCopy(
       category.seoTitle
@@ -87,7 +158,19 @@ export function categoryMetaTitle(category: Category): string {
   return `Best ${category.name} Deals on Amazon`;
 }
 
-export function categoryMetaDescription(category: Category): string {
+export function categoryMetaDescription(
+  category: Category,
+  locale: Locale = "en",
+): string {
+  const name = localizeCategoryName(category.name, locale);
+  if (locale === "ko") {
+    return clampText(
+      sanitizeMetaCopy(
+        `Amazon.com ${name} 딜을 ${SITE_NAME}에서 둘러보세요. 현재 가격, 할인, 추천 상품을 미국 쇼핑객 기준으로 정리합니다.`,
+      ),
+      160,
+    );
+  }
   if (category.seoDescription?.trim()) {
     return clampText(sanitizeMetaCopy(category.seoDescription), 160);
   }
@@ -98,6 +181,70 @@ export function categoryMetaDescription(category: Category): string {
     category.description?.trim() ||
     `Browse curated ${category.name} deals on Amazon.com. ${SITE_NAME} lists price drops, top-rated picks, and featured deals for US shoppers.`;
   return clampText(sanitizeMetaCopy(base), 160);
+}
+
+export function searchMetaTitle(q: string, locale: Locale = "en"): string {
+  if (!q) {
+    return locale === "ko"
+      ? `아마존 딜 검색 | ${SITE_NAME}`
+      : `Search Amazon deals | ${SITE_NAME}`;
+  }
+  return locale === "ko"
+    ? `“${q}” 검색 | ${SITE_NAME}`
+    : `Search “${q}” | ${SITE_NAME}`;
+}
+
+export function searchMetaDescription(q: string, locale: Locale = "en"): string {
+  if (!q) {
+    return locale === "ko"
+      ? `${SITE_NAME}에서 Amazon.com 큐레이션 딜을 검색하세요. 카테고리·가격으로 필터할 수 있습니다.`
+      : `Search curated Amazon.com deals on ${SITE_NAME}. Filter by category and price.`;
+  }
+  return locale === "ko"
+    ? `${SITE_NAME}의 “${q}” 아마존 딜 검색 결과. 카테고리·가격으로 필터하세요.`
+    : `Amazon deals matching “${q}” on ${SITE_NAME}. Filter by category and price.`;
+}
+
+export function aboutMetaTitle(locale: Locale = "en"): string {
+  return locale === "ko"
+    ? `${SITE_NAME} 소개 — 미국 쇼핑객을 위한 아마존 딜 큐레이션`
+    : `About ${SITE_NAME} — Amazon Deal Curation for US Shoppers`;
+}
+
+export function aboutMetaDescription(locale: Locale = "en"): string {
+  return locale === "ko"
+    ? `${SITE_NAME}는 미국 온라인 쇼핑객을 위한 아마존 딜 큐레이션 사이트입니다. 잡음을 줄이고 살펴볼 만한 Amazon.com 딜을 모읍니다.`
+    : "DealStoker is an Amazon deal curation site for US online shoppers. Since 2026 we cut the noise and highlight practical Amazon.com deals worth your attention.";
+}
+
+export function contactMetaTitle(locale: Locale = "en"): string {
+  return locale === "ko" ? "문의" : "Contact";
+}
+
+export function contactMetaDescription(locale: Locale = "en"): string {
+  return locale === "ko"
+    ? `${SITE_NAME} 팀에 상품·파트너십·개인정보 관련 문의를 보내 주세요.`
+    : `Contact the ${SITE_NAME} team about listings, partnerships, or privacy.`;
+}
+
+export function disclosureMetaTitle(locale: Locale = "en"): string {
+  return locale === "ko" ? "제휴 고지" : "Affiliate Disclosure";
+}
+
+export function disclosureMetaDescription(locale: Locale = "en"): string {
+  return locale === "ko"
+    ? "DealStoker의 Amazon Associates(미국) 제휴 고지입니다."
+    : "DealStoker affiliate disclosure for Amazon Associates (United States).";
+}
+
+export function privacyMetaTitle(locale: Locale = "en"): string {
+  return locale === "ko" ? "개인정보 처리방침" : "Privacy Policy";
+}
+
+export function privacyMetaDescription(locale: Locale = "en"): string {
+  return locale === "ko"
+    ? `${SITE_NAME}의 개인정보 처리 안내입니다.`
+    : `Privacy practices for ${SITE_NAME}.`;
 }
 
 export function buildProductJsonLd(product: ProductDetail): Record<string, unknown> {
@@ -253,25 +400,29 @@ export function buildItemListJsonLd(
   };
 }
 
-export function buildOrganizationJsonLd(): Record<string, unknown> {
+export function buildOrganizationJsonLd(
+  locale: Locale = "en",
+): Record<string, unknown> {
   const siteUrl = getSiteUrl();
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE_NAME,
     url: siteUrl,
-    description: homeMetaDescription(),
+    description: homeMetaDescription(locale),
   };
 }
 
-export function buildWebSiteJsonLd(): Record<string, unknown> {
+export function buildWebSiteJsonLd(
+  locale: Locale = "en",
+): Record<string, unknown> {
   const siteUrl = getSiteUrl();
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: SITE_NAME,
     url: siteUrl,
-    inLanguage: "en-US",
+    inLanguage: schemaLanguage(locale),
     publisher: {
       "@type": "Organization",
       name: SITE_NAME,
@@ -296,6 +447,7 @@ type BuildMetaInput = {
   noIndex?: boolean;
   keywords?: string[];
   type?: "website" | "article";
+  locale?: Locale;
 };
 
 export function buildPageMetadata({
@@ -306,9 +458,13 @@ export function buildPageMetadata({
   noIndex,
   keywords,
   type = "website",
+  locale = "en",
 }: BuildMetaInput): Metadata {
   const siteUrl = getSiteUrl();
-  const url = `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const canonical = localizedAbsoluteUrl(siteUrl, normalizedPath, locale);
+  const enUrl = localizedAbsoluteUrl(siteUrl, normalizedPath, "en");
+  const koUrl = localizedAbsoluteUrl(siteUrl, normalizedPath, "ko");
   const fullTitle = finalizePageTitle(title);
   const safeDescription = clampText(sanitizeMetaCopy(description), 160);
 
@@ -316,13 +472,21 @@ export function buildPageMetadata({
     title: fullTitle,
     description: safeDescription,
     keywords: keywords?.length ? keywords : undefined,
-    alternates: { canonical: url },
+    alternates: {
+      canonical,
+      languages: {
+        en: enUrl,
+        ko: koUrl,
+        "x-default": enUrl,
+      },
+    },
     openGraph: {
       title: fullTitle,
       description: safeDescription,
-      url,
+      url: canonical,
       siteName: SITE_NAME,
-      locale: "en_US",
+      locale: ogLocale(locale),
+      alternateLocale: locale === "ko" ? ["en_US"] : ["ko_KR"],
       type,
       ...(image ? { images: [{ url: image, alt: title }] } : {}),
     },
@@ -332,6 +496,8 @@ export function buildPageMetadata({
       description: safeDescription,
       ...(image ? { images: [image] } : {}),
     },
-    robots: noIndex ? { index: false, follow: false } : { index: true, follow: true },
+    robots: noIndex
+      ? { index: false, follow: false }
+      : { index: true, follow: true },
   };
 }

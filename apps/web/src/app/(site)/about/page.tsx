@@ -1,26 +1,37 @@
+import type { Metadata } from "next";
 import { FaqSection } from "@/components/FaqSection";
 import { JsonLd } from "@/components/JsonLd";
 import { getAboutFaqs } from "@/lib/faq";
-import { formatMessage, getI18n } from "@/lib/i18n";
-import { buildMetadata } from "@/lib/metadata";
-import { buildFaqJsonLd } from "@/lib/seo";
+import { formatMessage, getI18n, getLocale } from "@/lib/i18n";
+import {
+  aboutMetaDescription,
+  aboutMetaTitle,
+  buildFaqJsonLd,
+  buildPageMetadata,
+} from "@/lib/seo";
 import { SITE_DOMAIN, SITE_NAME } from "@/lib/site";
 import styles from "../policy.module.css";
 
-export const metadata = buildMetadata({
-  title: `About ${SITE_NAME} — Amazon Deal Curation for US Shoppers`,
-  description:
-    "DealStoker is an Amazon deal curation site for US online shoppers. Since 2026 we cut the noise and highlight practical Amazon.com deals worth your attention.",
-  path: "/about",
-  keywords: [
-    SITE_NAME,
-    "Amazon deals",
-    "Amazon Associate",
-    "deal curation",
-    "US shoppers",
-    "Amazon.com",
-  ],
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return buildPageMetadata({
+    title: aboutMetaTitle(locale),
+    description: aboutMetaDescription(locale),
+    path: "/about",
+    locale,
+    keywords:
+      locale === "ko"
+        ? [SITE_NAME, "아마존 딜", "딜 큐레이션", "미국 쇼핑", "Amazon.com"]
+        : [
+            SITE_NAME,
+            "Amazon deals",
+            "Amazon Associate",
+            "deal curation",
+            "US shoppers",
+            "Amazon.com",
+          ],
+  });
+}
 
 export default async function AboutPage() {
   const { t } = await getI18n();

@@ -1,18 +1,21 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import type { Locale } from "@/lib/i18n/locale";
 import styles from "./Header.module.css";
 
 type Props = {
   searchLabel: string;
   placeholder: string;
   buttonLabel: string;
+  locale?: Locale;
 };
 
 export function HeaderSearch({
   searchLabel,
   placeholder,
   buttonLabel,
+  locale = "en",
 }: Props) {
   const searchParams = useSearchParams();
   const defaultQuery = searchParams.get("q") || "";
@@ -38,6 +41,7 @@ export function HeaderSearch({
         defaultValue={defaultQuery}
         key={defaultQuery}
       />
+      {locale === "ko" ? <input type="hidden" name="hl" value="ko" /> : null}
       <button className={styles.searchButton} type="submit">
         {buttonLabel}
       </button>

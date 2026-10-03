@@ -18,7 +18,7 @@ export async function Header({ categories = [], compact = false }: HeaderProps) 
     <header className={`${styles.header} ${compact ? styles.compact : ""}`}>
       <div className={styles.inner}>
         <Link
-          href="/"
+          href={locale === "ko" ? "/?hl=ko" : "/"}
           className={styles.brand}
           aria-label={`${SITE_NAME} ${t.homeAria}`}
         >
@@ -46,6 +46,9 @@ export async function Header({ categories = [], compact = false }: HeaderProps) 
                 autoComplete="off"
                 enterKeyHint="search"
               />
+              {locale === "ko" ? (
+                <input type="hidden" name="hl" value="ko" />
+              ) : null}
               <button className={styles.searchButton} type="submit">
                 {t.search}
               </button>
@@ -56,6 +59,7 @@ export async function Header({ categories = [], compact = false }: HeaderProps) 
             searchLabel={t.searchDeals}
             placeholder={t.searchPlaceholder}
             buttonLabel={t.search}
+            locale={locale}
           />
         </Suspense>
 
@@ -63,7 +67,11 @@ export async function Header({ categories = [], compact = false }: HeaderProps) 
           {categories.slice(0, 5).map((category) => (
             <Link
               key={category.id}
-              href={`/c/${category.slug}`}
+              href={
+                locale === "ko"
+                  ? `/c/${category.slug}?hl=ko`
+                  : `/c/${category.slug}`
+              }
               className={styles.navLink}
             >
               {localizeCategoryName(category.name, locale)}

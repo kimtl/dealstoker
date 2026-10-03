@@ -1,13 +1,22 @@
-import { formatMessage, getI18n } from "@/lib/i18n";
-import { buildMetadata } from "@/lib/metadata";
+import type { Metadata } from "next";
+import { formatMessage, getI18n, getLocale } from "@/lib/i18n";
+import {
+  buildPageMetadata,
+  contactMetaDescription,
+  contactMetaTitle,
+} from "@/lib/seo";
 import { SITE_DOMAIN, SITE_NAME } from "@/lib/site";
 import styles from "../policy.module.css";
 
-export const metadata = buildMetadata({
-  title: "Contact",
-  description: `Contact the ${SITE_NAME} team about listings, partnerships, or privacy.`,
-  path: "/contact",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return buildPageMetadata({
+    title: contactMetaTitle(locale),
+    description: contactMetaDescription(locale),
+    path: "/contact",
+    locale,
+  });
+}
 
 export default async function ContactPage() {
   const { t } = await getI18n();

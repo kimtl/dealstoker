@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { getI18n } from "@/lib/i18n";
 import { SITE_DOMAIN, SITE_NAME } from "@/lib/site";
@@ -14,13 +15,23 @@ export async function Footer() {
         <div className={styles.brandBlock}>
           <p className={styles.brand}>{SITE_NAME}</p>
           <p className={styles.tagline}>{t.footerTagline}</p>
-          <LanguageSwitcher locale={locale} t={t} />
+          <Suspense fallback={null}>
+            <LanguageSwitcher locale={locale} t={t} />
+          </Suspense>
         </div>
         <nav className={styles.links} aria-label={t.footerNav}>
-          <Link href="/about">{t.about}</Link>
-          <Link href="/disclosure">{t.disclosure}</Link>
-          <Link href="/privacy">{t.privacy}</Link>
-          <Link href="/contact">{t.contact}</Link>
+          <Link href={locale === "ko" ? "/about?hl=ko" : "/about"}>
+            {t.about}
+          </Link>
+          <Link href={locale === "ko" ? "/disclosure?hl=ko" : "/disclosure"}>
+            {t.disclosure}
+          </Link>
+          <Link href={locale === "ko" ? "/privacy?hl=ko" : "/privacy"}>
+            {t.privacy}
+          </Link>
+          <Link href={locale === "ko" ? "/contact?hl=ko" : "/contact"}>
+            {t.contact}
+          </Link>
         </nav>
         <p className={styles.disclosure}>{t.affiliateShort}</p>
         <p className={styles.copy}>

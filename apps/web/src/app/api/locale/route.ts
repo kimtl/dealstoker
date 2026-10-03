@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isLocale, LOCALE_COOKIE } from "@/lib/i18n/locale";
+import { isLocale, LOCALE_COOKIE, withLocaleQuery } from "@/lib/i18n/locale";
 
 export async function POST(request: NextRequest) {
   const form = await request.formData().catch(() => null);
@@ -16,7 +16,10 @@ export async function POST(request: NextRequest) {
     safeRedirect = "/";
   }
 
-  const response = NextResponse.redirect(new URL(safeRedirect, request.url), 303);
+  const [pathPart, queryPart = ""] = safeRedirect.split("?");
+  const withHl = withLocaleQuery(pathPart || "/", queryPart, locale);
+
+  const response = NextResponse.redirect(new URL(withHl, request.url), 303);
   response.cookies.set(LOCALE_COOKIE, locale, {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,

@@ -10,6 +10,11 @@ import {
   detectLocale,
   LOCALE_COOKIE,
   LOCALE_HEADER,
+  LOCALE_QUERY,
+  localizedAbsoluteUrl,
+  ogLocale,
+  schemaLanguage,
+  withLocaleQuery,
   type Locale,
 } from "./locale";
 
@@ -17,9 +22,14 @@ export type { Locale, Messages };
 export {
   DEFAULT_LOCALE,
   LOCALE_COOKIE,
+  LOCALE_QUERY,
   detectLocale,
   formatMessage,
   localizeCategoryName,
+  localizedAbsoluteUrl,
+  ogLocale,
+  schemaLanguage,
+  withLocaleQuery,
 };
 
 export async function getLocale(): Promise<Locale> {
@@ -33,6 +43,7 @@ export async function getLocale(): Promise<Locale> {
   return detectLocale(
     headerStore.get("accept-language"),
     jar.get(LOCALE_COOKIE)?.value,
+    null,
   );
 }
 

@@ -4,40 +4,38 @@ import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { DealList } from "@/components/DealList";
 import { JsonLd } from "@/components/JsonLd";
 import { getHome, getProducts } from "@/lib/api";
-import { formatMessage, getI18n, localizeCategoryName } from "@/lib/i18n";
+import { formatMessage, getI18n, getLocale, localizeCategoryName } from "@/lib/i18n";
 import {
   buildItemListJsonLd,
   buildOrganizationJsonLd,
   buildPageMetadata,
   buildWebSiteJsonLd,
   homeMetaDescription,
+  homeMetaKeywords,
   homeMetaTitle,
 } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 import type { ProductSummary } from "@/lib/types";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = {
-  ...buildPageMetadata({
-    title: homeMetaTitle(),
-    description: homeMetaDescription(),
-    path: "/",
-    keywords: [
-      "Amazon deals",
-      "best Amazon deals today",
-      "Amazon price drops",
-      "US Amazon discounts",
-      "featured deals",
-      SITE_NAME,
-    ],
-  }),
-  verification: {
-    other: {
-      "naver-site-verification":
-        "c38cadddf7da4068cc32a9a3c931c50c07279b30",
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return {
+    ...buildPageMetadata({
+      title: homeMetaTitle(locale),
+      description: homeMetaDescription(locale),
+      path: "/",
+      keywords: homeMetaKeywords(locale),
+      locale,
+    }),
+    verification: {
+      other: {
+        "naver-site-verification":
+          "c38cadddf7da4068cc32a9a3c931c50c07279b30",
+      },
     },
-  },
-};
+  };
+}
 
 export default async function HomePage() {
   const { locale, t } = await getI18n();
@@ -85,12 +83,14 @@ export default async function HomePage() {
 
   return (
     <main className={styles.main}>
-      <JsonLd data={buildOrganizationJsonLd()} />
-      <JsonLd data={buildWebSiteJsonLd()} />
+      <JsonLd data={buildOrganizationJsonLd(locale)} />
+      <JsonLd data={buildWebSiteJsonLd(locale)} />
       {listedForSchema.length > 0 ? (
         <JsonLd
           data={buildItemListJsonLd(
-            `Today's top Amazon deals on ${SITE_NAME}`,
+            locale === "ko"
+              ? `${SITE_NAME} 오늘의 아마존 딜`
+              : `Today's top Amazon deals on ${SITE_NAME}`,
             listedForSchema,
             "/",
           )}

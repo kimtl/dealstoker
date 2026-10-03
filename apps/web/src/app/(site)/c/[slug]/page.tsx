@@ -20,6 +20,7 @@ import { splitIntoParagraphs } from "@/lib/text";
 import {
   formatMessage,
   getI18n,
+  getLocale,
   localizeCategoryName,
 } from "@/lib/i18n";
 import styles from "./category.module.css";
@@ -31,27 +32,45 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
+  const locale = await getLocale();
   try {
     const category = await getCategory(slug);
+    const localizedName = localizeCategoryName(category.name, locale);
     return buildPageMetadata({
-      title: categoryMetaTitle(category),
-      description: categoryMetaDescription(category),
+      title: categoryMetaTitle(category, locale),
+      description: categoryMetaDescription(category, locale),
       path: `/c/${slug}`,
-      keywords: [
-        category.name,
-        `best ${category.name} deals`,
-        `${category.name} deals`,
-        `${category.name} Amazon`,
-        "Amazon deals",
-        "price drops",
-        SITE_NAME,
-      ],
+      locale,
+      keywords:
+        locale === "ko"
+          ? [
+              localizedName,
+              `${localizedName} 딜`,
+              `아마존 ${localizedName}`,
+              "아마존 딜",
+              "아마존 할인",
+              SITE_NAME,
+            ]
+          : [
+              category.name,
+              `best ${category.name} deals`,
+              `${category.name} deals`,
+              `${category.name} Amazon`,
+              "Amazon deals",
+              "price drops",
+              SITE_NAME,
+            ],
     });
   } catch {
     return buildPageMetadata({
-      title: "Amazon Category Deals",
-      description: `Browse curated Amazon.com category deals on ${SITE_NAME}.`,
+      title:
+        locale === "ko" ? "아마존 카테고리 딜" : "Amazon Category Deals",
+      description:
+        locale === "ko"
+          ? `${SITE_NAME}에서 Amazon.com 카테고리 딜을 둘러보세요.`
+          : `Browse curated Amazon.com category deals on ${SITE_NAME}.`,
       path: `/c/${slug}`,
+      locale,
     });
   }
 }

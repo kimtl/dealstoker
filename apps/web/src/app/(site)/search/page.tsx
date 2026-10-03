@@ -2,8 +2,12 @@ import Link from "next/link";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { DealList } from "@/components/DealList";
 import { getCategories, getProducts } from "@/lib/api";
-import { formatMessage, getI18n, localizeCategoryName } from "@/lib/i18n";
-import { buildPageMetadata } from "@/lib/seo";
+import { formatMessage, getI18n, getLocale, localizeCategoryName } from "@/lib/i18n";
+import {
+  buildPageMetadata,
+  searchMetaDescription,
+  searchMetaTitle,
+} from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 import styles from "./search.module.css";
 
@@ -48,17 +52,13 @@ function hasActiveFilters(input: {
 export async function generateMetadata({ searchParams }: PageProps) {
   const query = await searchParams;
   const q = normalizeQuery(query.q);
-  if (!q) {
-    return buildPageMetadata({
-      title: `Search Amazon deals | ${SITE_NAME}`,
-      description: `Search curated Amazon.com deals on ${SITE_NAME}. Filter by category and price.`,
-      path: "/search",
-    });
-  }
+  const locale = await getLocale();
+  const path = q ? `/search?q=${encodeURIComponent(q)}` : "/search";
   return buildPageMetadata({
-    title: `Search “${q}” | ${SITE_NAME}`,
-    description: `Amazon deals matching “${q}” on ${SITE_NAME}. Filter by category and price.`,
-    path: `/search?q=${encodeURIComponent(q)}`,
+    title: searchMetaTitle(q, locale),
+    description: searchMetaDescription(q, locale),
+    path,
+    locale,
   });
 }
 
