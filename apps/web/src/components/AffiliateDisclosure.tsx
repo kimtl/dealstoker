@@ -1,16 +1,17 @@
 import Link from "next/link";
-import { AFFILIATE_DISCLOSURE_SHORT } from "@/lib/site";
+import { getMessages } from "@/lib/i18n";
 import styles from "./AffiliateDisclosure.module.css";
 
 type Props = {
   className?: string;
 };
 
-export function AffiliateDisclosure({ className }: Props) {
+export async function AffiliateDisclosure({ className }: Props) {
+  const t = await getMessages();
   return (
     <p className={`${styles.text} ${className || ""}`}>
-      {AFFILIATE_DISCLOSURE_SHORT}{" "}
-      <Link href="/disclosure">Full disclosure</Link>
+      {t.affiliateShort}{" "}
+      <Link href="/disclosure">{t.fullDisclosure}</Link>
     </p>
   );
 }

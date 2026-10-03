@@ -24,6 +24,7 @@ import {
 } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 import { splitIntoParagraphs } from "@/lib/text";
+import { formatMessage, getI18n, localizeCategoryName } from "@/lib/i18n";
 import styles from "./product.module.css";
 
 type PageProps = {
@@ -74,41 +75,62 @@ export default async function ProductPage({ params }: PageProps) {
     related = [];
   }
 
-  const price = formatMoney(product.priceAmount, product.currency);
-  const listPrice = formatMoney(product.listPrice, product.currency);
+  const { locale, t } = await getI18n();
+  const price = formatMoney(product.priceAmount, product.currency, locale);
+  const listPrice = formatMoney(product.listPrice, product.currency, locale);
   const rating = formatRating(product.rating);
-  const reviews = formatReviewCount(product.reviewCount);
+  const reviews = formatReviewCount(product.reviewCount, locale);
   const goHref = `/go/${product.slug}`;
   const imageAlt = productImageAlt(product);
+  const localizedCategory = product.categoryName
+    ? localizeCategoryName(product.categoryName, locale)
+    : null;
 
   const breadcrumbItems = [
-    { name: "Home", path: "/" },
-    ...(product.categorySlug && product.categoryName
-      ? [{ name: product.categoryName, path: `/c/${product.categorySlug}` }]
+    { name: t.breadcrumbHome, path: "/" },
+    ...(product.categorySlug && localizedCategory
+      ? [{ name: localizedCategory, path: `/c/${product.categorySlug}` }]
       : []),
     { name: product.title, path: `/p/${product.slug}` },
   ];
   const faqs = getProductFaqs(product);
   const faqJsonLd = buildFaqJsonLd(faqs);
   const recommendationParagraphs = splitIntoParagraphs(product.recommendation);
-  const categoryLabel = product.categoryName?.trim();
+  const categoryLabel = localizedCategory?.trim();
   const updatedLabel = formatUpdatedAt(
     product.updatedAt || product.lastSyncedAt || product.publishedAt,
+    locale,
   );
-  const intro = [
-    `${product.title} is a curated Amazon.com deal on ${SITE_NAME}`,
-    categoryLabel ? ` in ${categoryLabel}` : "",
-    price ? `. The currently shown price is ${price}` : "",
-    listPrice && listPrice !== price
-      ? `. The listed comparison price is ${listPrice}`
-      : "",
-    rating
-      ? `. Shopper rating signals show ${rating} stars${
-          reviews ? ` from about ${reviews}` : ""
-        }`
-      : "",
-    ".",
-  ].join("");
+  const intro =
+    locale === "ko"
+      ? [
+          `${product.title}은(는) ${SITE_NAME}의 Amazon.com 큐레이션 딜`,
+          categoryLabel ? ` · ${categoryLabel}` : "",
+          price ? `입니다. 현재 표시 가격은 ${price}` : "입니다",
+          listPrice && listPrice !== price
+            ? `. 비교 가격은 ${listPrice}`
+            : "",
+          rating
+            ? `. 쇼핑객 평점은 ${rating}${t.stars}${
+                reviews ? ` · 약 ${reviews}${t.reviews}` : ""
+              }`
+            : "",
+          ".",
+        ].join("")
+      : [
+          `${product.title} is a curated Amazon.com deal on ${SITE_NAME}`,
+          categoryLabel ? ` in ${categoryLabel}` : "",
+          price ? `. The currently shown price is ${price}` : "",
+          listPrice && listPrice !== price
+            ? `. The listed comparison price is ${listPrice}`
+            : "",
+          rating
+            ? `. Shopper rating signals show ${rating} ${t.stars}${
+                reviews ? ` from about ${reviews}` : ""
+              }`
+            : "",
+          ".",
+        ].join("");
 
   return (
     <main className={styles.main}>
@@ -120,13 +142,13 @@ export default async function ProductPage({ params }: PageProps) {
         ]}
       />
       <div className={styles.inner}>
-        <nav className={styles.crumbs} aria-label="Breadcrumb">
-          <Link href="/">Home</Link>
-          {product.categorySlug && product.categoryName ? (
+        <nav className={styles.crumbs} aria-label={t.breadcrumb}>
+          <Link href="/">{t.breadcrumbHome}</Link>
+          {product.categorySlug && localizedCategory ? (
             <>
               <span aria-hidden>/</span>
               <Link href={`/c/${product.categorySlug}`}>
-                {product.categoryName}
+                {localizedCategory}
               </Link>
             </>
           ) : null}
@@ -158,12 +180,11 @@ export default async function ProductPage({ params }: PageProps) {
                 target="_blank"
                 rel="nofollow sponsored noopener noreferrer"
               >
-                View on Amazon
+                {t.viewOnAmazon}
               </a>
               <AffiliateDisclosure />
               <p className={styles.siteNote}>
-                Curated by {SITE_NAME}. Price and availability may change on
-                Amazon.com.
+                {formatMessage(t.curatedBy, { site: SITE_NAME })}
               </p>
             </div>
           </div>
@@ -180,13 +201,15 @@ export default async function ProductPage({ params }: PageProps) {
               ) : null}
               {rating ? (
                 <span className={styles.rating}>
-                  {rating} stars
-                  {reviews ? ` · ${reviews} reviews` : ""}
+                  {rating} {t.stars}
+                  {reviews ? ` · ${reviews} ${t.reviews}` : ""}
                 </span>
               ) : null}
             </div>
             {updatedLabel ? (
-              <p className={styles.updated}>Updated {updatedLabel}</p>
+              <p className={styles.updated}>
+                {t.updated} {updatedLabel}
+              </p>
             ) : null}
             <p className={styles.intro}>{intro}</p>
             {recommendationParagraphs.length > 0 ? (
@@ -195,10 +218,10 @@ export default async function ProductPage({ params }: PageProps) {
                 aria-labelledby="why-recommend"
               >
                 <h2 id="why-recommend" className={styles.recommendationTitle}>
-                  Why we recommend it
+                  {t.whyRecommend}
                 </h2>
                 <p className={styles.recommendationByline}>
-                  by {SITE_NAME} curation team
+                  {formatMessage(t.curationByline, { site: SITE_NAME })}
                 </p>
                 <div className={styles.recommendationBody}>
                   {recommendationParagraphs.map((paragraph, index) => (
@@ -224,7 +247,7 @@ export default async function ProductPage({ params }: PageProps) {
         {related.length > 0 ? (
           <section className={styles.related} aria-labelledby="related-heading">
             <h2 id="related-heading" className={styles.relatedTitle}>
-              Related deals
+              {t.relatedDeals}
             </h2>
             <DealList products={related} showNewBadge={false} />
           </section>

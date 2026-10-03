@@ -3,7 +3,17 @@
 import { useSearchParams } from "next/navigation";
 import styles from "./Header.module.css";
 
-export function HeaderSearch() {
+type Props = {
+  searchLabel: string;
+  placeholder: string;
+  buttonLabel: string;
+};
+
+export function HeaderSearch({
+  searchLabel,
+  placeholder,
+  buttonLabel,
+}: Props) {
   const searchParams = useSearchParams();
   const defaultQuery = searchParams.get("q") || "";
 
@@ -15,21 +25,21 @@ export function HeaderSearch() {
       role="search"
     >
       <label className="sr-only" htmlFor="site-search">
-        Search deals
+        {searchLabel}
       </label>
       <input
         id="site-search"
         className={styles.searchInput}
         type="search"
         name="q"
-        placeholder="Search deals…"
+        placeholder={placeholder}
         autoComplete="off"
         enterKeyHint="search"
         defaultValue={defaultQuery}
         key={defaultQuery}
       />
       <button className={styles.searchButton} type="submit">
-        Search
+        {buttonLabel}
       </button>
     </form>
   );

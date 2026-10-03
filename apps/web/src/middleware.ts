@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  detectLocale,
+  isLocale,
+  LOCALE_COOKIE,
+  LOCALE_HEADER,
+} from "@/lib/i18n/locale";
 
 const CANONICAL_HOST = "www.dealstoker.com";
 
@@ -13,11 +19,7 @@ function requestHost(request: NextRequest): string {
 /**
  * Force apex → www so crawlers never index duplicate hosts.
  * Preserves path + query (e.g. /c/electronics?sort=newest).
- *
- * DNS note: apex must hit this Next.js app (Railway custom domain).
- * A Spaceship/hosting “URL redirect” that always sends users to
- * https://www.dealstoker.com (no path) will drop path/query before
- * middleware runs — remove that naked redirect and point apex at Railway.
+ * Also stamps detected locale for server components.
  */
 export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -32,19 +34,39 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(`${base}/sitemap.xml${search}`, 301);
   }
 
-  if (requestHost(request) !== "dealstoker.com") {
-    return NextResponse.next();
+  if (requestHost(request) === "dealstoker.com") {
+    const destination = `https://${CANONICAL_HOST}${pathname}${search}`;
+    return NextResponse.redirect(destination, 301);
   }
 
-  const destination = `https://${CANONICAL_HOST}${pathname}${search}`;
-  return NextResponse.redirect(destination, 301);
+  const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value;
+  const locale = detectLocale(
+    request.headers.get("accept-language"),
+    cookieLocale,
+  );
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set(LOCALE_HEADER, locale);
+
+  const response = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
+  response.headers.set(LOCALE_HEADER, locale);
+
+  // Persist detected locale only when user has not chosen one yet.
+  // Skip /api/locale — that route sets the cookie itself on language switch.
+  if (!isLocale(cookieLocale) && pathname !== "/api/locale") {
+    response.cookies.set(LOCALE_COOKIE, locale, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+    });
+  }
+
+  return response;
 }
 
 export const config = {
   matcher: [
-    /*
-     * Skip Next internals and common static assets; still redirect HTML/docs.
-     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

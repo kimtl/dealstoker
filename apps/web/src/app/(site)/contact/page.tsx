@@ -1,5 +1,6 @@
+import { formatMessage, getI18n } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_DOMAIN, SITE_NAME } from "@/lib/site";
 import styles from "../policy.module.css";
 
 export const metadata = buildMetadata({
@@ -8,33 +9,36 @@ export const metadata = buildMetadata({
   path: "/contact",
 });
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const { t } = await getI18n();
+  const helloEmail = `hello@${SITE_DOMAIN}`;
+  const privacyEmail = `privacy@${SITE_DOMAIN}`;
+  const body = formatMessage(t.contactBody, { domain: SITE_DOMAIN });
+
   return (
     <main className={styles.main}>
       <article className={styles.inner}>
-        <h1 className={styles.title}>Contact</h1>
-        <p className={styles.updated}>
-          We read every message. Typical response time is 1–3 business days.
-        </p>
+        <h1 className={styles.title}>{t.contactTitle}</h1>
+        <p className={styles.updated}>{t.contactLead}</p>
         <p>
-          For general questions, listing feedback, or partnership inquiries,
-          email{" "}
-          <a href="mailto:hello@dealstoker.com">hello@dealstoker.com</a>.
+          {body.split(new RegExp(`(${helloEmail}|${privacyEmail})`)).map((part, index) =>
+            part === helloEmail || part === privacyEmail ? (
+              <a key={`${part}-${index}`} href={`mailto:${part}`}>
+                {part}
+              </a>
+            ) : (
+              <span key={`${index}-${part.slice(0, 12)}`}>{part}</span>
+            ),
+          )}
         </p>
-        <h2>Privacy requests</h2>
+        <h2>{t.privacy}</h2>
         <p>
-          For privacy-related requests, contact{" "}
-          <a href="mailto:privacy@dealstoker.com">privacy@dealstoker.com</a>.
+          <a href={`mailto:${privacyEmail}`}>{privacyEmail}</a>
         </p>
-        <h2>Mailing address</h2>
         <p>
           {SITE_NAME}
           <br />
-          United States
-        </p>
-        <p>
-          Please do not send payment card details or Amazon account credentials
-          by email.
+          {t.unitedStates}
         </p>
       </article>
     </main>

@@ -17,6 +17,11 @@ import {
 } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 import { splitIntoParagraphs } from "@/lib/text";
+import {
+  formatMessage,
+  getI18n,
+  localizeCategoryName,
+} from "@/lib/i18n";
 import styles from "./category.module.css";
 
 type PageProps = {
@@ -77,17 +82,23 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     };
   }
 
+  const { locale, t } = await getI18n();
+  const localizedName = localizeCategoryName(category.name, locale);
+
   const sorts = [
-    { value: "newest", label: "Newest" },
-    { value: "price_asc", label: "Price ↑" },
-    { value: "price_desc", label: "Price ↓" },
-    { value: "rating", label: "Top rated" },
+    { value: "newest", label: t.newest },
+    { value: "price_asc", label: t.priceAsc },
+    { value: "price_desc", label: t.priceDesc },
+    { value: "rating", label: t.topRated },
   ];
 
   const faqs = getCategoryFaqs(category);
   const buyingGuide = category.buyingGuide?.trim() || "";
   const guideParagraphs = splitIntoParagraphs(buyingGuide);
-  const seoLead = `Browse the best ${category.name} deals on Amazon.com. ${SITE_NAME} lists current prices, price drops, and featured picks for US shoppers.`;
+  const seoLead = formatMessage(t.categoryLead, {
+    name: localizedName,
+    site: SITE_NAME,
+  });
   const description = category.description?.trim() || "";
   const leadParagraphs = description
     ? description.toLowerCase().includes("deal")
@@ -97,11 +108,11 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   const faqJsonLd = buildFaqJsonLd(faqs);
   const jsonLd = [
     buildBreadcrumbJsonLd([
-      { name: "Home", path: "/" },
-      { name: category.name, path: `/c/${category.slug}` },
+      { name: t.breadcrumbHome, path: "/" },
+      { name: localizedName, path: `/c/${category.slug}` },
     ]),
     buildItemListJsonLd(
-      `${category.name} deals on ${SITE_NAME}`,
+      `${localizedName} deals on ${SITE_NAME}`,
       products.items,
       `/c/${category.slug}`,
     ),
@@ -112,15 +123,15 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     <main className={styles.main}>
       <JsonLd data={jsonLd} />
       <div className={styles.inner}>
-        <nav className={styles.crumbs} aria-label="Breadcrumb">
-          <Link href="/">Frontpage</Link>
+        <nav className={styles.crumbs} aria-label={t.breadcrumb}>
+          <Link href="/">{t.frontpage}</Link>
           <span aria-hidden>/</span>
-          <span>{category.name}</span>
+          <span>{localizedName}</span>
         </nav>
 
         <header className={styles.header}>
           <div>
-            <h1 className={styles.title}>{category.name}</h1>
+            <h1 className={styles.title}>{localizedName}</h1>
             {leadParagraphs.map((paragraph, index) => (
               <p key={`lead-${index}`} className={styles.lead}>
                 {paragraph}
@@ -128,8 +139,13 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             ))}
             {buyingGuide ? (
               <BuyingGuideModalButton
-                categoryName={category.name}
+                categoryName={localizedName}
                 buyingGuide={buyingGuide}
+                triggerLabel={t.buyingGuide}
+                titleLabel={formatMessage(t.buyingGuideTitle, {
+                  name: localizedName,
+                })}
+                closeLabel={t.closeBuyingGuide}
               />
             ) : null}
           </div>
@@ -138,10 +154,12 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
         <div className={styles.toolbar}>
           <p className={styles.count}>
-            {products.totalElements} deal
-            {products.totalElements === 1 ? "" : "s"}
+            {formatMessage(
+              products.totalElements === 1 ? t.dealCount : t.dealsCount,
+              { count: products.totalElements },
+            )}
           </p>
-          <div className={styles.sorts} role="navigation" aria-label="Sort">
+          <div className={styles.sorts} role="navigation" aria-label={t.sortNav}>
             {sorts.map((option) => (
               <Link
                 key={option.value}
@@ -158,24 +176,27 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
         <DealList
           products={products.items}
-          emptyMessage="No published deals in this category yet."
+          emptyMessage={t.emptyCategory}
         />
 
         {products.totalPages > 1 ? (
           <nav className={styles.pager} aria-label="Pagination">
             {page > 0 ? (
               <Link href={`/c/${slug}?sort=${sort}&page=${page - 1}`}>
-                Previous
+                {t.previous}
               </Link>
             ) : (
               <span />
             )}
             <span>
-              Page {page + 1} of {products.totalPages}
+              {formatMessage(t.pageOf, {
+                page: page + 1,
+                total: products.totalPages,
+              })}
             </span>
             {page + 1 < products.totalPages ? (
               <Link href={`/c/${slug}?sort=${sort}&page=${page + 1}`}>
-                Next
+                {t.next}
               </Link>
             ) : (
               <span />
@@ -190,7 +211,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             aria-labelledby="buying-guide-heading"
           >
             <h2 id="buying-guide-heading" className={styles.guideTitle}>
-              {category.name} buying guide
+              {formatMessage(t.buyingGuideTitle, { name: localizedName })}
             </h2>
             <div className={styles.guideBody}>
               {guideParagraphs.map((paragraph, index) => (

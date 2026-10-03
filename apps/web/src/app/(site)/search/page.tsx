@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { DealList } from "@/components/DealList";
 import { getCategories, getProducts } from "@/lib/api";
+import { formatMessage, getI18n, localizeCategoryName } from "@/lib/i18n";
 import { buildPageMetadata } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 import styles from "./search.module.css";
@@ -62,6 +63,7 @@ export async function generateMetadata({ searchParams }: PageProps) {
 }
 
 export default async function SearchPage({ searchParams }: PageProps) {
+  const { locale, t } = await getI18n();
   const query = await searchParams;
   const q = normalizeQuery(query.q);
   const category = normalizeCategory(query.category);
@@ -72,10 +74,10 @@ export default async function SearchPage({ searchParams }: PageProps) {
   const active = hasActiveFilters({ q, category, minPrice, maxPrice });
 
   const sorts = [
-    { value: "newest", label: "Newest" },
-    { value: "price_asc", label: "Price ↑" },
-    { value: "price_desc", label: "Price ↓" },
-    { value: "rating", label: "Top rated" },
+    { value: "newest", label: t.newest },
+    { value: "price_asc", label: t.priceAsc },
+    { value: "price_desc", label: t.priceDesc },
+    { value: "rating", label: t.topRated },
   ];
 
   let categories: Awaited<ReturnType<typeof getCategories>> = [];
@@ -122,28 +124,34 @@ export default async function SearchPage({ searchParams }: PageProps) {
     return `/search?${params.toString()}`;
   }
 
-  const categoryName =
+  const categoryNameRaw =
     categories.find((item) => item.slug === category)?.name || category;
+  const categoryName = localizeCategoryName(categoryNameRaw, locale);
 
   const title = q
-    ? `Results for “${q}”`
+    ? formatMessage(t.resultsForQ, { q })
     : category
-      ? `${categoryName} deals`
+      ? formatMessage(t.categoryDealsTitle, { name: categoryName })
       : minPrice || maxPrice
-        ? "Filtered deals"
-        : "Search deals";
+        ? t.filteredDeals
+        : t.searchPageTitle;
 
   const lead = active
-    ? `Browse curated Amazon.com deals on ${SITE_NAME} with your selected filters.`
-    : `Search by keyword, pick a category, or set a price range to find deals on ${SITE_NAME}.`;
+    ? formatMessage(t.searchActiveLead, { site: SITE_NAME })
+    : formatMessage(t.searchPageLead, { site: SITE_NAME });
+
+  const resultLabel =
+    products.totalElements === 1
+      ? formatMessage(t.resultOne, { count: products.totalElements })
+      : formatMessage(t.resultMany, { count: products.totalElements });
 
   return (
     <main className={styles.main}>
       <div className={styles.inner}>
-        <nav className={styles.crumbs} aria-label="Breadcrumb">
-          <Link href="/">Home</Link>
+        <nav className={styles.crumbs} aria-label={t.breadcrumb}>
+          <Link href="/">{t.breadcrumbHome}</Link>
           <span aria-hidden>/</span>
-          <span>Search</span>
+          <span>{t.search}</span>
         </nav>
 
         <header className={styles.header}>
@@ -161,35 +169,35 @@ export default async function SearchPage({ searchParams }: PageProps) {
           method="get"
         >
           <div className={styles.filterField}>
-            <label htmlFor="search-q">Keywords</label>
+            <label htmlFor="search-q">{t.keywords}</label>
             <input
               id="search-q"
               type="search"
               name="q"
               defaultValue={q}
-              placeholder="Product or brand"
+              placeholder={t.productOrBrand}
               autoComplete="off"
             />
           </div>
 
           <div className={styles.filterField}>
-            <label htmlFor="search-category">Category</label>
+            <label htmlFor="search-category">{t.category}</label>
             <select
               id="search-category"
               name="category"
               defaultValue={category}
             >
-              <option value="">All categories</option>
+              <option value="">{t.allCategories}</option>
               {categories.map((item) => (
                 <option key={item.id} value={item.slug}>
-                  {item.name}
+                  {localizeCategoryName(item.name, locale)}
                 </option>
               ))}
             </select>
           </div>
 
           <div className={styles.filterField}>
-            <label htmlFor="search-min-price">Min price ($)</label>
+            <label htmlFor="search-min-price">{t.minPrice} ($)</label>
             <input
               id="search-min-price"
               type="number"
@@ -203,7 +211,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
           </div>
 
           <div className={styles.filterField}>
-            <label htmlFor="search-max-price">Max price ($)</label>
+            <label htmlFor="search-max-price">{t.maxPrice} ($)</label>
             <input
               id="search-max-price"
               type="number"
@@ -212,12 +220,12 @@ export default async function SearchPage({ searchParams }: PageProps) {
               step="1"
               inputMode="decimal"
               defaultValue={maxPrice}
-              placeholder="Any"
+              placeholder={t.anyPrice}
             />
           </div>
 
           <div className={styles.filterField}>
-            <label htmlFor="search-sort">Sort</label>
+            <label htmlFor="search-sort">{t.sortNav}</label>
             <select id="search-sort" name="sort" defaultValue={sort}>
               {sorts.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -229,10 +237,10 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
           <div className={styles.filterActions}>
             <button className={styles.applyButton} type="submit">
-              Apply filters
+              {t.applyFilters}
             </button>
             <Link className={styles.clearLink} href="/search">
-              Clear
+              {t.clearFilters}
             </Link>
           </div>
         </form>
@@ -240,11 +248,12 @@ export default async function SearchPage({ searchParams }: PageProps) {
         {active ? (
           <>
             <div className={styles.toolbar}>
-              <p className={styles.count}>
-                {products.totalElements} result
-                {products.totalElements === 1 ? "" : "s"}
-              </p>
-              <div className={styles.sorts} role="navigation" aria-label="Sort">
+              <p className={styles.count}>{resultLabel}</p>
+              <div
+                className={styles.sorts}
+                role="navigation"
+                aria-label={t.sortNav}
+              >
                 {sorts.map((option) => (
                   <Link
                     key={option.value}
@@ -259,23 +268,23 @@ export default async function SearchPage({ searchParams }: PageProps) {
               </div>
             </div>
 
-            <DealList
-              products={products.items}
-              emptyMessage="No deals matched these filters. Try another category, price range, or keyword."
-            />
+            <DealList products={products.items} emptyMessage={t.searchEmpty} />
 
             {products.totalPages > 1 ? (
               <nav className={styles.pager} aria-label="Pagination">
                 {page > 0 ? (
-                  <Link href={hrefFor({ page: page - 1 })}>Previous</Link>
+                  <Link href={hrefFor({ page: page - 1 })}>{t.previous}</Link>
                 ) : (
                   <span />
                 )}
                 <span>
-                  Page {page + 1} of {products.totalPages}
+                  {formatMessage(t.pageOf, {
+                    page: page + 1,
+                    total: products.totalPages,
+                  })}
                 </span>
                 {page + 1 < products.totalPages ? (
-                  <Link href={hrefFor({ page: page + 1 })}>Next</Link>
+                  <Link href={hrefFor({ page: page + 1 })}>{t.next}</Link>
                 ) : (
                   <span />
                 )}
@@ -283,10 +292,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
             ) : null}
           </>
         ) : (
-          <p className={styles.hint}>
-            Use the filters above, or search from the header, to see matching
-            deals.
-          </p>
+          <p className={styles.hint}>{t.searchHint}</p>
         )}
       </div>
     </main>

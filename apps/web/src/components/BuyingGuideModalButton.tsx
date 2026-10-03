@@ -7,9 +7,18 @@ import styles from "./BuyingGuideModal.module.css";
 type Props = {
   categoryName: string;
   buyingGuide: string;
+  triggerLabel: string;
+  titleLabel: string;
+  closeLabel: string;
 };
 
-export function BuyingGuideModalButton({ categoryName, buyingGuide }: Props) {
+export function BuyingGuideModalButton({
+  categoryName,
+  buyingGuide,
+  triggerLabel,
+  titleLabel,
+  closeLabel,
+}: Props) {
   const [open, setOpen] = useState(false);
   const titleId = useId();
   const guide = buyingGuide.trim();
@@ -38,7 +47,7 @@ export function BuyingGuideModalButton({ categoryName, buyingGuide }: Props) {
         className={styles.trigger}
         onClick={() => setOpen(true)}
       >
-        Buying guide
+        {triggerLabel}
       </button>
       {open ? (
         <div
@@ -55,13 +64,13 @@ export function BuyingGuideModalButton({ categoryName, buyingGuide }: Props) {
           >
             <div className={styles.dialogHeader}>
               <h2 id={titleId} className={styles.dialogTitle}>
-                {categoryName} buying guide
+                {titleLabel || `${categoryName}`}
               </h2>
               <button
                 type="button"
                 className={styles.close}
                 onClick={() => setOpen(false)}
-                aria-label="Close buying guide"
+                aria-label={closeLabel}
               >
                 ×
               </button>
