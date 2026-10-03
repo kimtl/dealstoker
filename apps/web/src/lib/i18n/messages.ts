@@ -303,11 +303,11 @@ const ko: Messages = {
   trending: "인기",
   updated: "업데이트",
   frontpageSections: "메인 섹션",
-  homeHeadline: "아마존 딜, 가격 하락 & 추천 딜",
+  homeHeadline: "아마존 딜, 할인 & 추천 딜",
   homeSupport:
     "미국 쇼핑객을 위한 Amazon.com 큐레이션 딜 — 추천 딜, 명확한 가격, 덜 복잡한 목록.",
   homeIntro1:
-    "{site}는 홈·전자·아웃도어 등 카테고리의 아마존 딜과 가격 하락을 모아, 미국 쇼핑객이 복잡한 마켓플레이스를 헤매지 않고 추천 딜을 비교할 수 있게 합니다.",
+    "{site}는 홈·전자·아웃도어 등 카테고리의 아마존 딜과 할인을 모아, 미국 쇼핑객이 복잡한 마켓플레이스를 헤매지 않고 추천 딜을 비교할 수 있게 합니다.",
   homeIntro2:
     "각 상품은 Amazon.com 현재 가격을 먼저 보여 주고, 평점 신호와 함께 추천 딜·인기 조회 순위에 오른 상품에는 짧은 편집 코멘트를 더합니다.",
   featuredMeta: "DealStoker 추천 · 최대 5개",
@@ -334,7 +334,7 @@ const ko: Messages = {
   pageOf: "{total}페이지 중 {page}",
   emptyCategory: "이 카테고리에 공개된 딜이 아직 없습니다.",
   categoryLead:
-    "Amazon.com의 인기 {name} 딜을 둘러보세요. {site}는 미국 쇼핑객을 위해 현재 가격, 가격 하락, 추천 상품을 정리합니다.",
+    "Amazon.com의 인기 {name} 딜을 둘러보세요. {site}는 미국 쇼핑객을 위해 현재 가격, 할인, 추천 상품을 정리합니다.",
 
   viewOnAmazon: "아마존에서 보기",
   curatedBy:
