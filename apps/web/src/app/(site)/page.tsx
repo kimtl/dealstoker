@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { DealList } from "@/components/DealList";
@@ -16,19 +17,27 @@ import { SITE_NAME } from "@/lib/site";
 import type { ProductSummary } from "@/lib/types";
 import styles from "./page.module.css";
 
-export const metadata = buildPageMetadata({
-  title: homeMetaTitle(),
-  description: homeMetaDescription(),
-  path: "/",
-  keywords: [
-    "Amazon deals",
-    "best Amazon deals today",
-    "Amazon price drops",
-    "US Amazon discounts",
-    "featured deals",
-    SITE_NAME,
-  ],
-});
+export const metadata: Metadata = {
+  ...buildPageMetadata({
+    title: homeMetaTitle(),
+    description: homeMetaDescription(),
+    path: "/",
+    keywords: [
+      "Amazon deals",
+      "best Amazon deals today",
+      "Amazon price drops",
+      "US Amazon discounts",
+      "featured deals",
+      SITE_NAME,
+    ],
+  }),
+  verification: {
+    other: {
+      "naver-site-verification":
+        "c38cadddf7da4068cc32a9a3c931c50c07279b30",
+    },
+  },
+};
 
 export default async function HomePage() {
   const { locale, t } = await getI18n();
