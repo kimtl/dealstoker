@@ -27,3 +27,10 @@ test("apex redirect keeps query string", () => {
 test("apex root stays root", () => {
   assert.equal(apexToWwwDestination("/"), "https://www.dealstoker.com/");
 });
+
+test("bare /robots maps to robots.txt on www", () => {
+  assert.equal(
+    apexToWwwDestination("/robots.txt"),
+    "https://www.dealstoker.com/robots.txt",
+  );
+});

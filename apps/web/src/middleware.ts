@@ -24,19 +24,36 @@ function requestHost(request: NextRequest): string {
 export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
-  // Bare /sitemap is a Next HTML 404 — send crawlers to the XML endpoint.
-  if (pathname === "/sitemap" || pathname === "/sitemap/") {
+  // Bare /sitemap or /robots HTML 404s — send crawlers to the real endpoints.
+  if (
+    pathname === "/sitemap" ||
+    pathname === "/sitemap/" ||
+    pathname === "/robots" ||
+    pathname === "/robots/"
+  ) {
     const host = requestHost(request);
     const base =
       host === "dealstoker.com" || host === "www.dealstoker.com"
         ? `https://${CANONICAL_HOST}`
         : request.nextUrl.origin;
-    return NextResponse.redirect(`${base}/sitemap.xml${search}`, 301);
+    const target =
+      pathname.startsWith("/robots") ? "/robots.txt" : "/sitemap.xml";
+    return NextResponse.redirect(`${base}${target}${search}`, 301);
   }
 
   if (requestHost(request) === "dealstoker.com") {
     const destination = `https://${CANONICAL_HOST}${pathname}${search}`;
     return NextResponse.redirect(destination, 301);
+  }
+
+  // Keep robots/sitemap free of locale cookies — crawlers expect a clean text file.
+  if (
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml" ||
+    pathname === "/api/robots" ||
+    pathname === "/api/sitemap"
+  ) {
+    return NextResponse.next();
   }
 
   const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value;
