@@ -1,14 +1,22 @@
-import { getI18n } from "@/lib/i18n";
-import { buildMetadata } from "@/lib/metadata";
+import type { Metadata } from "next";
+import { getI18n, getLocale } from "@/lib/i18n";
+import {
+  buildPageMetadata,
+  disclosureMetaDescription,
+  disclosureMetaTitle,
+} from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 import styles from "../policy.module.css";
 
-export const metadata = buildMetadata({
-  title: "Affiliate Disclosure",
-  description:
-    "DealStoker affiliate disclosure for Amazon Associates (United States).",
-  path: "/disclosure",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return buildPageMetadata({
+    title: disclosureMetaTitle(locale),
+    description: disclosureMetaDescription(locale),
+    path: "/disclosure",
+    locale,
+  });
+}
 
 export default async function DisclosurePage() {
   const { t } = await getI18n();

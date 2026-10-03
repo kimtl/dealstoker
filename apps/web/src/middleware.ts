@@ -4,6 +4,7 @@ import {
   isLocale,
   LOCALE_COOKIE,
   LOCALE_HEADER,
+  LOCALE_QUERY,
 } from "@/lib/i18n/locale";
 
 const CANONICAL_HOST = "www.dealstoker.com";
@@ -19,7 +20,7 @@ function requestHost(request: NextRequest): string {
 /**
  * Force apex → www so crawlers never index duplicate hosts.
  * Preserves path + query (e.g. /c/electronics?sort=newest).
- * Also stamps detected locale for server components.
+ * Honors ?hl=ko|en for crawlable locale URLs, then cookie / Accept-Language.
  */
 export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -56,10 +57,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const hl = request.nextUrl.searchParams.get(LOCALE_QUERY);
   const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value;
   const locale = detectLocale(
     request.headers.get("accept-language"),
     cookieLocale,
+    hl,
   );
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(LOCALE_HEADER, locale);
@@ -69,9 +72,11 @@ export function middleware(request: NextRequest) {
   });
   response.headers.set(LOCALE_HEADER, locale);
 
-  // Persist detected locale only when user has not chosen one yet.
+  // Persist ?hl= choice always; otherwise auto-set when cookie unset.
   // Skip /api/locale — that route sets the cookie itself on language switch.
-  if (!isLocale(cookieLocale) && pathname !== "/api/locale") {
+  const shouldPersist =
+    pathname !== "/api/locale" && (isLocale(hl) || !isLocale(cookieLocale));
+  if (shouldPersist) {
     response.cookies.set(LOCALE_COOKIE, locale, {
       path: "/",
       maxAge: 60 * 60 * 24 * 365,

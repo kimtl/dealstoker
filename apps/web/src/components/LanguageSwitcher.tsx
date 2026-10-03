@@ -1,7 +1,9 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import type { Locale } from "@/lib/i18n/locale";
+import { withLocaleQuery } from "@/lib/i18n/locale";
 import type { Messages } from "@/lib/i18n/messages";
 import styles from "./LanguageSwitcher.module.css";
 
@@ -12,31 +14,30 @@ type Props = {
 
 export function LanguageSwitcher({ locale, t }: Props) {
   const pathname = usePathname() || "/";
+  const searchParams = useSearchParams();
+  const search = searchParams?.toString() || "";
 
   return (
     <div className={styles.wrap} aria-label={t.language}>
       <span className={styles.label}>{t.language}</span>
-      <form className={styles.form} action="/api/locale" method="post">
-        <input type="hidden" name="redirect" value={pathname} />
-        <button
-          type="submit"
-          name="locale"
-          value="en"
+      <div className={styles.form} role="group">
+        <Link
+          href={withLocaleQuery(pathname, search, "en")}
           className={locale === "en" ? styles.active : styles.button}
-          aria-pressed={locale === "en"}
+          hrefLang="en"
+          aria-current={locale === "en" ? "true" : undefined}
         >
           {t.languageEn}
-        </button>
-        <button
-          type="submit"
-          name="locale"
-          value="ko"
+        </Link>
+        <Link
+          href={withLocaleQuery(pathname, search, "ko")}
           className={locale === "ko" ? styles.active : styles.button}
-          aria-pressed={locale === "ko"}
+          hrefLang="ko"
+          aria-current={locale === "ko" ? "true" : undefined}
         >
           {t.languageKo}
-        </button>
-      </form>
+        </Link>
+      </div>
     </div>
   );
 }

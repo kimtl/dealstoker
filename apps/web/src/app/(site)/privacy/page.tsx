@@ -1,13 +1,22 @@
-import { formatMessage, getI18n } from "@/lib/i18n";
-import { buildMetadata } from "@/lib/metadata";
+import type { Metadata } from "next";
+import { formatMessage, getI18n, getLocale } from "@/lib/i18n";
+import {
+  buildPageMetadata,
+  privacyMetaDescription,
+  privacyMetaTitle,
+} from "@/lib/seo";
 import { SITE_DOMAIN, SITE_NAME } from "@/lib/site";
 import styles from "../policy.module.css";
 
-export const metadata = buildMetadata({
-  title: "Privacy Policy",
-  description: `Privacy practices for ${SITE_NAME} (${SITE_DOMAIN}).`,
-  path: "/privacy",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return buildPageMetadata({
+    title: privacyMetaTitle(locale),
+    description: privacyMetaDescription(locale),
+    path: "/privacy",
+    locale,
+  });
+}
 
 export default async function PrivacyPage() {
   const { t } = await getI18n();
@@ -19,7 +28,7 @@ export default async function PrivacyPage() {
         <p className={styles.updated}>{t.privacyLead}</p>
         <p>{formatMessage(t.privacyBody, { domain: SITE_DOMAIN })}</p>
         <p>
-          <a href="mailto:privacy@dealstoker.com">privacy@dealstoker.com</a> ·{" "}
+          <a href={`mailto:privacy@${SITE_DOMAIN}`}>privacy@{SITE_DOMAIN}</a> ·{" "}
           <a href="/contact">{t.contact}</a>
         </p>
       </article>

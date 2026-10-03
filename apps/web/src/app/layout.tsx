@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope, Noto_Sans_KR } from "next/font/google";
-import { buildMetadata } from "@/lib/metadata";
 import { getLocale } from "@/lib/i18n";
-import { homeMetaDescription, homeMetaTitle } from "@/lib/seo";
-import { SITE_NAME } from "@/lib/site";
+import {
+  buildPageMetadata,
+  homeMetaDescription,
+  homeMetaKeywords,
+  homeMetaTitle,
+} from "@/lib/seo";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -25,18 +28,16 @@ const notoSansKr = Noto_Sans_KR({
   display: "swap",
 });
 
-export const metadata: Metadata = buildMetadata({
-  title: homeMetaTitle(),
-  description: homeMetaDescription(),
-  path: "/",
-  keywords: [
-    "Amazon deals",
-    "best Amazon deals today",
-    "Amazon price drops",
-    "US Amazon discounts",
-    SITE_NAME,
-  ],
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return buildPageMetadata({
+    title: homeMetaTitle(locale),
+    description: homeMetaDescription(locale),
+    path: "/",
+    keywords: homeMetaKeywords(locale),
+    locale,
+  });
+}
 
 export default async function RootLayout({
   children,

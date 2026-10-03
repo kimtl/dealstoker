@@ -72,6 +72,7 @@ async function buildFallbackSitemapXml(): Promise<string> {
   ];
 
   addUrl(parts, `${siteUrl}/`, now, "daily", "1.0");
+  addUrl(parts, `${siteUrl}/?hl=ko`, now, "daily", "0.9");
   for (const path of ["/about", "/search", "/disclosure", "/privacy", "/contact"]) {
     addUrl(
       parts,
@@ -79,6 +80,13 @@ async function buildFallbackSitemapXml(): Promise<string> {
       now,
       path === "/search" ? "weekly" : "monthly",
       path === "/search" ? "0.5" : "0.4",
+    );
+    addUrl(
+      parts,
+      `${siteUrl}${path}?hl=ko`,
+      now,
+      path === "/search" ? "weekly" : "monthly",
+      path === "/search" ? "0.45" : "0.35",
     );
   }
 
@@ -92,23 +100,40 @@ async function buildFallbackSitemapXml(): Promise<string> {
         "daily",
         "0.8",
       );
+      addUrl(
+        parts,
+        `${siteUrl}/c/${category.slug}?hl=ko`,
+        parseDate(category.updatedAt) || now,
+        "daily",
+        "0.7",
+      );
     }
   } catch {
     for (const slug of ["home-kitchen", "electronics", "outdoor-sports"]) {
       addUrl(parts, `${siteUrl}/c/${slug}`, now, "daily", "0.8");
+      addUrl(parts, `${siteUrl}/c/${slug}?hl=ko`, now, "daily", "0.7");
     }
   }
 
   try {
     const products = await fetchPublishedProducts();
     for (const product of products) {
+      const lastmod =
+        parseDate(product.updatedAt) || parseDate(product.publishedAt) || now;
       addUrl(
         parts,
         `${siteUrl}/p/${product.slug}`,
-        parseDate(product.updatedAt) || parseDate(product.publishedAt) || now,
+        lastmod,
         "daily",
         product.featured ? "0.85" : "0.7",
         product.imageUrl,
+      );
+      addUrl(
+        parts,
+        `${siteUrl}/p/${product.slug}?hl=ko`,
+        lastmod,
+        "daily",
+        product.featured ? "0.75" : "0.6",
       );
     }
   } catch {
