@@ -3,7 +3,6 @@ import { getSiteUrl } from "@/lib/site";
 import type { ProductSummary } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 300;
 
 function escapeXml(value: string): string {
   return value

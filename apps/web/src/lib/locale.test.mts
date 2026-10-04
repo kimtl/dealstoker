@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   detectLocale,
   localizedAbsoluteUrl,
+  stripLocaleQuery,
   withLocaleQuery,
 } from "./i18n/locale.ts";
 
@@ -58,9 +59,15 @@ test("localizedAbsoluteUrl adds hl only for Korean", () => {
   );
 });
 
-test("withLocaleQuery preserves other params", () => {
+test("withLocaleQuery preserves other params and always sets hl", () => {
   assert.equal(withLocaleQuery("/search", "q=ninja", "ko"), "/search?q=ninja&hl=ko");
-  assert.equal(withLocaleQuery("/search", "q=ninja&hl=ko", "en"), "/search?q=ninja");
+  assert.equal(withLocaleQuery("/search", "q=ninja&hl=ko", "en"), "/search?q=ninja&hl=en");
   assert.equal(withLocaleQuery("/", "", "ko"), "/?hl=ko");
-  assert.equal(withLocaleQuery("/", "hl=ko", "en"), "/");
+  assert.equal(withLocaleQuery("/", "hl=ko", "en"), "/?hl=en");
+});
+
+test("stripLocaleQuery removes only hl", () => {
+  assert.equal(stripLocaleQuery("?hl=en"), "");
+  assert.equal(stripLocaleQuery("hl=ko&q=ninja"), "?q=ninja");
+  assert.equal(stripLocaleQuery(""), "");
 });

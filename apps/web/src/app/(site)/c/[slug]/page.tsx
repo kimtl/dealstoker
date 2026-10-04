@@ -5,7 +5,7 @@ import { BuyingGuideModalButton } from "@/components/BuyingGuideModalButton";
 import { DealList } from "@/components/DealList";
 import { FaqSection } from "@/components/FaqSection";
 import { JsonLd } from "@/components/JsonLd";
-import { getCategory, getCategoryProducts } from "@/lib/api";
+import { getCategory, getCategoryProducts, isApiNotFound } from "@/lib/api";
 import { getCategoryFaqs } from "@/lib/faq";
 import {
   buildBreadcrumbJsonLd,
@@ -84,7 +84,14 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   let category;
   try {
     category = await getCategory(slug);
-  } catch {
+  } catch (error) {
+    if (isApiNotFound(error)) {
+      notFound();
+    }
+    throw error;
+  }
+  // Deactivated categories vanish from nav/sitemap; keep them out of search too.
+  if (category.active === false) {
     notFound();
   }
 

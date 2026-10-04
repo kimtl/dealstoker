@@ -2,8 +2,8 @@ package com.dealstoker.api.service;
 
 import com.dealstoker.api.config.DealStokerProperties;
 import com.dealstoker.api.domain.Category;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -20,14 +20,14 @@ import java.util.Map;
 public class BuyingGuideGenerationService {
 
     private static final Logger log = LoggerFactory.getLogger(BuyingGuideGenerationService.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final JsonMapper MAPPER = JsonMapper.builder().build();
 
     private final DealStokerProperties properties;
     private final RestClient restClient;
 
     public BuyingGuideGenerationService(DealStokerProperties properties) {
         this.properties = properties;
-        this.restClient = RestClient.create();
+        this.restClient = AiRestClients.create();
     }
 
     public boolean isConfigured() {
@@ -123,10 +123,10 @@ public class BuyingGuideGenerationService {
         }
         JsonNode root = MAPPER.readTree(raw);
         JsonNode content = root.path("choices").path(0).path("message").path("content");
-        if (content.isMissingNode() || content.asText().isBlank()) {
+        if (content.isMissingNode() || content.asString("").isBlank()) {
             throw new IllegalArgumentException("AI returned no buying guide text");
         }
-        String text = content.asText().trim();
+        String text = content.asString().trim();
         if (text.length() > 8000) {
             text = text.substring(0, 8000);
         }

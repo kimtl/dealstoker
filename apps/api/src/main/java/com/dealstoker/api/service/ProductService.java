@@ -133,7 +133,7 @@ public class ProductService {
                 .orElseThrow(() -> new NotFoundException("Product not found: " + slug));
         Long categoryId = product.getPrimaryCategory() != null ? product.getPrimaryCategory().getId() : null;
         List<Product> related = categoryId == null
-                ? productRepository.findTop12ByStatusOrderByPublishedAtDesc(ProductStatus.PUBLISHED)
+                ? productRepository.findByStatusOrderByPublishedAtDesc(ProductStatus.PUBLISHED, PageRequest.of(0, 12))
                 : productRepository.findTop12ByStatusAndPrimaryCategoryIdAndIdNotOrderByPublishedAtDesc(
                         ProductStatus.PUBLISHED, categoryId, product.getId());
         return related.stream()
@@ -145,8 +145,9 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public List<ProductSummary> latestPublished(int limit) {
-        return productRepository.findTop12ByStatusOrderByPublishedAtDesc(ProductStatus.PUBLISHED).stream()
-                .limit(limit)
+        int size = Math.max(1, Math.min(limit, 200));
+        return productRepository.findByStatusOrderByPublishedAtDesc(ProductStatus.PUBLISHED, PageRequest.of(0, size))
+                .stream()
                 .map(ProductSummary::from)
                 .toList();
     }
@@ -283,12 +284,13 @@ public class ProductService {
                 ? uniqueSlug(Slugify.slugify(request.title()), creating ? null : product.getId())
                 : uniqueSlug(Slugify.slugify(request.slug()), creating ? null : product.getId());
 
+        String externalId = request.externalId().trim();
         if (creating) {
-            if (productRepository.existsBySourceAndExternalIdAndMarketplace(source, request.externalId(), marketplace)) {
+            if (productRepository.existsBySourceAndExternalIdAndMarketplace(source, externalId, marketplace)) {
                 throw new ConflictException("Product already exists for ASIN/marketplace");
             }
         } else if (productRepository.existsBySourceAndExternalIdAndMarketplaceAndIdNot(
-                source, request.externalId(), marketplace, product.getId())) {
+                source, externalId, marketplace, product.getId())) {
             throw new ConflictException("Product already exists for ASIN/marketplace");
         }
 
@@ -296,7 +298,7 @@ public class ProductService {
         ProductStatus status = request.status() != null ? request.status() : ProductStatus.DRAFT;
 
         product.setSource(source);
-        product.setExternalId(request.externalId().trim());
+        product.setExternalId(externalId);
         product.setMarketplace(marketplace);
         product.setTitle(request.title().trim());
         product.setSlug(slug);
@@ -372,14 +374,20 @@ public class ProductService {
         if (sort == null || sort.isBlank() || "newest".equalsIgnoreCase(sort)) {
             return Sort.by(Sort.Direction.DESC, "publishedAt");
         }
+        // Postgres sorts NULLs first on DESC; products without a price/rating
+        // (common for keyword imports) must not float to the top.
         if ("price_asc".equalsIgnoreCase(sort)) {
-            return Sort.by(Sort.Direction.ASC, "priceAmount");
+            return Sort.by(Sort.Order.asc("priceAmount").nullsLast(), Sort.Order.desc("publishedAt"));
         }
         if ("price_desc".equalsIgnoreCase(sort)) {
-            return Sort.by(Sort.Direction.DESC, "priceAmount");
+            return Sort.by(Sort.Order.desc("priceAmount").nullsLast(), Sort.Order.desc("publishedAt"));
         }
         if ("rating".equalsIgnoreCase(sort)) {
-            return Sort.by(Sort.Direction.DESC, "rating");
+            return Sort.by(
+                    Sort.Order.desc("rating").nullsLast(),
+                    Sort.Order.desc("reviewCount").nullsLast(),
+                    Sort.Order.desc("publishedAt")
+            );
         }
         return Sort.by(Sort.Direction.DESC, "publishedAt");
     }

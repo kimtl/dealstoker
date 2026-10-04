@@ -25,6 +25,8 @@ public class RedirectController {
         String target = clickTrackingService.trackAndBuildRedirect(slug, request);
         return ResponseEntity.status(HttpStatus.FOUND)
                 .header(HttpHeaders.LOCATION, target)
+                // A cached redirect would bypass click logging.
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .build();
     }
 }

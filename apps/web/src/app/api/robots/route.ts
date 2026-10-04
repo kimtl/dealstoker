@@ -1,7 +1,6 @@
 import { getSiteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 3600;
 
 function robotsBody(): string {
   const siteUrl = getSiteUrl();

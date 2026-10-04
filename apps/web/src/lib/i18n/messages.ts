@@ -123,6 +123,11 @@ export type Messages = {
 
   noDealsYet: string;
   closeBuyingGuide: string;
+
+  notFoundTitle: string;
+  notFoundBody: string;
+  notFoundHome: string;
+  notFoundBrowse: string;
 };
 
 const en: Messages = {
@@ -271,6 +276,10 @@ const en: Messages = {
 
   noDealsYet: "No deals yet.",
   closeBuyingGuide: "Close buying guide",
+  notFoundTitle: "Page not found",
+  notFoundBody: "That page is gone or the product is unpublished.",
+  notFoundHome: "Back to the homepage",
+  notFoundBrowse: "Browse all deals",
 };
 
 const ko: Messages = {
@@ -416,6 +425,10 @@ const ko: Messages = {
 
   noDealsYet: "딜이 아직 없습니다.",
   closeBuyingGuide: "구매 가이드 닫기",
+  notFoundTitle: "페이지를 찾을 수 없습니다",
+  notFoundBody: "페이지가 삭제되었거나 상품이 비공개 상태입니다.",
+  notFoundHome: "홈으로 돌아가기",
+  notFoundBrowse: "전체 딜 보기",
 };
 
 export const dictionaries: Record<Locale, Messages> = { en, ko };
@@ -430,6 +443,7 @@ export const CATEGORY_NAME_KO: Record<string, string> = {
   Pets: "반려동물",
   "Office & School": "사무 & 학용",
   "Tools & Home Improvement": "공구 & 홈 임프루브먼트",
+  "Fashion & Accessories": "패션 & 액세서리",
 };
 
 export function formatMessage(

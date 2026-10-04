@@ -35,9 +35,14 @@ public class CategoryService {
                 .toList();
     }
 
+    /** Public lookup: deactivated categories are hidden like unpublished products. */
     @Transactional(readOnly = true)
     public CategoryResponse getBySlug(String slug) {
-        return CategoryResponse.from(requireBySlug(slug));
+        Category category = requireBySlug(slug);
+        if (!category.isActive()) {
+            throw new NotFoundException("Category not found: " + slug);
+        }
+        return CategoryResponse.from(category);
     }
 
     @Transactional(readOnly = true)
@@ -88,6 +93,9 @@ public class CategoryService {
         }
 
         if (request.parentId() != null) {
+            if (!creating && request.parentId().equals(category.getId())) {
+                throw new IllegalArgumentException("A category cannot be its own parent");
+            }
             category.setParent(requireById(request.parentId()));
         } else {
             category.setParent(null);

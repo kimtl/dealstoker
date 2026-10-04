@@ -8,14 +8,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RailwayDatabaseUrlsTest {
 
+    /** Every key applyFromEnvironment() may set — leaking any of them would change the
+     *  credentials seen by other tests (e.g. the Spring context test) in the same JVM. */
+    private static final String[] MUTATED_PROPERTIES = {
+            "DATABASE_URL", "SPRING_DATASOURCE_URL", "JDBC_DATABASE_URL",
+            "DATABASE_USERNAME", "SPRING_DATASOURCE_USERNAME",
+            "DATABASE_PASSWORD", "SPRING_DATASOURCE_PASSWORD",
+            "spring.datasource.url", "spring.datasource.username", "spring.datasource.password",
+            RailwayDatabaseUrls.JDBC_URL_PROPERTY,
+            RailwayDatabaseUrls.JDBC_USER_PROPERTY,
+            RailwayDatabaseUrls.JDBC_PASSWORD_PROPERTY,
+    };
+
     @AfterEach
     void clearProps() {
-        System.clearProperty("DATABASE_URL");
-        System.clearProperty("SPRING_DATASOURCE_URL");
-        System.clearProperty(RailwayDatabaseUrls.JDBC_URL_PROPERTY);
-        System.clearProperty(RailwayDatabaseUrls.JDBC_USER_PROPERTY);
-        System.clearProperty(RailwayDatabaseUrls.JDBC_PASSWORD_PROPERTY);
-        System.clearProperty("spring.datasource.url");
+        for (String key : MUTATED_PROPERTIES) {
+            System.clearProperty(key);
+        }
     }
 
     @Test

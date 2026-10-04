@@ -113,7 +113,36 @@ public class SeoController {
         );
     }
 
+    /**
+     * Emits the English URL plus its crawlable Korean variant (?hl=ko), matching
+     * the hreflang pairs the web app renders. Korean gets a slightly lower priority.
+     */
     private void addUrl(
+            StringBuilder xml,
+            String loc,
+            Instant lastmod,
+            String changeFreq,
+            String priority,
+            String imageUrl,
+            String imageTitle
+    ) {
+        addSingleUrl(xml, loc, lastmod, changeFreq, priority, imageUrl, imageTitle);
+        addSingleUrl(xml, loc + "?hl=ko", lastmod, changeFreq, lowerPriority(priority), null, null);
+    }
+
+    private static String lowerPriority(String priority) {
+        if (priority == null) {
+            return null;
+        }
+        try {
+            double value = Double.parseDouble(priority) - 0.1;
+            return String.format(java.util.Locale.ROOT, "%.1f", Math.max(0.1, value));
+        } catch (NumberFormatException ex) {
+            return priority;
+        }
+    }
+
+    private void addSingleUrl(
             StringBuilder xml,
             String loc,
             Instant lastmod,

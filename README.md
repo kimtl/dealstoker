@@ -63,6 +63,18 @@ Admin: `http://localhost:3000/admin/login`
 
 Associates re-application and PA-API auto-ingest are **Phase 1.5 / Phase 2**.
 
+## Tests & checks
+
+```bash
+# API — the Spring context test needs the local Postgres from docker compose
+cd apps/api && ./gradlew test
+
+# Web
+cd apps/web && npm run lint && npm run test:unit && npm run build
+```
+
+The live Amazon crawl test only runs with `AMAZON_LIVE_CRAWL=1`.
+
 ## Configuration
 
 See `.env.example`. Important knobs:

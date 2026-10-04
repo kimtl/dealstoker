@@ -53,7 +53,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findTop12ByStatusAndPrimaryCategoryIdAndIdNotOrderByPublishedAtDesc(
             ProductStatus status, Long categoryId, Long productId);
 
-    List<Product> findTop12ByStatusOrderByPublishedAtDesc(ProductStatus status);
+    List<Product> findByStatusOrderByPublishedAtDesc(ProductStatus status, Pageable pageable);
 
     List<Product> findTop5ByStatusAndFeaturedTrueOrderByFeaturedRankAscPublishedAtDesc(ProductStatus status);
 

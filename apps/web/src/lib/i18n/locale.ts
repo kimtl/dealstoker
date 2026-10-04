@@ -60,7 +60,13 @@ export function localizedAbsoluteUrl(
   return `${url.origin}${url.pathname}${search ? `?${search}` : ""}`;
 }
 
-/** Relative href for in-app language links (keeps other query params). */
+/**
+ * Relative href for in-app language links (keeps other query params).
+ * Always sets ?hl=<locale> explicitly so the proxy can persist the choice:
+ * a bare URL without ?hl would otherwise fall back to the existing cookie
+ * and an "EN" click could never override a stored Korean preference.
+ * The proxy strips ?hl=en again (English canonical URLs carry no ?hl).
+ */
 export function withLocaleQuery(
   pathname: string,
   currentSearch: string,
@@ -69,12 +75,18 @@ export function withLocaleQuery(
   const params = new URLSearchParams(
     currentSearch.startsWith("?") ? currentSearch.slice(1) : currentSearch,
   );
-  if (locale === "ko") {
-    params.set(LOCALE_QUERY, "ko");
-  } else {
-    params.delete(LOCALE_QUERY);
-  }
+  params.set(LOCALE_QUERY, locale);
   const q = params.toString();
   const path = pathname || "/";
   return q ? `${path}?${q}` : path;
+}
+
+/** Remove ?hl= from a search string; returns "" or "?a=b". */
+export function stripLocaleQuery(search: string): string {
+  const params = new URLSearchParams(
+    search.startsWith("?") ? search.slice(1) : search,
+  );
+  params.delete(LOCALE_QUERY);
+  const q = params.toString();
+  return q ? `?${q}` : "";
 }
