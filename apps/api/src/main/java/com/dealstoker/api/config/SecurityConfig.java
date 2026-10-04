@@ -58,7 +58,7 @@ public class SecurityConfig {
                                 "/api/v1/sitemap.xml",
                                 "/go/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/analytics/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/analytics/**", "/api/v1/catalog/views").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/**").permitAll()
                         .anyRequest().authenticated()
