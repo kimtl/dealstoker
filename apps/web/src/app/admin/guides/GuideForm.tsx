@@ -1,0 +1,524 @@
+"use client";
+
+import { useEffect, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import {
+  adminCreateGuide,
+  adminDeleteGuide,
+  adminDraftGuide,
+  adminListCategories,
+  adminListCategoryProducts,
+  adminTranslateGuide,
+  adminUpdateGuide,
+} from "@/lib/admin-api";
+import type {
+  Category,
+  GuideDetail,
+  GuideRequest,
+  GuideStatus,
+  ProductSummary,
+} from "@/lib/types";
+import styles from "../admin.module.css";
+
+type FormState = {
+  title: string;
+  slug: string;
+  excerpt: string;
+  body: string;
+  titleKo: string;
+  excerptKo: string;
+  bodyKo: string;
+  categoryId: string;
+  coverImageUrl: string;
+  authorName: string;
+  status: GuideStatus;
+  seoTitle: string;
+  seoDescription: string;
+};
+
+const EMPTY: FormState = {
+  title: "",
+  slug: "",
+  excerpt: "",
+  body: "",
+  titleKo: "",
+  excerptKo: "",
+  bodyKo: "",
+  categoryId: "",
+  coverImageUrl: "",
+  authorName: "DealStoker curation team",
+  status: "DRAFT",
+  seoTitle: "",
+  seoDescription: "",
+};
+
+function toForm(guide: GuideDetail | null): FormState {
+  if (!guide) return EMPTY;
+  return {
+    title: guide.title,
+    slug: guide.slug,
+    excerpt: guide.excerpt || "",
+    body: guide.body,
+    titleKo: guide.titleKo || "",
+    excerptKo: guide.excerptKo || "",
+    bodyKo: guide.bodyKo || "",
+    categoryId: guide.categoryId ? String(guide.categoryId) : "",
+    coverImageUrl: guide.coverImageUrl || "",
+    authorName: guide.authorName || "",
+    status: guide.status,
+    seoTitle: guide.seoTitle || "",
+    seoDescription: guide.seoDescription || "",
+  };
+}
+
+function toRequest(form: FormState): GuideRequest {
+  const clean = (value: string) => value.trim() || null;
+  return {
+    title: form.title.trim(),
+    slug: clean(form.slug),
+    excerpt: clean(form.excerpt),
+    body: form.body.trim(),
+    titleKo: clean(form.titleKo),
+    excerptKo: clean(form.excerptKo),
+    bodyKo: clean(form.bodyKo),
+    categoryId: form.categoryId ? Number(form.categoryId) : null,
+    coverImageUrl: clean(form.coverImageUrl),
+    authorName: clean(form.authorName),
+    status: form.status,
+    seoTitle: clean(form.seoTitle),
+    seoDescription: clean(form.seoDescription),
+  };
+}
+
+export function GuideForm({ guide }: { guide: GuideDetail | null }) {
+  const router = useRouter();
+  const [form, setForm] = useState<FormState>(() => toForm(guide));
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  // AI helpers (nothing is saved until the form is submitted).
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiSlugs, setAiSlugs] = useState<string[]>([]);
+  const [drafting, setDrafting] = useState(false);
+  const [translating, setTranslating] = useState(false);
+  const [categoryProducts, setCategoryProducts] = useState<ProductSummary[]>([]);
+  const [pickedSlug, setPickedSlug] = useState("");
+
+  useEffect(() => {
+    adminListCategories()
+      .then(setCategories)
+      .catch((err) =>
+        setError(err instanceof Error ? err.message : "Failed to load categories"),
+      );
+  }, []);
+
+  const selectedCategory = categories.find(
+    (category) => String(category.id) === form.categoryId,
+  );
+
+  useEffect(() => {
+    if (!selectedCategory) {
+      setCategoryProducts([]);
+      return;
+    }
+    let cancelled = false;
+    adminListCategoryProducts(selectedCategory.slug)
+      .then((page) => {
+        if (!cancelled) setCategoryProducts(page.items);
+      })
+      .catch(() => {
+        if (!cancelled) setCategoryProducts([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCategory]);
+
+  function update<K extends keyof FormState>(key: K, value: FormState[K]) {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function insertShortcode(slug: string) {
+    if (!slug) return;
+    const shortcode = `{{product:${slug}}}`;
+    setForm((prev) => {
+      if (prev.body.includes(shortcode)) return prev;
+      const body = prev.body.trimEnd();
+      return { ...prev, body: body ? `${body}\n\n${shortcode}\n` : `${shortcode}\n` };
+    });
+    setPickedSlug("");
+  }
+
+  function toggleAiSlug(slug: string) {
+    setAiSlugs((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
+    );
+  }
+
+  async function onDraft() {
+    if (!form.categoryId && !aiTopic.trim()) {
+      setError("Pick a category or enter a topic before drafting.");
+      return;
+    }
+    if (
+      form.body.trim() &&
+      !confirm("Replace the current English title, excerpt and body with the AI draft?")
+    ) {
+      return;
+    }
+    setDrafting(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const draft = await adminDraftGuide({
+        categoryId: form.categoryId ? Number(form.categoryId) : null,
+        topic: aiTopic.trim() || null,
+        productSlugs: aiSlugs,
+        prompt: aiPrompt.trim() || null,
+      });
+      setForm((prev) => ({
+        ...prev,
+        title: draft.title || prev.title,
+        excerpt: draft.excerpt || prev.excerpt,
+        body: draft.body,
+      }));
+      setMessage("Draft generated — review every claim before publishing.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "AI draft failed");
+    } finally {
+      setDrafting(false);
+    }
+  }
+
+  async function onTranslate() {
+    if (!form.body.trim()) {
+      setError("Write the English body first.");
+      return;
+    }
+    if (
+      form.bodyKo.trim() &&
+      !confirm("Replace the current Korean title, excerpt and body with the AI translation?")
+    ) {
+      return;
+    }
+    setTranslating(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const result = await adminTranslateGuide({
+        title: form.title,
+        excerpt: form.excerpt || null,
+        body: form.body,
+      });
+      setForm((prev) => ({
+        ...prev,
+        titleKo: result.titleKo || prev.titleKo,
+        excerptKo: result.excerptKo || prev.excerptKo,
+        bodyKo: result.bodyKo,
+      }));
+      setMessage("Korean translation drafted — proofread before publishing.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "AI translation failed");
+    } finally {
+      setTranslating(false);
+    }
+  }
+
+  async function onSubmit(event: FormEvent) {
+    event.preventDefault();
+    setError(null);
+    setMessage(null);
+    setSaving(true);
+    try {
+      const body = toRequest(form);
+      if (guide) {
+        const saved = await adminUpdateGuide(guide.id, body);
+        setForm(toForm(saved));
+        setMessage(`Saved. Public URL: /guides/${saved.slug}`);
+      } else {
+        const created = await adminCreateGuide(body);
+        router.replace(`/admin/guides/${created.id}`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function onDelete() {
+    if (!guide) return;
+    if (!confirm("Delete this guide? This cannot be undone.")) return;
+    try {
+      await adminDeleteGuide(guide.id);
+      router.replace("/admin/guides");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Delete failed");
+    }
+  }
+
+  return (
+    <form className={`${styles.form} ${styles.formWide}`} onSubmit={onSubmit}>
+      {error ? <p className={styles.error}>{error}</p> : null}
+      {message ? <p className={styles.okNote}>{message}</p> : null}
+
+      <div className={styles.row}>
+        <label>
+          Title (English)
+          <input
+            value={form.title}
+            onChange={(e) => update("title", e.target.value)}
+            required
+            maxLength={300}
+          />
+        </label>
+        <label>
+          Slug
+          <input
+            value={form.slug}
+            onChange={(e) => update("slug", e.target.value)}
+            placeholder="auto from title if empty"
+            maxLength={220}
+          />
+        </label>
+      </div>
+
+      <label>
+        Excerpt (English, shown on cards and as the default meta description)
+        <textarea
+          value={form.excerpt}
+          onChange={(e) => update("excerpt", e.target.value)}
+          rows={2}
+          maxLength={600}
+        />
+      </label>
+
+      <div className={styles.importBox}>
+        <h3 className={styles.sectionTitle} style={{ marginTop: 0 }}>
+          AI first draft (optional)
+        </h3>
+        <p className={styles.hint}>
+          Uses the selected category below plus a topic. Pick products to embed as
+          cards; the draft places <code>{"{{product:slug}}"}</code> shortcodes for them.
+        </p>
+        <label>
+          Topic
+          <input
+            value={aiTopic}
+            onChange={(e) => setAiTopic(e.target.value)}
+            placeholder="e.g. How to choose an air fryer for a family of four"
+            maxLength={300}
+          />
+        </label>
+        <label>
+          Extra instructions (optional)
+          <textarea
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            rows={2}
+            placeholder="e.g. budget under $100, compare basket vs oven style"
+          />
+        </label>
+        {categoryProducts.length > 0 ? (
+          <div>
+            <p className={styles.hint}>Products to reference ({aiSlugs.length} selected):</p>
+            <div className={styles.importActions}>
+              {categoryProducts.slice(0, 30).map((product) => (
+                <label key={product.id} style={{ display: "flex", gap: "0.4rem", fontWeight: 500 }}>
+                  <input
+                    type="checkbox"
+                    checked={aiSlugs.includes(product.slug)}
+                    onChange={() => toggleAiSlug(product.slug)}
+                  />
+                  <span>{product.title}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ) : form.categoryId ? (
+          <p className={styles.hint}>No published products in this category yet.</p>
+        ) : (
+          <p className={styles.hint}>Select a category to list products to reference.</p>
+        )}
+        <div className={styles.actions}>
+          <button
+            type="button"
+            className={styles.buttonSecondary}
+            onClick={onDraft}
+            disabled={drafting}
+          >
+            {drafting ? "Drafting…" : "Generate draft with AI"}
+          </button>
+        </div>
+      </div>
+
+      <label>
+        Body (English, Markdown)
+        <textarea
+          value={form.body}
+          onChange={(e) => update("body", e.target.value)}
+          rows={22}
+          required
+          placeholder={"## What to check before you buy\n\n- Point one\n- Point two\n\nLinks to Amazon get rel=sponsored automatically."}
+          style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}
+        />
+      </label>
+      <p className={styles.hint}>
+        Markdown (GFM) is supported: headings (##), lists, tables, links, images.
+        Raw HTML is not rendered. Do not paste Amazon product descriptions verbatim.
+        Put <code>{"{{product:slug}}"}</code> on its own line to embed a product card.
+      </p>
+      {categoryProducts.length > 0 ? (
+        <div className={styles.row}>
+          <label>
+            Insert product card
+            <select value={pickedSlug} onChange={(e) => insertShortcode(e.target.value)}>
+              <option value="">Choose a product…</option>
+              {categoryProducts.map((product) => (
+                <option key={product.id} value={product.slug}>
+                  {product.title}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      ) : null}
+
+      <div className={styles.row}>
+        <label>
+          Category
+          <select
+            value={form.categoryId}
+            onChange={(e) => update("categoryId", e.target.value)}
+          >
+            <option value="">(none)</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Status
+          <select
+            value={form.status}
+            onChange={(e) => update("status", e.target.value as GuideStatus)}
+          >
+            <option value="DRAFT">DRAFT</option>
+            <option value="PUBLISHED">PUBLISHED</option>
+          </select>
+        </label>
+      </div>
+
+      <div className={styles.row}>
+        <label>
+          Cover image URL (optional)
+          <input
+            value={form.coverImageUrl}
+            onChange={(e) => update("coverImageUrl", e.target.value)}
+            placeholder="https://…"
+          />
+        </label>
+        <label>
+          Author name
+          <input
+            value={form.authorName}
+            onChange={(e) => update("authorName", e.target.value)}
+            maxLength={120}
+          />
+        </label>
+      </div>
+
+      <h3 className={styles.sectionTitle}>Korean version (optional)</h3>
+      <p className={styles.hint}>
+        Leave empty to show the English guide with an &quot;English only&quot; notice on ?hl=ko.
+      </p>
+      <div className={styles.actions}>
+        <button
+          type="button"
+          className={styles.buttonSecondary}
+          onClick={onTranslate}
+          disabled={translating}
+        >
+          {translating ? "Translating…" : "Translate English → Korean with AI"}
+        </button>
+      </div>
+      <label>
+        Title (Korean)
+        <input
+          value={form.titleKo}
+          onChange={(e) => update("titleKo", e.target.value)}
+          maxLength={300}
+        />
+      </label>
+      <label>
+        Excerpt (Korean)
+        <textarea
+          value={form.excerptKo}
+          onChange={(e) => update("excerptKo", e.target.value)}
+          rows={2}
+          maxLength={600}
+        />
+      </label>
+      <label>
+        Body (Korean, Markdown)
+        <textarea
+          value={form.bodyKo}
+          onChange={(e) => update("bodyKo", e.target.value)}
+          rows={14}
+          style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}
+        />
+      </label>
+
+      <h3 className={styles.sectionTitle}>SEO (optional)</h3>
+      <label>
+        SEO title
+        <input
+          value={form.seoTitle}
+          onChange={(e) => update("seoTitle", e.target.value)}
+          maxLength={255}
+          placeholder="Defaults to the title + site name"
+        />
+      </label>
+      <label>
+        SEO description
+        <textarea
+          value={form.seoDescription}
+          onChange={(e) => update("seoDescription", e.target.value)}
+          rows={2}
+          maxLength={500}
+          placeholder="Defaults to the excerpt"
+        />
+      </label>
+
+      <div className={styles.actions}>
+        <button className={styles.button} type="submit" disabled={saving}>
+          {saving ? "Saving…" : guide ? "Save changes" : "Create guide"}
+        </button>
+        {guide ? (
+          <>
+            <a
+              className={styles.buttonSecondary}
+              href={`/guides/${guide.slug}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              View public page
+            </a>
+            <button
+              className={styles.buttonDanger}
+              type="button"
+              onClick={onDelete}
+            >
+              Delete
+            </button>
+          </>
+        ) : null}
+      </div>
+    </form>
+  );
+}

@@ -501,3 +501,39 @@ export function buildPageMetadata({
       : { index: true, follow: true },
   };
 }
+
+export function buildArticleJsonLd(input: {
+  title: string;
+  description: string;
+  path: string;
+  image?: string | null;
+  authorName?: string | null;
+  publishedAt?: string | null;
+  updatedAt?: string | null;
+  locale?: Locale;
+}): Record<string, unknown> {
+  const siteUrl = getSiteUrl();
+  const url = localizedAbsoluteUrl(siteUrl, input.path, input.locale ?? "en");
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: clampText(input.title, 110),
+    description: clampText(sanitizeMetaCopy(input.description), 300),
+    url,
+    mainEntityOfPage: url,
+    inLanguage: schemaLanguage(input.locale ?? "en"),
+    ...(input.image ? { image: [input.image] } : {}),
+    ...(input.publishedAt ? { datePublished: input.publishedAt } : {}),
+    ...(input.updatedAt ? { dateModified: input.updatedAt } : {}),
+    author: {
+      "@type": "Organization",
+      name: input.authorName?.trim() || SITE_NAME,
+      url: siteUrl,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: siteUrl,
+    },
+  };
+}

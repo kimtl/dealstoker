@@ -6,6 +6,13 @@ import type {
   AnalyticsSummary,
   Category,
   CategoryRequest,
+  GuideDetail,
+  GuideDraftRequest,
+  GuideDraftResponse,
+  GuideRequest,
+  GuideTranslateResponse,
+  GuideStatus,
+  GuideSummary,
   KeywordRegisterResponse,
   KeywordSearchResponse,
   PageResponse,
@@ -284,4 +291,77 @@ export async function adminAnalyticsSummary(
   days = 7,
 ): Promise<AnalyticsSummary> {
   return adminFetch(`/api/v1/admin/analytics/summary?days=${days}`);
+}
+
+// ---------- guides ----------
+
+export async function adminListGuides(
+  params: { status?: GuideStatus; page?: number; size?: number } = {},
+): Promise<PageResponse<GuideSummary>> {
+  const search = new URLSearchParams();
+  if (params.status) search.set("status", params.status);
+  if (params.page !== undefined) search.set("page", String(params.page));
+  if (params.size !== undefined) search.set("size", String(params.size));
+  const qs = search.toString();
+  return adminFetch(`/api/v1/admin/guides${qs ? `?${qs}` : ""}`);
+}
+
+export async function adminGetGuide(id: number): Promise<GuideDetail> {
+  return adminFetch(`/api/v1/admin/guides/${id}`);
+}
+
+export async function adminCreateGuide(body: GuideRequest): Promise<GuideDetail> {
+  return adminFetch("/api/v1/admin/guides", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function adminUpdateGuide(
+  id: number,
+  body: GuideRequest,
+): Promise<GuideDetail> {
+  return adminFetch(`/api/v1/admin/guides/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function adminPublishGuide(id: number): Promise<GuideDetail> {
+  return adminFetch(`/api/v1/admin/guides/${id}/publish`, { method: "POST" });
+}
+
+export async function adminUnpublishGuide(id: number): Promise<GuideDetail> {
+  return adminFetch(`/api/v1/admin/guides/${id}/unpublish`, { method: "POST" });
+}
+
+export async function adminDeleteGuide(id: number): Promise<void> {
+  await adminFetch(`/api/v1/admin/guides/${id}`, { method: "DELETE" });
+}
+
+export async function adminDraftGuide(body: GuideDraftRequest): Promise<GuideDraftResponse> {
+  return adminFetch("/api/v1/admin/guides/draft", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function adminTranslateGuide(body: {
+  title: string;
+  excerpt?: string | null;
+  body: string;
+}): Promise<GuideTranslateResponse> {
+  return adminFetch("/api/v1/admin/guides/translate", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+/** Published products of a category, for the shortcode picker (public endpoint). */
+export async function adminListCategoryProducts(
+  categorySlug: string,
+): Promise<PageResponse<ProductSummary>> {
+  return adminFetch(
+    `/api/v1/products?category=${encodeURIComponent(categorySlug)}&size=100&sort=newest`,
+  );
 }

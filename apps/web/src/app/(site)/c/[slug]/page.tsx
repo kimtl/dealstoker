@@ -5,7 +5,9 @@ import { BuyingGuideModalButton } from "@/components/BuyingGuideModalButton";
 import { DealList } from "@/components/DealList";
 import { FaqSection } from "@/components/FaqSection";
 import { JsonLd } from "@/components/JsonLd";
-import { getCategory, getCategoryProducts, isApiNotFound } from "@/lib/api";
+import { getCategory, getCategoryProducts, getGuides, isApiNotFound } from "@/lib/api";
+import { GuideCard } from "@/components/GuideCard";
+import type { GuideSummary } from "@/lib/types";
 import { getCategoryFaqs } from "@/lib/faq";
 import {
   buildBreadcrumbJsonLd,
@@ -118,6 +120,13 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     { value: "rating", label: t.topRated },
   ];
 
+  let guides: GuideSummary[] = [];
+  try {
+    guides = (await getGuides({ category: slug, size: 6 })).items;
+  } catch {
+    guides = [];
+  }
+
   const faqs = getCategoryFaqs(category);
   const buyingGuide = category.buyingGuide?.trim() || "";
   const guideParagraphs = splitIntoParagraphs(buyingGuide);
@@ -228,6 +237,31 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
               <span />
             )}
           </nav>
+        ) : null}
+
+        {guides.length > 0 ? (
+          <section
+            id="guides"
+            className={styles.guidesSection}
+            aria-labelledby="guides-heading"
+          >
+            <div className={styles.guidesHeader}>
+              <h2 id="guides-heading" className={styles.guideTitle}>
+                {formatMessage(t.guidesForCategory, { name: localizedName })}
+              </h2>
+              <Link
+                href={locale === "ko" ? "/guides?hl=ko" : "/guides"}
+                className={styles.guidesAll}
+              >
+                {t.allGuides} →
+              </Link>
+            </div>
+            <div className={styles.guidesGrid}>
+              {guides.map((guide) => (
+                <GuideCard key={guide.id} guide={guide} showCategory={false} />
+              ))}
+            </div>
+          </section>
         ) : null}
 
         {guideParagraphs.length > 0 ? (

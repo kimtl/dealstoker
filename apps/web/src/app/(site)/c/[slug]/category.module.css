@@ -71,6 +71,38 @@
   white-space: pre-line;
 }
 
+.guidesSection {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 1rem;
+}
+
+.guidesHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.guidesHeader .guideTitle {
+  margin-bottom: 0;
+}
+
+.guidesAll {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--link);
+}
+
+.guidesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;

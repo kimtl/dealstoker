@@ -3,7 +3,9 @@ import Link from "next/link";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { DealList } from "@/components/DealList";
 import { JsonLd } from "@/components/JsonLd";
-import { getHome, getProducts } from "@/lib/api";
+import { getGuides, getHome, getProducts } from "@/lib/api";
+import { GuideCard } from "@/components/GuideCard";
+import type { GuideSummary } from "@/lib/types";
 import { formatMessage, getI18n, getLocale, localizeCategoryName } from "@/lib/i18n";
 import {
   buildItemListJsonLd,
@@ -63,6 +65,13 @@ export default async function HomePage() {
     } catch {
       // API may be offline during build/preview.
     }
+  }
+
+  let guides: GuideSummary[] = [];
+  try {
+    guides = (await getGuides({ size: 3 })).items;
+  } catch {
+    guides = [];
   }
 
   const listedForSchema = [
@@ -186,6 +195,34 @@ export default async function HomePage() {
               emptyMessage={t.emptyTopViews}
             />
           </section>
+
+          {guides.length > 0 ? (
+            <section
+              id="guides"
+              className={styles.feed}
+              aria-labelledby="guides-heading"
+            >
+              <div className={styles.feedHeader}>
+                <div>
+                  <h2 id="guides-heading" className={styles.feedTitle}>
+                    {t.latestGuides}
+                  </h2>
+                  <p className={styles.feedMeta}>{t.latestGuidesMeta}</p>
+                </div>
+                <Link
+                  href={locale === "ko" ? "/guides?hl=ko" : "/guides"}
+                  className={styles.feedMore}
+                >
+                  {t.allGuides} →
+                </Link>
+              </div>
+              <div className={styles.guideGrid}>
+                {guides.map((guide) => (
+                  <GuideCard key={guide.id} guide={guide} />
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <section
             id="deal-feed"

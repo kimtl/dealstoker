@@ -24,8 +24,9 @@ The site expects the Spring Boot API from `apps/api` on `API_BASE_URL` (default 
 
 ## Layout
 
-- `src/app/(site)` — public pages (home, category, product, search, policies)
-- `src/app/admin` — admin UI (Basic auth against the API via `/api/backend`)
+- `src/app/(site)` — public pages (home, category, product, search, guides, policies)
+- `src/app/(site)/guides` — editorial buying guides (`/guides`, `/guides/[slug]`); Markdown body via `components/GuideBody`, which turns `{{product:slug}}` shortcodes into product cards
+- `src/app/admin` — admin UI (Basic auth against the API via `/api/backend`); `/admin/guides` edits guides
 - `src/app/api/backend/[...path]` — runtime proxy to `API_BASE_URL/api/v1/*`
 - `src/app/go/[slug]` — affiliate redirect proxy (click logging happens in the API)
 - `src/proxy.ts` — apex→www redirect and locale detection (`?hl=`, cookie, Accept-Language)

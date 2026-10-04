@@ -1,6 +1,8 @@
 import { getApiBaseUrl } from "./site";
 import type {
   Category,
+  GuideDetail,
+  GuideSummary,
   HomeResponse,
   PageResponse,
   ProductDetail,
@@ -136,6 +138,26 @@ export async function getRelatedProducts(
     `/api/v1/products/${encodeURIComponent(slug)}/related`,
     { revalidate: 120 },
   );
+}
+
+export async function getGuides(
+  params: { category?: string; page?: number; size?: number } = {},
+): Promise<PageResponse<GuideSummary>> {
+  const search = new URLSearchParams();
+  if (params.category) search.set("category", params.category);
+  if (params.page !== undefined) search.set("page", String(params.page));
+  if (params.size !== undefined) search.set("size", String(params.size));
+  const qs = search.toString();
+  return apiFetch<PageResponse<GuideSummary>>(
+    `/api/v1/guides${qs ? `?${qs}` : ""}`,
+    { revalidate: 120 },
+  );
+}
+
+export async function getGuide(slug: string): Promise<GuideDetail> {
+  return apiFetch<GuideDetail>(`/api/v1/guides/${encodeURIComponent(slug)}`, {
+    revalidate: 120,
+  });
 }
 
 export async function getSitemapXml(): Promise<string | null> {

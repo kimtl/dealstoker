@@ -4,6 +4,7 @@ import com.dealstoker.api.config.DealStokerProperties;
 import com.dealstoker.api.domain.ProductStatus;
 import com.dealstoker.api.repository.CategoryRepository;
 import com.dealstoker.api.repository.ProductRepository;
+import com.dealstoker.api.service.GuideService;
 import com.dealstoker.api.service.ProductService;
 import com.dealstoker.api.web.dto.ProductDtos.ProductSummary;
 import org.springframework.data.domain.PageRequest;
@@ -26,17 +27,20 @@ public class SeoController {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final ProductService productService;
+    private final GuideService guideService;
 
     public SeoController(
             DealStokerProperties properties,
             CategoryRepository categoryRepository,
             ProductRepository productRepository,
-            ProductService productService
+            ProductService productService,
+            GuideService guideService
     ) {
         this.properties = properties;
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.productService = productService;
+        this.guideService = guideService;
     }
 
     @GetMapping(value = "/robots.txt", produces = MediaType.TEXT_PLAIN_VALUE)
@@ -98,6 +102,17 @@ public class SeoController {
                         product.getImageUrl(),
                         product.getTitle()
                 ));
+
+        addUrl(xml, base + "/guides", null, "weekly", "0.6", null, null);
+        guideService.publishedForSitemap(2000).forEach(guide -> addUrl(
+                xml,
+                base + "/guides/" + guide.getSlug(),
+                guide.getUpdatedAt() != null ? guide.getUpdatedAt() : guide.getPublishedAt(),
+                "weekly",
+                "0.7",
+                guide.getCoverImageUrl(),
+                guide.getTitle()
+        ));
 
         xml.append("</urlset>");
         return xml.toString();

@@ -147,6 +147,19 @@
   animation: slide-feed 560ms ease both;
 }
 
+.feedMore {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--link);
+  white-space: nowrap;
+}
+
+.guideGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
 .feedStack {
   display: grid;
   gap: 1.35rem;
