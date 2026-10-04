@@ -67,12 +67,16 @@ export function AnalyticsBeacon() {
       sessionKey,
     });
 
-    const url = `${API_PROXY_PREFIX}/api/v1/analytics/pageview`;
+    // Neutral path on purpose: "/analytics/pageview" matches common ad-block
+    // privacy lists, which silently dropped first-party view counts.
+    const url = `${API_PROXY_PREFIX}/api/v1/catalog/views`;
     try {
       if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
         const blob = new Blob([body], { type: "application/json" });
-        navigator.sendBeacon(url, blob);
-        return;
+        // sendBeacon returns false when the browser refuses to queue it.
+        if (navigator.sendBeacon(url, blob)) {
+          return;
+        }
       }
     } catch {
       // fall through to fetch

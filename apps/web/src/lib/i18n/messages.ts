@@ -168,7 +168,7 @@ const en: Messages = {
   homeIntro2:
     "Each listing highlights the current Amazon.com price first, then adds rating signals and our short editorial notes when a product earns a featured deals slot or climbs the top-views ranking.",
   featuredMeta: "Featured by DealStoker · up to 5 deals",
-  topViewsMeta: "Most-viewed product pages · top 5",
+  topViewsMeta: "Most-viewed product pages · last 7 days · top 5",
   latestMeta: "{count} live pick{suffix} · Amazon",
   emptyFeatured: "No featured deals yet. Mark products as featured in Admin.",
   emptyTopViews:
@@ -320,7 +320,7 @@ const ko: Messages = {
   homeIntro2:
     "각 상품은 Amazon.com 현재 가격을 먼저 보여 주고, 평점 신호와 함께 추천 딜·인기 조회 순위에 오른 상품에는 짧은 편집 코멘트를 더합니다.",
   featuredMeta: "DealStoker 추천 · 최대 5개",
-  topViewsMeta: "가장 많이 본 상품 페이지 · 상위 5개",
+  topViewsMeta: "최근 7일 가장 많이 본 상품 페이지 · 상위 5개",
   latestMeta: "라이브 {count}개 · Amazon",
   emptyFeatured: "추천 딜이 아직 없습니다. 관리자에서 상품을 추천으로 표시하세요.",
   emptyTopViews: "조회 기록이 아직 없습니다. 쇼핑객이 상품을 보면 순위가 나타납니다.",

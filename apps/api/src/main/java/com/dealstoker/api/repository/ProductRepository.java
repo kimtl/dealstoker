@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,16 +69,24 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             """, nativeQuery = true)
     List<Product> findTopByBuyClicks(@Param("status") String status, @Param("limit") int limit);
 
+    /**
+     * Products that were actually viewed since {@code since}, most viewed first;
+     * ties go to the most recently viewed product so the list reacts to traffic.
+     * Products with zero views are never used as filler.
+     */
     @Query(value = """
             SELECT p.*
             FROM products p
-            LEFT JOIN page_view_events v ON v.product_id = p.id
+            JOIN page_view_events v ON v.product_id = p.id AND v.occurred_at >= :since
             WHERE p.status = :status
             GROUP BY p.id
-            ORDER BY COUNT(v.id) DESC, p.published_at DESC NULLS LAST
+            ORDER BY COUNT(v.id) DESC, MAX(v.occurred_at) DESC
             LIMIT :limit
             """, nativeQuery = true)
-    List<Product> findTopByPageViews(@Param("status") String status, @Param("limit") int limit);
+    List<Product> findTopByPageViewsSince(
+            @Param("status") String status,
+            @Param("since") Instant since,
+            @Param("limit") int limit);
 
     long countByStatus(ProductStatus status);
 

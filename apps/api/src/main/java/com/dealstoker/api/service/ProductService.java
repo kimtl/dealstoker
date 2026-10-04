@@ -162,18 +162,31 @@ public class ProductService {
                 .toList();
     }
 
+    /** Rolling window for the homepage "Top views" ranking. */
+    public static final int TOP_VIEWS_WINDOW_DAYS = 7;
+
+    /**
+     * Most-viewed published products over the last {@link #TOP_VIEWS_WINDOW_DAYS} days.
+     * Falls back to all-time views when the window is empty, and returns an empty
+     * list (the UI shows its "no views yet" message) when nothing was ever viewed.
+     */
     @Transactional(readOnly = true)
     public List<ProductSummary> topViewPublished(int limit) {
-        List<Product> products = productRepository.findTopByPageViews(
-                ProductStatus.PUBLISHED.name(),
-                Math.max(1, Math.min(limit, 20))
-        );
+        int size = Math.max(1, Math.min(limit, 20));
+        Instant since = Instant.now().minus(TOP_VIEWS_WINDOW_DAYS, java.time.temporal.ChronoUnit.DAYS);
+        List<Product> products = productRepository.findTopByPageViewsSince(
+                ProductStatus.PUBLISHED.name(), since, size);
+        if (products.isEmpty()) {
+            since = Instant.EPOCH;
+            products = productRepository.findTopByPageViewsSince(
+                    ProductStatus.PUBLISHED.name(), since, size);
+        }
         if (products.isEmpty()) {
             return List.of();
         }
         List<Long> ids = products.stream().map(Product::getId).toList();
         Map<Long, Long> counts = pageViewEventRepository
-                .countByProductIdsSince(ids, Instant.EPOCH)
+                .countByProductIdsSince(ids, since)
                 .stream()
                 .collect(Collectors.toMap(
                         row -> ((Number) row[0]).longValue(),
