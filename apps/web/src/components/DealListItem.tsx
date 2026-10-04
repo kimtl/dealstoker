@@ -6,6 +6,7 @@ import {
   formatReviewCount,
   formatUpdatedAt,
 } from "@/lib/format";
+import { canOptimizeImage } from "@/lib/images";
 import { getI18n, localizeCategoryName } from "@/lib/i18n";
 import { productImageAlt } from "@/lib/seo";
 import type { ProductSummary } from "@/lib/types";
@@ -68,6 +69,7 @@ export async function DealListItem({
               width={112}
               height={112}
               className={styles.image}
+              unoptimized={!canOptimizeImage(product.imageUrl)}
             />
           ) : (
             <div className={styles.placeholder} aria-hidden />

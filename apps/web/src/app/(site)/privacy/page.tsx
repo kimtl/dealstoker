@@ -5,7 +5,7 @@ import {
   privacyMetaDescription,
   privacyMetaTitle,
 } from "@/lib/seo";
-import { SITE_DOMAIN, SITE_NAME } from "@/lib/site";
+import { SITE_DOMAIN } from "@/lib/site";
 import styles from "../policy.module.css";
 
 export async function generateMetadata(): Promise<Metadata> {

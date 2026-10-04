@@ -13,6 +13,24 @@ type FetchOptions = {
   revalidate?: number | false;
 };
 
+/** Thrown for non-2xx API responses so callers can distinguish 404 from outages. */
+export class ApiError extends Error {
+  readonly status: number;
+  readonly path: string;
+
+  constructor(status: number, path: string) {
+    super(`API ${status} for ${path}`);
+    this.name = "ApiError";
+    this.status = status;
+    this.path = path;
+  }
+}
+
+/** True only for a genuine 404 from the API (not for 5xx / network failures). */
+export function isApiNotFound(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 404;
+}
+
 async function apiFetch<T>(
   path: string,
   options: FetchOptions = {},
@@ -40,7 +58,7 @@ async function apiFetch<T>(
 
   const res = await fetch(url, init);
   if (!res.ok) {
-    throw new Error(`API ${res.status} for ${path}`);
+    throw new ApiError(res.status, path);
   }
   return res.json() as Promise<T>;
 }

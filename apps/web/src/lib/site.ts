@@ -48,6 +48,14 @@ export function getApiBaseUrl(): string {
   return raw.replace(/\/$/, "");
 }
 
+/** True when a production build still points at the Dockerfile's localhost default. */
+export function isUnconfiguredApiBase(apiBase: string): boolean {
+  return (
+    process.env.NODE_ENV === "production" &&
+    (!apiBase || /localhost|127\.0\.0\.1/.test(apiBase))
+  );
+}
+
 /** Browser-safe proxy prefix that rewrites to the API. */
 export const API_PROXY_PREFIX = "/api/backend";
 

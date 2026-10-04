@@ -4,6 +4,8 @@ import { AdminChrome } from "./AdminChrome";
 export const metadata: Metadata = {
   title: "Admin | DealStoker",
   robots: { index: false, follow: false },
+  // Do not inherit the root layout's canonical + hreflang (they point at /).
+  alternates: { canonical: null },
 };
 
 export default function AdminLayout({

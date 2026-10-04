@@ -110,14 +110,17 @@ public class AffiliateLinkBuilder {
         return host != null && AFFILIATE_SHORT_HOSTS.contains(host);
     }
 
+    /** amazon.<tld> or <sub>.amazon.<tld> (incl. co.uk/com.au style), anchored so
+     *  look-alikes such as www.amazon.attacker.com are rejected. */
+    private static final java.util.regex.Pattern AMAZON_HOST = java.util.regex.Pattern.compile(
+            "^(?:[a-z0-9-]+\\.)*amazon\\.(?:[a-z]{2,3}|[a-z]{2,3}\\.[a-z]{2})$"
+    );
+
     private static boolean isAmazonHost(String host) {
         if (host == null || host.isBlank()) {
             return false;
         }
-        return host.equals("amazon.com")
-                || host.endsWith(".amazon.com")
-                || host.matches("amazon\\.[a-z.]+")
-                || host.matches(".*\\.amazon\\.[a-z.]+");
+        return AMAZON_HOST.matcher(host).matches();
     }
 
     private static String canonicalTaggedUrl(String asin, String tag) {
@@ -134,24 +137,28 @@ public class AffiliateLinkBuilder {
             if (uri == null) {
                 return detailPageUrl + (detailPageUrl.contains("?") ? "&" : "?") + "tag=" + encodedTag;
             }
-            String query = uri.getQuery();
+            // Work on the raw (still-encoded) query so %2B / %26 inside values survive.
+            String query = uri.getRawQuery();
             if (query == null || query.isBlank()) {
                 return detailPageUrl + (detailPageUrl.contains("?") ? "&" : "?") + "tag=" + encodedTag;
             }
+            String newQuery;
             if (query.matches("(?i).*(^|&)tag=.*")) {
-                String replaced = query.replaceAll("(?i)(^|&)tag=[^&]*", "$1tag=" + encodedTag);
-                if (replaced.startsWith("&")) {
-                    replaced = replaced.substring(1);
+                newQuery = query.replaceAll("(?i)(^|&)tag=[^&]*", "$1tag=" + encodedTag);
+                if (newQuery.startsWith("&")) {
+                    newQuery = newQuery.substring(1);
                 }
-                return new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), replaced, uri.getFragment()).toString();
+            } else {
+                newQuery = query + "&tag=" + encodedTag;
             }
-            return new URI(
-                    uri.getScheme(),
-                    uri.getAuthority(),
-                    uri.getPath(),
-                    query + "&tag=" + encodedTag,
-                    uri.getFragment()
-            ).toString();
+            StringBuilder rebuilt = new StringBuilder();
+            rebuilt.append(uri.getScheme()).append("://").append(uri.getRawAuthority());
+            rebuilt.append(uri.getRawPath() == null ? "" : uri.getRawPath());
+            rebuilt.append('?').append(newQuery);
+            if (uri.getRawFragment() != null) {
+                rebuilt.append('#').append(uri.getRawFragment());
+            }
+            return rebuilt.toString();
         } catch (Exception ex) {
             return detailPageUrl + (detailPageUrl.contains("?") ? "&" : "?") + "tag=" + tag.trim();
         }

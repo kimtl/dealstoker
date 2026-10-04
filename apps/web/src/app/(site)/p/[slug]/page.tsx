@@ -5,7 +5,7 @@ import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { DealList } from "@/components/DealList";
 import { FaqSection } from "@/components/FaqSection";
 import { JsonLd } from "@/components/JsonLd";
-import { getProduct, getRelatedProducts } from "@/lib/api";
+import { getProduct, getRelatedProducts, isApiNotFound } from "@/lib/api";
 import { getProductFaqs } from "@/lib/faq";
 import {
   formatMoney,
@@ -23,6 +23,7 @@ import {
   productMetaTitle,
 } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
+import { canOptimizeImage } from "@/lib/images";
 import { splitIntoParagraphs } from "@/lib/text";
 import { formatMessage, getI18n, getLocale, localizeCategoryName } from "@/lib/i18n";
 import styles from "./product.module.css";
@@ -72,8 +73,13 @@ export default async function ProductPage({ params }: PageProps) {
   let product;
   try {
     product = await getProduct(slug);
-  } catch {
-    notFound();
+  } catch (error) {
+    // Only a real 404 is a missing product; outages must surface as errors,
+    // not soft-404s that get the URL deindexed.
+    if (isApiNotFound(error)) {
+      notFound();
+    }
+    throw error;
   }
 
   let related: Awaited<ReturnType<typeof getRelatedProducts>> = [];
@@ -134,7 +140,7 @@ export default async function ProductPage({ params }: PageProps) {
             : "",
           rating
             ? `. Shopper rating signals show ${rating} ${t.stars}${
-                reviews ? ` from about ${reviews}` : ""
+                reviews ? ` from about ${reviews} ${t.reviews}` : ""
               }`
             : "",
           ".",
@@ -175,6 +181,7 @@ export default async function ProductPage({ params }: PageProps) {
                   height={720}
                   className={styles.image}
                   priority
+                  unoptimized={!canOptimizeImage(product.imageUrl)}
                 />
               ) : (
                 <div className={styles.placeholder} />
@@ -242,8 +249,8 @@ export default async function ProductPage({ params }: PageProps) {
             ) : null}
             {product.features?.length ? (
               <ul className={styles.features}>
-                {product.features.map((feature) => (
-                  <li key={feature}>{feature}</li>
+                {product.features.map((feature, index) => (
+                  <li key={`${index}-${feature}`}>{feature}</li>
                 ))}
               </ul>
             ) : null}

@@ -59,6 +59,9 @@ export async function generateMetadata({ searchParams }: PageProps) {
     description: searchMetaDescription(q, locale),
     path,
     locale,
+    // Internal search results are thin/duplicate content; keep only the
+    // bare /search landing page indexable.
+    noIndex: Boolean(q),
   });
 }
 

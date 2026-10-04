@@ -1,6 +1,9 @@
 package com.dealstoker.api.config;
 
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,6 +31,10 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
+    /** Matches the fallback in application.yml; only acceptable for local development. */
+    static final String DEFAULT_ADMIN_PASSWORD = "changeme";
+
     private final DealStokerProperties properties;
 
     public SecurityConfig(DealStokerProperties properties) {
@@ -41,6 +48,9 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Boot's /error forwards on the ERROR dispatch; without this an
+                        // anonymous 400/404/500 would be rewritten into a 401 by the entry point.
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers(
                                 "/robots.txt",
@@ -71,6 +81,10 @@ public class SecurityConfig {
 
     @Bean
     UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+        if (DEFAULT_ADMIN_PASSWORD.equals(properties.admin().password())) {
+            log.warn("ADMIN_PASSWORD is the default '{}'. Set ADMIN_USERNAME/ADMIN_PASSWORD before exposing "
+                    + "/api/v1/admin/** publicly.", DEFAULT_ADMIN_PASSWORD);
+        }
         return new InMemoryUserDetailsManager(
                 User.withUsername(properties.admin().username())
                         .password(passwordEncoder.encode(properties.admin().password()))

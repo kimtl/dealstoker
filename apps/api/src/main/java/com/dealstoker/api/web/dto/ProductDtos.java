@@ -2,10 +2,13 @@ package com.dealstoker.api.web.dto;
 
 import com.dealstoker.api.domain.Product;
 import com.dealstoker.api.domain.ProductStatus;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
@@ -14,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 public final class ProductDtos {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final JsonMapper MAPPER = JsonMapper.builder().build();
 
     private ProductDtos() {}
 
@@ -151,8 +154,8 @@ public final class ProductDtos {
             @Size(max = 8) String currency,
             BigDecimal listPrice,
             @Size(max = 80) String availability,
-            BigDecimal rating,
-            Integer reviewCount,
+            @DecimalMin("0") @DecimalMax("5.0") BigDecimal rating,
+            @PositiveOrZero Integer reviewCount,
             @NotBlank String detailPageUrl,
             @Size(max = 200) String brand,
             List<String> features,

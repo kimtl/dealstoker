@@ -5,8 +5,9 @@ import com.dealstoker.api.amazon.AmazonProductPageFetcher;
 import com.dealstoker.api.amazon.AmazonProductPageFetcher.ScrapedProduct;
 import com.dealstoker.api.config.DealStokerProperties;
 import com.dealstoker.api.domain.Product;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -23,7 +24,7 @@ import java.util.Map;
 public class RecommendationGenerationService {
 
     private static final Logger log = LoggerFactory.getLogger(RecommendationGenerationService.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final JsonMapper MAPPER = JsonMapper.builder().build();
 
     private final DealStokerProperties properties;
     private final AmazonProductPageFetcher pageFetcher;
@@ -35,7 +36,7 @@ public class RecommendationGenerationService {
     ) {
         this.properties = properties;
         this.pageFetcher = pageFetcher;
-        this.restClient = RestClient.create();
+        this.restClient = AiRestClients.create();
     }
 
     public boolean isConfigured() {
@@ -193,10 +194,10 @@ public class RecommendationGenerationService {
         }
         JsonNode root = MAPPER.readTree(raw);
         JsonNode content = root.path("choices").path(0).path("message").path("content");
-        if (content.isMissingNode() || content.asText().isBlank()) {
+        if (content.isMissingNode() || content.asString("").isBlank()) {
             throw new IllegalArgumentException("AI returned no recommendation text");
         }
-        String text = content.asText().trim();
+        String text = content.asString().trim();
         if (text.length() > 4000) {
             text = text.substring(0, 4000);
         }
@@ -208,7 +209,7 @@ public class RecommendationGenerationService {
             return List.of();
         }
         try {
-            return MAPPER.readValue(json, MAPPER.getTypeFactory().constructCollectionType(List.class, String.class));
+            return MAPPER.readValue(json, new TypeReference<List<String>>() {});
         } catch (Exception ex) {
             return List.of();
         }

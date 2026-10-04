@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DealStoker Web
 
-## Getting Started
+Next.js (App Router) public site + admin UI for [dealstoker.com](https://www.dealstoker.com).
+See the repository root `README.md` for the full stack and `docs/deploy/railway.md` for deployment.
 
-First, run the development server:
+## Local development
 
 ```bash
+cp .env.local.example .env.local   # API_BASE_URL, NEXT_PUBLIC_SITE_URL
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The site expects the Spring Boot API from `apps/api` on `API_BASE_URL` (default `http://localhost:8080`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Script | Purpose |
+|--------|---------|
+| `npm run dev` | Dev server with Turbopack |
+| `npm run build` / `npm start` | Production build / serve |
+| `npm run lint` | ESLint (flat config, `eslint-config-next`) |
+| `npm run test:unit` | Node test runner over `src/**/*.test.mts` |
 
-## Learn More
+## Layout
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/app/(site)` — public pages (home, category, product, search, policies)
+- `src/app/admin` — admin UI (Basic auth against the API via `/api/backend`)
+- `src/app/api/backend/[...path]` — runtime proxy to `API_BASE_URL/api/v1/*`
+- `src/app/go/[slug]` — affiliate redirect proxy (click logging happens in the API)
+- `src/proxy.ts` — apex→www redirect and locale detection (`?hl=`, cookie, Accept-Language)
+- `src/lib/i18n` — en/ko messages and locale helpers

@@ -14,7 +14,7 @@ import com.dealstoker.api.web.dto.AmazonImportDtos.PreviewResponse;
 import com.dealstoker.api.web.dto.ProductDtos.ProductDetail;
 import com.dealstoker.api.web.dto.ProductDtos.ProductRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,19 +31,22 @@ public class AmazonImportService {
     private final ProductRepository productRepository;
     private final DealStokerProperties properties;
     private final AffiliateLinkBuilder affiliateLinkBuilder;
+    private final TransactionTemplate transactionTemplate;
 
     public AmazonImportService(
             AmazonProductPageFetcher pageFetcher,
             ProductService productService,
             ProductRepository productRepository,
             DealStokerProperties properties,
-            AffiliateLinkBuilder affiliateLinkBuilder
+            AffiliateLinkBuilder affiliateLinkBuilder,
+            TransactionTemplate transactionTemplate
     ) {
         this.pageFetcher = pageFetcher;
         this.productService = productService;
         this.productRepository = productRepository;
         this.properties = properties;
         this.affiliateLinkBuilder = affiliateLinkBuilder;
+        this.transactionTemplate = transactionTemplate;
     }
 
     public PreviewResponse preview(String amazonUrl) {
@@ -91,7 +94,11 @@ public class AmazonImportService {
         );
     }
 
-    @Transactional
+    /**
+     * Not transactional on purpose: the Amazon crawl inside preview() can take
+     * minutes and must not hold a DB connection. ProductService.create() opens
+     * its own transaction for the write.
+     */
     public ProductDetail importProduct(ImportRequest request) {
         PreviewResponse preview = preview(request.amazonUrl());
         if (preview.alreadyExists()) {
@@ -142,10 +149,10 @@ public class AmazonImportService {
         return productService.create(body);
     }
 
-    @Transactional
+    /** Crawl first (no transaction), then apply the result in a short write transaction. */
     public ProductDetail resyncPricing(Long productId) {
-        Product product = productService.requireById(productId);
-        String asin = product.getExternalId();
+        Product snapshot = productService.requireById(productId);
+        String asin = snapshot.getExternalId();
         if (asin == null || asin.isBlank()) {
             throw new IllegalArgumentException("Product has no ASIN/externalId to resync");
         }
@@ -159,6 +166,11 @@ public class AmazonImportService {
             );
         }
 
+        return transactionTemplate.execute(status -> applyResync(productId, asin.trim(), canonical, scraped));
+    }
+
+    private ProductDetail applyResync(Long productId, String asin, String canonical, ScrapedProduct scraped) {
+        Product product = productService.requireById(productId);
         if (scraped.priceAmount() != null) {
             product.setPriceAmount(scraped.priceAmount());
         }

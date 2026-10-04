@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getApiBaseUrl } from "@/lib/site";
+import { getApiBaseUrl, isUnconfiguredApiBase } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -22,26 +22,30 @@ const HOP_BY_HOP = new Set([
   // Prevent the browser from hijacking fetch() with a native Basic-auth dialog
   // (cancel → TypeError: Failed to fetch).
   "www-authenticate",
+  // The API is stateless Basic-auth; site cookies must not leak upstream.
+  "cookie",
 ]);
+
+/** Only the versioned JSON API is reachable through this proxy. */
+const ALLOWED_PREFIX = "api/v1/";
 
 async function proxy(request: NextRequest, context: RouteContext) {
   const { path } = await context.params;
   const apiBase = getApiBaseUrl();
-  if (
-    process.env.NODE_ENV === "production" &&
-    (!apiBase || /localhost|127\.0\.0\.1/.test(apiBase))
-  ) {
+  if (isUnconfiguredApiBase(apiBase)) {
     return NextResponse.json(
       {
         error: "API_BASE_URL is not configured",
         message:
-          "Set the Web service API_BASE_URL to https://api.dealstoker.com and redeploy.",
-        apiBase,
+          "Set the Web service API_BASE_URL to the public API URL and redeploy.",
       },
       { status: 503 },
     );
   }
   const suffix = path?.length ? path.join("/") : "";
+  if (!suffix.startsWith(ALLOWED_PREFIX) || suffix.includes("..")) {
+    return NextResponse.json({ error: "not found" }, { status: 404 });
+  }
   const target = `${apiBase}/${suffix}${request.nextUrl.search}`;
 
   const headers = new Headers();
@@ -79,7 +83,6 @@ async function proxy(request: NextRequest, context: RouteContext) {
       {
         error: "Bad gateway",
         message,
-        target: apiBase,
       },
       { status: 502 },
     );
