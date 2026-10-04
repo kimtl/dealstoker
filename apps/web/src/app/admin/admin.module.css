@@ -116,6 +116,10 @@
   max-width: 640px;
 }
 
+.formWide {
+  max-width: 960px;
+}
+
 .form label {
   display: grid;
   gap: 0.3rem;

@@ -64,6 +64,12 @@ export async function Header({ categories = [], compact = false }: HeaderProps) 
         </Suspense>
 
         <nav className={styles.nav} aria-label={t.primaryNav}>
+          <Link
+            href={locale === "ko" ? "/guides?hl=ko" : "/guides"}
+            className={styles.navLink}
+          >
+            {t.guides}
+          </Link>
           {categories.slice(0, 5).map((category) => (
             <Link
               key={category.id}

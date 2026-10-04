@@ -20,6 +20,9 @@ export async function Footer() {
           </Suspense>
         </div>
         <nav className={styles.links} aria-label={t.footerNav}>
+          <Link href={locale === "ko" ? "/guides?hl=ko" : "/guides"}>
+            {t.guides}
+          </Link>
           <Link href={locale === "ko" ? "/about?hl=ko" : "/about"}>
             {t.about}
           </Link>

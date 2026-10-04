@@ -128,6 +128,20 @@ export type Messages = {
   notFoundBody: string;
   notFoundHome: string;
   notFoundBrowse: string;
+
+  guides: string;
+  guidesTitle: string;
+  guidesLead: string;
+  readGuide: string;
+  guideBy: string;
+  guideEnglishOnly: string;
+  guidesForCategory: string;
+  allGuides: string;
+  emptyGuides: string;
+  guideReadingTime: string;
+  guideBrowseDeals: string;
+  guideCount: string;
+  guidesCount: string;
 };
 
 const en: Messages = {
@@ -280,6 +294,21 @@ const en: Messages = {
   notFoundBody: "That page is gone or the product is unpublished.",
   notFoundHome: "Back to the homepage",
   notFoundBrowse: "Browse all deals",
+
+  guides: "Guides",
+  guidesTitle: "Buying guides",
+  guidesLead:
+    "Original, practical guides on what to check before you buy on Amazon.com, written by the DealStoker curation team.",
+  readGuide: "Read guide",
+  guideBy: "By {name}",
+  guideEnglishOnly: "This guide is currently available in English only.",
+  guidesForCategory: "{name} buying guides",
+  allGuides: "All guides",
+  emptyGuides: "No guides yet. Check back soon.",
+  guideReadingTime: "{minutes} min read",
+  guideBrowseDeals: "Browse {name} deals",
+  guideCount: "{count} guide",
+  guidesCount: "{count} guides",
 };
 
 const ko: Messages = {
@@ -429,6 +458,21 @@ const ko: Messages = {
   notFoundBody: "페이지가 삭제되었거나 상품이 비공개 상태입니다.",
   notFoundHome: "홈으로 돌아가기",
   notFoundBrowse: "전체 딜 보기",
+
+  guides: "가이드",
+  guidesTitle: "구매 가이드",
+  guidesLead:
+    "Amazon.com에서 구매하기 전에 확인할 점을 DealStoker 큐레이션 팀이 직접 정리한 가이드입니다.",
+  readGuide: "가이드 읽기",
+  guideBy: "{name} 작성",
+  guideEnglishOnly: "이 가이드는 현재 영어로만 제공됩니다.",
+  guidesForCategory: "{name} 구매 가이드",
+  allGuides: "전체 가이드",
+  emptyGuides: "아직 가이드가 없습니다. 곧 추가될 예정입니다.",
+  guideReadingTime: "약 {minutes}분",
+  guideBrowseDeals: "{name} 딜 보기",
+  guideCount: "가이드 {count}개",
+  guidesCount: "가이드 {count}개",
 };
 
 export const dictionaries: Record<Locale, Messages> = { en, ko };

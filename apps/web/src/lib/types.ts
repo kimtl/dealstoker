@@ -215,3 +215,46 @@ export type KeywordRegisterResponse = {
     error: string | null;
   }>;
 };
+
+export type GuideStatus = "DRAFT" | "PUBLISHED";
+
+export type GuideSummary = {
+  id: number;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  titleKo: string | null;
+  excerptKo: string | null;
+  coverImageUrl: string | null;
+  authorName: string | null;
+  categoryId: number | null;
+  categorySlug: string | null;
+  categoryName: string | null;
+  status: GuideStatus;
+  publishedAt: string | null;
+  updatedAt: string | null;
+};
+
+export type GuideDetail = GuideSummary & {
+  body: string;
+  bodyKo: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  createdAt: string | null;
+};
+
+export type GuideRequest = {
+  title: string;
+  slug?: string | null;
+  excerpt?: string | null;
+  body: string;
+  titleKo?: string | null;
+  excerptKo?: string | null;
+  bodyKo?: string | null;
+  categoryId?: number | null;
+  coverImageUrl?: string | null;
+  authorName?: string | null;
+  status?: GuideStatus;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+};

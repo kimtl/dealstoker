@@ -1,4 +1,4 @@
-import { getCategories, getProducts, getSitemapXml } from "@/lib/api";
+import { getCategories, getGuides, getProducts, getSitemapXml } from "@/lib/api";
 import { getSiteUrl } from "@/lib/site";
 import type { ProductSummary } from "@/lib/types";
 
@@ -72,7 +72,7 @@ async function buildFallbackSitemapXml(): Promise<string> {
 
   addUrl(parts, `${siteUrl}/`, now, "daily", "1.0");
   addUrl(parts, `${siteUrl}/?hl=ko`, now, "daily", "0.9");
-  for (const path of ["/about", "/search", "/disclosure", "/privacy", "/contact"]) {
+  for (const path of ["/about", "/guides", "/search", "/disclosure", "/privacy", "/contact"]) {
     addUrl(
       parts,
       `${siteUrl}${path}`,
@@ -137,6 +137,23 @@ async function buildFallbackSitemapXml(): Promise<string> {
     }
   } catch {
     // Keep static + category URLs if product fetch fails.
+  }
+
+  try {
+    let page = 0;
+    let totalPages = 1;
+    while (page < totalPages && page < 20) {
+      const data = await getGuides({ page, size: 50 });
+      for (const guide of data.items || []) {
+        const lastmod = parseDate(guide.updatedAt) || parseDate(guide.publishedAt) || now;
+        addUrl(parts, `${siteUrl}/guides/${guide.slug}`, lastmod, "weekly", "0.7", guide.coverImageUrl);
+        addUrl(parts, `${siteUrl}/guides/${guide.slug}?hl=ko`, lastmod, "weekly", "0.6");
+      }
+      totalPages = data.totalPages || 1;
+      page += 1;
+    }
+  } catch {
+    // Guides are optional in the fallback sitemap.
   }
 
   parts.push("</urlset>");
