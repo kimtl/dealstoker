@@ -198,6 +198,16 @@
   margin-top: 2.5rem;
 }
 
+.guides {
+  margin-top: 2.5rem;
+}
+
+.guideGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
 .relatedTitle {
   font-family: var(--font-display);
   font-size: 1.4rem;

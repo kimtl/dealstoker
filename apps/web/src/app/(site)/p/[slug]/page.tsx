@@ -5,7 +5,9 @@ import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { DealList } from "@/components/DealList";
 import { FaqSection } from "@/components/FaqSection";
 import { JsonLd } from "@/components/JsonLd";
-import { getProduct, getRelatedProducts, isApiNotFound } from "@/lib/api";
+import { getGuides, getProduct, getRelatedProducts, isApiNotFound } from "@/lib/api";
+import { GuideCard } from "@/components/GuideCard";
+import type { GuideSummary } from "@/lib/types";
 import { getProductFaqs } from "@/lib/faq";
 import {
   formatMoney,
@@ -87,6 +89,15 @@ export default async function ProductPage({ params }: PageProps) {
     related = await getRelatedProducts(slug);
   } catch {
     related = [];
+  }
+
+  let guides: GuideSummary[] = [];
+  if (product.categorySlug) {
+    try {
+      guides = (await getGuides({ category: product.categorySlug, size: 3 })).items;
+    } catch {
+      guides = [];
+    }
   }
 
   const { locale, t } = await getI18n();
@@ -256,6 +267,19 @@ export default async function ProductPage({ params }: PageProps) {
             ) : null}
           </div>
         </div>
+
+        {guides.length > 0 && localizedCategory ? (
+          <section className={styles.guides} aria-labelledby="guides-heading">
+            <h2 id="guides-heading" className={styles.relatedTitle}>
+              {formatMessage(t.guidesForCategory, { name: localizedCategory })}
+            </h2>
+            <div className={styles.guideGrid}>
+              {guides.map((guide) => (
+                <GuideCard key={guide.id} guide={guide} showCategory={false} />
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <FaqSection items={faqs} />
 

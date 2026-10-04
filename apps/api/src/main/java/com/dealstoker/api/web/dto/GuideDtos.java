@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.time.Instant;
+import java.util.List;
 
 public final class GuideDtos {
     private GuideDtos() {}
@@ -108,4 +109,22 @@ public final class GuideDtos {
             @Size(max = 255) String seoTitle,
             @Size(max = 500) String seoDescription
     ) {}
+
+    /** AI first draft: category and/or topic, optional product slugs to embed. */
+    public record GuideDraftRequest(
+            Long categoryId,
+            @Size(max = 300) String topic,
+            List<String> productSlugs,
+            String prompt
+    ) {}
+
+    public record GuideDraftResponse(String title, String excerpt, String body) {}
+
+    public record GuideTranslateRequest(
+            @Size(max = 300) String title,
+            @Size(max = 600) String excerpt,
+            @NotBlank String body
+    ) {}
+
+    public record GuideTranslateResponse(String titleKo, String excerptKo, String bodyKo) {}
 }

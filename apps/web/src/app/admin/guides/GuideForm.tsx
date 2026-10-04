@@ -5,10 +5,19 @@ import { useRouter } from "next/navigation";
 import {
   adminCreateGuide,
   adminDeleteGuide,
+  adminDraftGuide,
   adminListCategories,
+  adminListCategoryProducts,
+  adminTranslateGuide,
   adminUpdateGuide,
 } from "@/lib/admin-api";
-import type { Category, GuideDetail, GuideRequest, GuideStatus } from "@/lib/types";
+import type {
+  Category,
+  GuideDetail,
+  GuideRequest,
+  GuideStatus,
+  ProductSummary,
+} from "@/lib/types";
 import styles from "../admin.module.css";
 
 type FormState = {
@@ -89,6 +98,15 @@ export function GuideForm({ guide }: { guide: GuideDetail | null }) {
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // AI helpers (nothing is saved until the form is submitted).
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiSlugs, setAiSlugs] = useState<string[]>([]);
+  const [drafting, setDrafting] = useState(false);
+  const [translating, setTranslating] = useState(false);
+  const [categoryProducts, setCategoryProducts] = useState<ProductSummary[]>([]);
+  const [pickedSlug, setPickedSlug] = useState("");
+
   useEffect(() => {
     adminListCategories()
       .then(setCategories)
@@ -97,8 +115,116 @@ export function GuideForm({ guide }: { guide: GuideDetail | null }) {
       );
   }, []);
 
+  const selectedCategory = categories.find(
+    (category) => String(category.id) === form.categoryId,
+  );
+
+  useEffect(() => {
+    if (!selectedCategory) {
+      setCategoryProducts([]);
+      return;
+    }
+    let cancelled = false;
+    adminListCategoryProducts(selectedCategory.slug)
+      .then((page) => {
+        if (!cancelled) setCategoryProducts(page.items);
+      })
+      .catch(() => {
+        if (!cancelled) setCategoryProducts([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCategory]);
+
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function insertShortcode(slug: string) {
+    if (!slug) return;
+    const shortcode = `{{product:${slug}}}`;
+    setForm((prev) => {
+      if (prev.body.includes(shortcode)) return prev;
+      const body = prev.body.trimEnd();
+      return { ...prev, body: body ? `${body}\n\n${shortcode}\n` : `${shortcode}\n` };
+    });
+    setPickedSlug("");
+  }
+
+  function toggleAiSlug(slug: string) {
+    setAiSlugs((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
+    );
+  }
+
+  async function onDraft() {
+    if (!form.categoryId && !aiTopic.trim()) {
+      setError("Pick a category or enter a topic before drafting.");
+      return;
+    }
+    if (
+      form.body.trim() &&
+      !confirm("Replace the current English title, excerpt and body with the AI draft?")
+    ) {
+      return;
+    }
+    setDrafting(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const draft = await adminDraftGuide({
+        categoryId: form.categoryId ? Number(form.categoryId) : null,
+        topic: aiTopic.trim() || null,
+        productSlugs: aiSlugs,
+        prompt: aiPrompt.trim() || null,
+      });
+      setForm((prev) => ({
+        ...prev,
+        title: draft.title || prev.title,
+        excerpt: draft.excerpt || prev.excerpt,
+        body: draft.body,
+      }));
+      setMessage("Draft generated — review every claim before publishing.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "AI draft failed");
+    } finally {
+      setDrafting(false);
+    }
+  }
+
+  async function onTranslate() {
+    if (!form.body.trim()) {
+      setError("Write the English body first.");
+      return;
+    }
+    if (
+      form.bodyKo.trim() &&
+      !confirm("Replace the current Korean title, excerpt and body with the AI translation?")
+    ) {
+      return;
+    }
+    setTranslating(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const result = await adminTranslateGuide({
+        title: form.title,
+        excerpt: form.excerpt || null,
+        body: form.body,
+      });
+      setForm((prev) => ({
+        ...prev,
+        titleKo: result.titleKo || prev.titleKo,
+        excerptKo: result.excerptKo || prev.excerptKo,
+        bodyKo: result.bodyKo,
+      }));
+      setMessage("Korean translation drafted — proofread before publishing.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "AI translation failed");
+    } finally {
+      setTranslating(false);
+    }
   }
 
   async function onSubmit(event: FormEvent) {
@@ -170,6 +296,65 @@ export function GuideForm({ guide }: { guide: GuideDetail | null }) {
         />
       </label>
 
+      <div className={styles.importBox}>
+        <h3 className={styles.sectionTitle} style={{ marginTop: 0 }}>
+          AI first draft (optional)
+        </h3>
+        <p className={styles.hint}>
+          Uses the selected category below plus a topic. Pick products to embed as
+          cards; the draft places <code>{"{{product:slug}}"}</code> shortcodes for them.
+        </p>
+        <label>
+          Topic
+          <input
+            value={aiTopic}
+            onChange={(e) => setAiTopic(e.target.value)}
+            placeholder="e.g. How to choose an air fryer for a family of four"
+            maxLength={300}
+          />
+        </label>
+        <label>
+          Extra instructions (optional)
+          <textarea
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            rows={2}
+            placeholder="e.g. budget under $100, compare basket vs oven style"
+          />
+        </label>
+        {categoryProducts.length > 0 ? (
+          <div>
+            <p className={styles.hint}>Products to reference ({aiSlugs.length} selected):</p>
+            <div className={styles.importActions}>
+              {categoryProducts.slice(0, 30).map((product) => (
+                <label key={product.id} style={{ display: "flex", gap: "0.4rem", fontWeight: 500 }}>
+                  <input
+                    type="checkbox"
+                    checked={aiSlugs.includes(product.slug)}
+                    onChange={() => toggleAiSlug(product.slug)}
+                  />
+                  <span>{product.title}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ) : form.categoryId ? (
+          <p className={styles.hint}>No published products in this category yet.</p>
+        ) : (
+          <p className={styles.hint}>Select a category to list products to reference.</p>
+        )}
+        <div className={styles.actions}>
+          <button
+            type="button"
+            className={styles.buttonSecondary}
+            onClick={onDraft}
+            disabled={drafting}
+          >
+            {drafting ? "Drafting…" : "Generate draft with AI"}
+          </button>
+        </div>
+      </div>
+
       <label>
         Body (English, Markdown)
         <textarea
@@ -184,7 +369,23 @@ export function GuideForm({ guide }: { guide: GuideDetail | null }) {
       <p className={styles.hint}>
         Markdown (GFM) is supported: headings (##), lists, tables, links, images.
         Raw HTML is not rendered. Do not paste Amazon product descriptions verbatim.
+        Put <code>{"{{product:slug}}"}</code> on its own line to embed a product card.
       </p>
+      {categoryProducts.length > 0 ? (
+        <div className={styles.row}>
+          <label>
+            Insert product card
+            <select value={pickedSlug} onChange={(e) => insertShortcode(e.target.value)}>
+              <option value="">Choose a product…</option>
+              {categoryProducts.map((product) => (
+                <option key={product.id} value={product.slug}>
+                  {product.title}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      ) : null}
 
       <div className={styles.row}>
         <label>
@@ -236,6 +437,16 @@ export function GuideForm({ guide }: { guide: GuideDetail | null }) {
       <p className={styles.hint}>
         Leave empty to show the English guide with an &quot;English only&quot; notice on ?hl=ko.
       </p>
+      <div className={styles.actions}>
+        <button
+          type="button"
+          className={styles.buttonSecondary}
+          onClick={onTranslate}
+          disabled={translating}
+        >
+          {translating ? "Translating…" : "Translate English → Korean with AI"}
+        </button>
+      </div>
       <label>
         Title (Korean)
         <input

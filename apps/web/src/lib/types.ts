@@ -258,3 +258,22 @@ export type GuideRequest = {
   seoTitle?: string | null;
   seoDescription?: string | null;
 };
+
+export type GuideDraftRequest = {
+  categoryId?: number | null;
+  topic?: string | null;
+  productSlugs?: string[];
+  prompt?: string | null;
+};
+
+export type GuideDraftResponse = {
+  title: string;
+  excerpt: string | null;
+  body: string;
+};
+
+export type GuideTranslateResponse = {
+  titleKo: string | null;
+  excerptKo: string | null;
+  bodyKo: string;
+};

@@ -1,0 +1,10 @@
+.body {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.embed {
+  max-width: 46rem;
+  border-left: 3px solid var(--brass);
+  padding-left: 0.75rem;
+}

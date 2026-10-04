@@ -3,10 +3,10 @@ import { notFound } from "next/navigation";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { GuideCard } from "@/components/GuideCard";
 import { JsonLd } from "@/components/JsonLd";
-import { MarkdownBody } from "@/components/MarkdownBody";
+import { GuideBody } from "@/components/GuideBody";
 import { getGuide, getGuides, isApiNotFound } from "@/lib/api";
 import { formatUpdatedAt } from "@/lib/format";
-import { localizeGuide, readingMinutes } from "@/lib/guides";
+import { localizeGuide, readingMinutes, stripShortcodes } from "@/lib/guides";
 import { formatMessage, getI18n, getLocale, localizeCategoryName } from "@/lib/i18n";
 import {
   buildArticleJsonLd,
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: PageProps) {
     const description =
       guide.seoDescription?.trim() ||
       localized.excerpt ||
-      clampText(localized.body?.replace(/[#*_>`]/g, " ") || "", 160);
+      clampText(stripShortcodes(localized.body || "").replace(/[#*_>`]/g, " "), 160);
     return buildPageMetadata({
       title: guide.seoTitle?.trim() || `${localized.title} | ${SITE_NAME}`,
       description,
@@ -154,7 +154,7 @@ export default async function GuidePage({ params }: PageProps) {
           <p className={styles.notice}>{t.guideEnglishOnly}</p>
         ) : null}
 
-        <MarkdownBody markdown={body} />
+        <GuideBody markdown={body} />
 
         <footer className={styles.footer}>
           <div className={styles.ctaRow}>

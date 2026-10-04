@@ -142,6 +142,8 @@ export type Messages = {
   guideBrowseDeals: string;
   guideCount: string;
   guidesCount: string;
+  latestGuides: string;
+  latestGuidesMeta: string;
 };
 
 const en: Messages = {
@@ -309,6 +311,8 @@ const en: Messages = {
   guideBrowseDeals: "Browse {name} deals",
   guideCount: "{count} guide",
   guidesCount: "{count} guides",
+  latestGuides: "Buying guides",
+  latestGuidesMeta: "What to check before you buy · from the curation team",
 };
 
 const ko: Messages = {
@@ -473,6 +477,8 @@ const ko: Messages = {
   guideBrowseDeals: "{name} 딜 보기",
   guideCount: "가이드 {count}개",
   guidesCount: "가이드 {count}개",
+  latestGuides: "구매 가이드",
+  latestGuidesMeta: "구매 전 확인할 점 · 큐레이션 팀 작성",
 };
 
 export const dictionaries: Record<Locale, Messages> = { en, ko };

@@ -7,7 +7,10 @@ import type {
   Category,
   CategoryRequest,
   GuideDetail,
+  GuideDraftRequest,
+  GuideDraftResponse,
   GuideRequest,
+  GuideTranslateResponse,
   GuideStatus,
   GuideSummary,
   KeywordRegisterResponse,
@@ -334,4 +337,31 @@ export async function adminUnpublishGuide(id: number): Promise<GuideDetail> {
 
 export async function adminDeleteGuide(id: number): Promise<void> {
   await adminFetch(`/api/v1/admin/guides/${id}`, { method: "DELETE" });
+}
+
+export async function adminDraftGuide(body: GuideDraftRequest): Promise<GuideDraftResponse> {
+  return adminFetch("/api/v1/admin/guides/draft", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function adminTranslateGuide(body: {
+  title: string;
+  excerpt?: string | null;
+  body: string;
+}): Promise<GuideTranslateResponse> {
+  return adminFetch("/api/v1/admin/guides/translate", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+/** Published products of a category, for the shortcode picker (public endpoint). */
+export async function adminListCategoryProducts(
+  categorySlug: string,
+): Promise<PageResponse<ProductSummary>> {
+  return adminFetch(
+    `/api/v1/products?category=${encodeURIComponent(categorySlug)}&size=100&sort=newest`,
+  );
 }
