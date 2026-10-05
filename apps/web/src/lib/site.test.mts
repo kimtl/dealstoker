@@ -20,3 +20,17 @@ test("localhost and railway preview unchanged", () => {
     "https://dealstoker-web.up.railway.app",
   );
 });
+
+test("Google Ads ID: unset or empty falls back to the default", async () => {
+  const { resolveGoogleAdsId, DEFAULT_GOOGLE_ADS_ID } = await import("./site.ts");
+  assert.equal(resolveGoogleAdsId(undefined), DEFAULT_GOOGLE_ADS_ID);
+  assert.equal(resolveGoogleAdsId(""), DEFAULT_GOOGLE_ADS_ID);
+  assert.equal(resolveGoogleAdsId("   "), DEFAULT_GOOGLE_ADS_ID);
+});
+
+test("Google Ads ID: explicit value wins, 'off' disables", async () => {
+  const { resolveGoogleAdsId } = await import("./site.ts");
+  assert.equal(resolveGoogleAdsId("AW-123"), "AW-123");
+  assert.equal(resolveGoogleAdsId("off"), "");
+  assert.equal(resolveGoogleAdsId("NONE"), "");
+});

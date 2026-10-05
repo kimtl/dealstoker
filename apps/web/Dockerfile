@@ -13,8 +13,8 @@ COPY . .
 # Canonical host is www (apex 301s to www). Override only for local/preview builds.
 ARG NEXT_PUBLIC_SITE_URL=https://www.dealstoker.com
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
-# Google Ads tag ID; defaults in code. Pass an empty value to build without the tag.
-ARG NEXT_PUBLIC_GOOGLE_ADS_ID
+# Google Ads tag ID (public). Pass "off" to build without the tag.
+ARG NEXT_PUBLIC_GOOGLE_ADS_ID=AW-18495871546
 ENV NEXT_PUBLIC_GOOGLE_ADS_ID=$NEXT_PUBLIC_GOOGLE_ADS_ID
 
 RUN npm run build
