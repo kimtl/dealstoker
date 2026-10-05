@@ -56,14 +56,24 @@ export function isUnconfiguredApiBase(apiBase: string): boolean {
   );
 }
 
+export const DEFAULT_GOOGLE_ADS_ID = "AW-18495871546";
+
 /**
- * Google Ads tag ID (gtag.js). Public value; override at build time with
- * NEXT_PUBLIC_GOOGLE_ADS_ID (set it to an empty string to disable the tag).
+ * Resolve the Google Ads tag ID from NEXT_PUBLIC_GOOGLE_ADS_ID.
+ * Unset or empty means "use the default" (Docker turns an unset ARG into an
+ * empty ENV, which previously disabled the tag in production by accident).
+ * Only an explicit "off" / "none" / "false" / "0" disables the tag.
  */
-export const GOOGLE_ADS_ID: string =
-  process.env.NEXT_PUBLIC_GOOGLE_ADS_ID !== undefined
-    ? process.env.NEXT_PUBLIC_GOOGLE_ADS_ID
-    : "AW-18495871546";
+export function resolveGoogleAdsId(raw: string | undefined): string {
+  const value = (raw ?? "").trim();
+  if (!value) return DEFAULT_GOOGLE_ADS_ID;
+  if (/^(off|none|false|0|disabled?)$/i.test(value)) return "";
+  return value;
+}
+
+export const GOOGLE_ADS_ID: string = resolveGoogleAdsId(
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_ID,
+);
 
 /** Browser-safe proxy prefix that rewrites to the API. */
 export const API_PROXY_PREFIX = "/api/backend";
