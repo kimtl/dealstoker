@@ -60,6 +60,7 @@ public class SeoController {
                 Allow: /
                 Disallow: /admin
                 Disallow: /api/v1/admin
+                Disallow: /go/
 
                 Host: %s
                 Sitemap: %s/sitemap.xml

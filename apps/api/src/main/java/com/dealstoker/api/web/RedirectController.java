@@ -27,6 +27,7 @@ public class RedirectController {
                 .header(HttpHeaders.LOCATION, target)
                 // A cached redirect would bypass click logging.
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .header("X-Robots-Tag", "noindex, nofollow")
                 .build();
     }
 }

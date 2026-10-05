@@ -4,6 +4,7 @@ import com.dealstoker.api.domain.PageViewEvent;
 import com.dealstoker.api.repository.ClickEventRepository;
 import com.dealstoker.api.repository.PageViewEventRepository;
 import com.dealstoker.api.repository.ProductRepository;
+import com.dealstoker.api.util.BotUserAgents;
 import com.dealstoker.api.web.dto.AnalyticsDtos.AnalyticsSummary;
 import com.dealstoker.api.web.dto.AnalyticsDtos.DailyStat;
 import com.dealstoker.api.web.dto.AnalyticsDtos.PageViewRequest;
@@ -42,23 +43,14 @@ public class AnalyticsService {
         this.productRepository = productRepository;
     }
 
-    /** Crawlers and headless tools must not inflate "Top views". */
-    private static final java.util.regex.Pattern BOT_USER_AGENT = java.util.regex.Pattern.compile(
-            "(?i)bot|crawl|spider|slurp|headless|lighthouse|pingdom|uptime|monitor|facebookexternalhit|"
-                    + "preview|fetch|python-requests|curl/|wget/|java/|go-http-client|okhttp"
-    );
-
-    static boolean looksLikeBot(String userAgent) {
-        return userAgent == null || userAgent.isBlank() || BOT_USER_AGENT.matcher(userAgent).find();
-    }
-
     @Transactional
     public void recordPageView(PageViewRequest request, HttpServletRequest httpRequest) {
         String path = normalizePath(request != null ? request.path() : null);
         if (path == null || shouldIgnorePath(path)) {
             return;
         }
-        if (looksLikeBot(httpRequest.getHeader("User-Agent"))) {
+        // Crawlers and headless tools must not inflate "Top views".
+        if (BotUserAgents.isBot(httpRequest.getHeader("User-Agent"))) {
             return;
         }
 
@@ -89,11 +81,11 @@ public class AnalyticsService {
         int rangeDays = Math.max(1, Math.min(days, 90));
         Instant since = Instant.now().minus(rangeDays, ChronoUnit.DAYS);
 
-        long pageViews = pageViewEventRepository.countByOccurredAtGreaterThanEqual(since);
+        long pageViews = pageViewEventRepository.countHumanViewsSince(since);
         long uniqueVisitors = pageViewEventRepository.countDistinctVisitorsSince(since);
         long uniqueSessions = pageViewEventRepository.countDistinctSessionsSince(since);
-        long productViews = pageViewEventRepository.countByProductIsNotNullAndOccurredAtGreaterThanEqual(since);
-        long outboundClicks = clickEventRepository.countByOccurredAtGreaterThanEqual(since);
+        long productViews = pageViewEventRepository.countHumanProductViewsSince(since);
+        long outboundClicks = clickEventRepository.countHumanClicksSince(since);
 
         Map<LocalDate, long[]> dailyMap = new LinkedHashMap<>();
         LocalDate startDay = LocalDate.ofInstant(since, ZoneOffset.UTC);

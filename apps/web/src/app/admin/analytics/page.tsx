@@ -42,7 +42,9 @@ export default function AdminAnalyticsPage() {
     <div>
       <h1 className={styles.title}>Analytics</h1>
       <p className={styles.muted} style={{ marginBottom: "1rem" }}>
-        Site visits, product page views, and Amazon outbound clicks.
+        Site visits, product page views, and Amazon outbound clicks. Bots,
+        crawlers and requests without a browser user agent are excluded, and
+        repeat clicks on the same product within 30 minutes count once.
       </p>
 
       <div className={styles.actions} style={{ marginBottom: "1rem" }}>
