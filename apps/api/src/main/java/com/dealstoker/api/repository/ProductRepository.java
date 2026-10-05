@@ -78,7 +78,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             SELECT p.*
             FROM products p
             JOIN page_view_events v ON v.product_id = p.id AND v.occurred_at >= :since
-            WHERE p.status = :status
+            WHERE p.status = :status AND
+            """ + PageViewEventRepository.HUMAN_V + """
             GROUP BY p.id
             ORDER BY COUNT(v.id) DESC, MAX(v.occurred_at) DESC
             LIMIT :limit

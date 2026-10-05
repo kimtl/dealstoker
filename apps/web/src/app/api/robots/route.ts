@@ -11,6 +11,8 @@ function robotsBody(): string {
     "Disallow: /admin",
     "Disallow: /api/backend",
     "Disallow: /api/v1/admin",
+    // Affiliate redirects: crawlers following them inflate click stats.
+    "Disallow: /go/",
     "",
     `Host: ${host}`,
     `Sitemap: ${siteUrl}/sitemap.xml`,

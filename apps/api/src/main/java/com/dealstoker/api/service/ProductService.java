@@ -420,7 +420,7 @@ public class ProductService {
         Map<Long, Long> clickCounts = Map.of();
         Map<Long, Long> viewCounts = Map.of();
         if (!ids.isEmpty()) {
-            clickCounts = clickEventRepository.countByProductIds(ids).stream()
+            clickCounts = clickEventRepository.countHumanClicksByProductIds(ids).stream()
                     .collect(Collectors.toMap(
                             row -> ((Number) row[0]).longValue(),
                             row -> ((Number) row[1]).longValue()
