@@ -10,7 +10,7 @@ export async function AffiliateDisclosure({ className }: Props) {
   const t = await getMessages();
   return (
     <p className={`${styles.text} ${className || ""}`}>
-      {t.affiliateShort}{" "}
+      {t.affiliateShort} {t.affiliateNoCost}{" "}
       <Link href="/disclosure">{t.fullDisclosure}</Link>
     </p>
   );
