@@ -56,5 +56,14 @@ export function isUnconfiguredApiBase(apiBase: string): boolean {
   );
 }
 
+/**
+ * Google Ads tag ID (gtag.js). Public value; override at build time with
+ * NEXT_PUBLIC_GOOGLE_ADS_ID (set it to an empty string to disable the tag).
+ */
+export const GOOGLE_ADS_ID: string =
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_ID !== undefined
+    ? process.env.NEXT_PUBLIC_GOOGLE_ADS_ID
+    : "AW-18495871546";
+
 /** Browser-safe proxy prefix that rewrites to the API. */
 export const API_PROXY_PREFIX = "/api/backend";
