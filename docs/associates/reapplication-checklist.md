@@ -83,7 +83,7 @@ Do these in order:
 
 1. [ ] Confirm apex + www resolve and show the same branded site.
 2. [ ] Spot-check `/`, `/about`, `/disclosure`, `/privacy`, `/contact`, one `/c/*`, one `/p/*`.
-3. [ ] Confirm footer shows: *As an Amazon Associate I earn from qualifying purchases.*
+3. [ ] Confirm footer shows: *As an Amazon Associate I earn from qualifying purchases.* followed by the no-extra-cost clarification (Amazon pays the fee; shopper price unchanged).
 4. [ ] Confirm product CTA shows disclosure near “View on Amazon”.
 5. [ ] Open Associates Central → apply / re-apply for **Amazon.com (US)**.
 6. [ ] Enter `https://dealstoker.com` exactly; use the description drafts above.

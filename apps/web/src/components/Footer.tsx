@@ -36,7 +36,12 @@ export async function Footer() {
             {t.contact}
           </Link>
         </nav>
-        <p className={styles.disclosure}>{t.affiliateShort}</p>
+        <p className={styles.disclosure}>
+          {t.affiliateShort} {t.affiliateNoCost}{" "}
+          <Link href={locale === "ko" ? "/disclosure?hl=ko" : "/disclosure"}>
+            {t.fullDisclosure}
+          </Link>
+        </p>
         <p className={styles.copy}>
           © {year} {SITE_NAME} · {SITE_DOMAIN}
         </p>

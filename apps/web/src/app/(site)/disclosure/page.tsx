@@ -30,6 +30,9 @@ export default async function DisclosurePage() {
           <strong>{t.affiliateShort}</strong>
         </p>
         <p>{t.disclosureBody}</p>
+        <h2>{t.disclosureNoCostTitle}</h2>
+        <p>{t.disclosureNoCostBody}</p>
+        <p>{t.disclosureIndependenceBody}</p>
         <p>
           {SITE_NAME} · <a href="/about">{t.about}</a> ·{" "}
           <a href="/contact">{t.contact}</a>

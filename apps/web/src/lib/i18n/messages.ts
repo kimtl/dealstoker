@@ -14,6 +14,8 @@ export type Messages = {
   contact: string;
   fullDisclosure: string;
   affiliateShort: string;
+  /** Plain-language clarification: the fee is paid by Amazon, never by the shopper. */
+  affiliateNoCost: string;
   footerTagline: string;
   language: string;
   languageEn: string;
@@ -116,6 +118,9 @@ export type Messages = {
   disclosureTitle: string;
   disclosureLead: string;
   disclosureBody: string;
+  disclosureNoCostTitle: string;
+  disclosureNoCostBody: string;
+  disclosureIndependenceBody: string;
 
   privacyTitle: string;
   privacyLead: string;
@@ -161,6 +166,8 @@ const en: Messages = {
   fullDisclosure: "Full disclosure",
   affiliateShort:
     "As an Amazon Associate I earn from qualifying purchases.",
+  affiliateNoCost:
+    "This never costs you extra: Amazon pays the referral fee, and you pay the same price as you would on Amazon directly.",
   footerTagline:
     "Curated Amazon.com picks for US shoppers — practical deals, clear context, no noise.",
   language: "Language",
@@ -273,7 +280,7 @@ const en: Messages = {
     "Editors review ratings, review volume, usefulness, and price positioning before a product is published. We favor clear use cases over hype. Listings can be updated or unpublished when availability or quality signals change. Prices shown on {site} may differ from the live price on Amazon.com at the moment you buy.",
   aboutAffiliateTitle: "Affiliate relationship",
   aboutAffiliate:
-    "{site} is a participant in the Amazon Services LLC Associates Program. As an Amazon Associate, we may earn a commission when you buy through our links, at no extra cost to you.",
+    "{site} is a participant in the Amazon Services LLC Associates Program. When you buy through our links, Amazon pays us a small referral fee out of its own revenue. You are never charged for this: your price, shipping, and returns are exactly the same as when you shop on Amazon.com directly.",
 
   contactTitle: "Contact",
   contactLead: "Get in touch with the DealStoker team.",
@@ -281,9 +288,14 @@ const en: Messages = {
     "Questions about a listing, partnership ideas, or privacy requests? Email hello@{domain}. For privacy-specific requests, use privacy@{domain}.",
 
   disclosureTitle: "Affiliate Disclosure",
-  disclosureLead: "How DealStoker earns commissions.",
+  disclosureLead: "How DealStoker is funded, and why it never costs you more.",
   disclosureBody:
     "DealStoker is a participant in the Amazon Services LLC Associates Program, an affiliate advertising program designed to provide a means for sites to earn advertising fees by advertising and linking to Amazon.com. Prices and availability are accurate as of the time of writing and may change.",
+  disclosureNoCostTitle: "You are never charged for this",
+  disclosureNoCostBody:
+    "When you click a product link on DealStoker and buy on Amazon.com, Amazon pays DealStoker a referral fee out of its own revenue. Nothing is added to your order: you pay exactly the same price, shipping, and tax as you would by going to Amazon.com directly, and your returns and warranty are handled by Amazon as usual. There is no surcharge, markup, or hidden fee of any kind.",
+  disclosureIndependenceBody:
+    "Referral fees do not influence which products we list or how we describe them. We choose deals based on price, ratings, and review volume, and we say so when a product has caveats.",
 
   privacyTitle: "Privacy Policy",
   privacyLead: "How we handle information on DealStoker.",
@@ -329,7 +341,9 @@ const ko: Messages = {
   contact: "문의",
   fullDisclosure: "전체 고지 보기",
   affiliateShort:
-    "Amazon Associates로서 적격 구매 시 수수료를 받을 수 있습니다.",
+    "DealStoker는 Amazon Associates 회원으로, 링크를 통한 적격 구매가 발생하면 Amazon으로부터 소개 수수료를 받습니다.",
+  affiliateNoCost:
+    "구매자에게 추가 비용은 전혀 없습니다. 수수료는 Amazon이 지급하며, 결제 금액은 Amazon에서 직접 구매할 때와 동일합니다.",
   footerTagline:
     "미국 쇼핑객을 위한 Amazon.com 큐레이션 — 실용적인 딜, 명확한 정보, 군더더기 없음.",
   language: "언어",
@@ -439,7 +453,7 @@ const ko: Messages = {
     "편집자가 평점, 리뷰 수, 실용성, 가격 포지션을 검토한 뒤 공개합니다. 과대광고보다 명확한 사용 상황을 우선합니다. 재고·품질 신호가 바뀌면 목록을 수정하거나 비공개할 수 있습니다. {site}에 표시된 가격은 구매 시점의 Amazon.com 가격과 다를 수 있습니다.",
   aboutAffiliateTitle: "제휴 관계",
   aboutAffiliate:
-    "{site}는 Amazon Services LLC Associates Program 참여자입니다. Amazon Associate로서 링크를 통한 구매 시 추가 비용 없이 수수료를 받을 수 있습니다.",
+    "{site}는 Amazon Services LLC Associates Program 참여자입니다. 링크를 통해 구매하시면 Amazon이 자사 수익에서 소액의 소개 수수료를 {site}에 지급합니다. 구매자가 부담하는 금액은 없으며, 가격·배송·반품 조건은 Amazon.com에서 직접 구매할 때와 완전히 동일합니다.",
 
   contactTitle: "문의",
   contactLead: "DealStoker 팀에 연락하세요.",
@@ -447,9 +461,14 @@ const ko: Messages = {
     "상품, 파트너십, 개인정보 관련 문의는 hello@{domain}으로 보내 주세요. 개인정보 요청은 privacy@{domain}을 이용해 주세요.",
 
   disclosureTitle: "제휴 고지",
-  disclosureLead: "DealStoker의 수수료 안내.",
+  disclosureLead: "DealStoker의 수익 구조와 구매자에게 추가 비용이 없는 이유.",
   disclosureBody:
-    "DealStoker는 Amazon.com에 광고하고 링크하여 광고 수수료를 받을 수 있도록 마련된 Amazon Services LLC Associates Program 참여자입니다. 가격과 재고 정보는 작성 시점 기준이며 변경될 수 있습니다.",
+    "DealStoker는 Amazon.com에 광고하고 링크하는 사이트가 Amazon으로부터 광고 수수료를 받을 수 있도록 마련된 Amazon Services LLC Associates Program 참여자입니다. 가격과 재고 정보는 작성 시점 기준이며 변경될 수 있습니다.",
+  disclosureNoCostTitle: "구매자에게 청구되는 비용은 없습니다",
+  disclosureNoCostBody:
+    "DealStoker의 상품 링크를 눌러 Amazon.com에서 구매하면, Amazon이 자사 수익에서 DealStoker에 소개 수수료를 지급합니다. 주문 금액에 더해지는 것은 없습니다. 상품 가격, 배송비, 세금은 Amazon.com에 직접 접속해 구매할 때와 정확히 같고, 반품과 보증도 평소처럼 Amazon이 처리합니다. 추가 요금, 가격 인상, 숨은 비용은 어떤 형태로도 없습니다.",
+  disclosureIndependenceBody:
+    "소개 수수료는 어떤 상품을 소개하고 어떻게 설명하는지에 영향을 주지 않습니다. 딜은 가격, 평점, 리뷰 수를 기준으로 선정하며, 단점이 있는 상품은 그 점을 함께 적습니다.",
 
   privacyTitle: "개인정보 처리방침",
   privacyLead: "DealStoker의 정보 처리 안내.",

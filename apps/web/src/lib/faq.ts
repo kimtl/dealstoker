@@ -181,7 +181,7 @@ function genericCategoryFaqs(categoryName: string): FaqItem[] {
     },
     {
       question: "Does DealStoker earn money from these links?",
-      answer: `Yes. As an Amazon Associate, ${SITE_NAME} may earn a commission when you buy through our links, at no extra cost to you.`,
+      answer: `Yes. As an Amazon Associate, ${SITE_NAME} earns a referral fee from Amazon when you buy through our links. Amazon pays that fee out of its own revenue — nothing is added to your price, shipping, or tax.`,
     },
   ];
 }
@@ -215,7 +215,7 @@ export function getAboutFaqs(): FaqItem[] {
     },
     {
       question: "Is DealStoker an Amazon Associate?",
-      answer: `Yes. ${SITE_NAME} participates in the Amazon Services LLC Associates Program and may earn a commission from qualifying purchases at no extra cost to you.`,
+      answer: `Yes. ${SITE_NAME} participates in the Amazon Services LLC Associates Program. Amazon pays us a referral fee on qualifying purchases; you are never charged for it and pay the same price as on Amazon.com directly.`,
     },
     {
       question: "Why might the price differ on Amazon?",
@@ -257,7 +257,7 @@ export function getProductFaqs(product: ProductDetail): FaqItem[] {
     },
     {
       question: "Does clicking the Amazon link cost more?",
-      answer: `No. Buying through ${SITE_NAME} affiliate links does not increase the Amazon price. We may earn a commission if you purchase.`,
+      answer: `No. The price, shipping, and tax are exactly what Amazon.com charges everyone. If you buy, Amazon pays ${SITE_NAME} a referral fee from its own revenue — it is not added to your order.`,
     },
   ];
 
