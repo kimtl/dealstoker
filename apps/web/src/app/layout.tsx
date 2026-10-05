@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope, Noto_Sans_KR } from "next/font/google";
+import { headers } from "next/headers";
+import { GoogleTagHead, shouldRenderGoogleTag } from "@/components/GoogleTag";
 import { getLocale } from "@/lib/i18n";
+import { PATHNAME_HEADER } from "@/lib/i18n/locale";
 import {
   buildPageMetadata,
   homeMetaDescription,
@@ -45,6 +48,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getLocale();
+  const pathname = (await headers()).get(PATHNAME_HEADER);
   const fontClass = [
     fraunces.variable,
     manrope.variable,
@@ -54,6 +58,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
+      <head>{shouldRenderGoogleTag(pathname) ? <GoogleTagHead /> : null}</head>
       <body className={fontClass}>{children}</body>
     </html>
   );

@@ -1,7 +1,6 @@
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { AnalyticsBeacon } from "@/components/AnalyticsBeacon";
-import { GoogleTag } from "@/components/GoogleTag";
 import { getCategories } from "@/lib/api";
 
 export default async function SiteLayout({
@@ -18,7 +17,6 @@ export default async function SiteLayout({
 
   return (
     <>
-      <GoogleTag />
       <AnalyticsBeacon />
       <Header categories={categories} compact />
       {children}
