@@ -4,6 +4,8 @@ export const LOCALES: Locale[] = ["en", "ko"];
 export const DEFAULT_LOCALE: Locale = "en";
 export const LOCALE_COOKIE = "ds_locale";
 export const LOCALE_HEADER = "x-dealstoker-locale";
+/** Request pathname forwarded by the proxy so the root layout can tell admin from site pages. */
+export const PATHNAME_HEADER = "x-dealstoker-pathname";
 /** Crawlable language query (?hl=ko). Preferred over cookie for SEO bots. */
 export const LOCALE_QUERY = "hl";
 

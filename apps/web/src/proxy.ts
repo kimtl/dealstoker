@@ -5,6 +5,7 @@ import {
   LOCALE_COOKIE,
   LOCALE_HEADER,
   LOCALE_QUERY,
+  PATHNAME_HEADER,
   stripLocaleQuery,
 } from "@/lib/i18n/locale";
 import {
@@ -76,6 +77,7 @@ export function proxy(request: NextRequest) {
   );
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(LOCALE_HEADER, locale);
+  requestHeaders.set(PATHNAME_HEADER, pathname);
 
   const response = NextResponse.next({
     request: { headers: requestHeaders },
