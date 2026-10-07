@@ -3,6 +3,7 @@ package com.dealstoker.api.service;
 import com.dealstoker.api.domain.Guide;
 import com.dealstoker.api.domain.GuideStatus;
 import com.dealstoker.api.repository.GuideRepository;
+import com.dealstoker.api.repository.PageViewEventRepository;
 import com.dealstoker.api.util.Slugify;
 import com.dealstoker.api.web.ApiExceptionHandler.NotFoundException;
 import com.dealstoker.api.web.dto.GuideDtos.GuideDetail;
@@ -14,20 +15,30 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GuideService {
 
     private static final int MAX_PAGE_SIZE = 50;
+    private static final Duration RECENT_VIEWS_WINDOW = Duration.ofDays(7);
 
     private final GuideRepository guideRepository;
     private final CategoryService categoryService;
+    private final PageViewEventRepository pageViewEventRepository;
 
-    public GuideService(GuideRepository guideRepository, CategoryService categoryService) {
+    public GuideService(
+            GuideRepository guideRepository,
+            CategoryService categoryService,
+            PageViewEventRepository pageViewEventRepository
+    ) {
         this.guideRepository = guideRepository;
         this.categoryService = categoryService;
+        this.pageViewEventRepository = pageViewEventRepository;
     }
 
     // ---------- public ----------
@@ -64,7 +75,17 @@ public class GuideService {
         Page<Guide> result = status == null
                 ? guideRepository.findAllByOrderByUpdatedAtDesc(pageable)
                 : guideRepository.findByStatusOrderByUpdatedAtDesc(status, pageable);
-        return toPage(result);
+        Map<String, long[]> views = viewCountsByPath(result.getContent());
+        return new PageResponse<>(
+                result.getContent().stream().map(guide -> {
+                    long[] counts = views.getOrDefault(guidePath(guide.getSlug()), new long[] {0, 0});
+                    return GuideSummary.from(guide, counts[0], counts[1]);
+                }).toList(),
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages()
+        );
     }
 
     @Transactional(readOnly = true)
@@ -135,6 +156,27 @@ public class GuideService {
             guide.setPublishedAt(Instant.now());
         }
         guide.setStatus(next);
+    }
+
+    /** Guide pages are recorded by the page-view beacon as /guides/{slug} (query string stripped). */
+    private Map<String, long[]> viewCountsByPath(List<Guide> guides) {
+        Map<String, long[]> counts = new HashMap<>();
+        if (guides.isEmpty()) {
+            return counts;
+        }
+        List<String> paths = guides.stream().map(guide -> guidePath(guide.getSlug())).toList();
+        Instant since = Instant.now().minus(RECENT_VIEWS_WINDOW);
+        for (Object[] row : pageViewEventRepository.countByPaths(paths, since)) {
+            counts.put((String) row[0], new long[] {
+                    ((Number) row[1]).longValue(),
+                    ((Number) row[2]).longValue()
+            });
+        }
+        return counts;
+    }
+
+    private static String guidePath(String slug) {
+        return "/guides/" + slug;
     }
 
     private String uniqueSlug(String base, Long currentId) {

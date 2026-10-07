@@ -233,6 +233,10 @@ export type GuideSummary = {
   status: GuideStatus;
   publishedAt: string | null;
   updatedAt: string | null;
+  /** Human page views, all time (admin list only). */
+  viewCount?: number | null;
+  /** Human page views in the last 7 days (admin list only). */
+  viewCount7d?: number | null;
 };
 
 export type GuideDetail = GuideSummary & {

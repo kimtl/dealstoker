@@ -26,9 +26,17 @@ public final class GuideDtos {
             String categoryName,
             GuideStatus status,
             Instant publishedAt,
-            Instant updatedAt
+            Instant updatedAt,
+            /** Human page views, all time (admin list only; null elsewhere). */
+            Long viewCount,
+            /** Human page views in the last 7 days (admin list only; null elsewhere). */
+            Long viewCount7d
     ) {
         public static GuideSummary from(Guide guide) {
+            return from(guide, null, null);
+        }
+
+        public static GuideSummary from(Guide guide, Long viewCount, Long viewCount7d) {
             return new GuideSummary(
                     guide.getId(),
                     guide.getSlug(),
@@ -43,7 +51,9 @@ public final class GuideDtos {
                     guide.getCategory() != null ? guide.getCategory().getName() : null,
                     guide.getStatus(),
                     guide.getPublishedAt(),
-                    guide.getUpdatedAt()
+                    guide.getUpdatedAt(),
+                    viewCount,
+                    viewCount7d
             );
         }
     }
