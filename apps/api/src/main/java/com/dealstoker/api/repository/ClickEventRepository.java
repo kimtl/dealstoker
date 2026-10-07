@@ -2,6 +2,7 @@ package com.dealstoker.api.repository;
 
 import com.dealstoker.api.domain.ClickEvent;
 import com.dealstoker.api.util.BotUserAgents;
+import com.dealstoker.api.util.SiteTime;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,6 +24,9 @@ public interface ClickEventRepository extends JpaRepository<ClickEvent, Long> {
 
     boolean existsByProductIdAndIpHashAndOccurredAtAfter(Long productId, String ipHash, Instant since);
 
+    /** Calendar day in the site's reporting time zone (US Eastern). */
+    String DAY_C = " CAST(c.occurred_at AT TIME ZONE '" + SiteTime.ZONE_ID + "' AS date) ";
+
     @Query(value = "SELECT COUNT(*) FROM click_events c WHERE c.occurred_at >= :since AND" + HUMAN_C,
             nativeQuery = true)
     long countHumanClicksSince(@Param("since") Instant since);
@@ -37,12 +41,15 @@ public interface ClickEventRepository extends JpaRepository<ClickEvent, Long> {
     List<Object[]> countHumanClicksByProductIds(@Param("productIds") List<Long> productIds);
 
     @Query(value = """
-            SELECT CAST(c.occurred_at AT TIME ZONE 'UTC' AS date) AS day,
+            SELECT
+            """ + DAY_C + """
+            AS day,
                    COUNT(*) AS clicks
             FROM click_events c
             WHERE c.occurred_at >= :since AND
             """ + HUMAN_C + """
-            GROUP BY CAST(c.occurred_at AT TIME ZONE 'UTC' AS date)
+            GROUP BY
+            """ + DAY_C + """
             ORDER BY day ASC
             """, nativeQuery = true)
     List<Object[]> dailyClicksSince(@Param("since") Instant since);

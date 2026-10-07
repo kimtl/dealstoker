@@ -6,6 +6,7 @@ import com.dealstoker.api.repository.PageViewEventRepository;
 import com.dealstoker.api.repository.ProductRepository;
 import com.dealstoker.api.util.BotUserAgents;
 import com.dealstoker.api.util.IpHasher;
+import com.dealstoker.api.util.SiteTime;
 import com.dealstoker.api.web.dto.AnalyticsDtos.AnalyticsSummary;
 import com.dealstoker.api.web.dto.AnalyticsDtos.DailyStat;
 import com.dealstoker.api.web.dto.AnalyticsDtos.PageViewRequest;
@@ -16,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -89,8 +89,8 @@ public class AnalyticsService {
         long outboundClicks = clickEventRepository.countHumanClicksSince(since);
 
         Map<LocalDate, long[]> dailyMap = new LinkedHashMap<>();
-        LocalDate startDay = LocalDate.ofInstant(since, ZoneOffset.UTC);
-        LocalDate endDay = LocalDate.now(ZoneOffset.UTC);
+        LocalDate startDay = LocalDate.ofInstant(since, SiteTime.ZONE);
+        LocalDate endDay = LocalDate.now(SiteTime.ZONE);
         for (LocalDate day = startDay; !day.isAfter(endDay); day = day.plusDays(1)) {
             dailyMap.put(day, new long[]{0, 0, 0, 0, 0});
         }

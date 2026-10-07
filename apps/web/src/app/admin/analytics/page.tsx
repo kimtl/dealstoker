@@ -95,7 +95,7 @@ export default function AdminAnalyticsPage() {
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Date (UTC)</th>
+                  <th>Date (US Eastern)</th>
                   <th>Visitors</th>
                   <th>Sessions</th>
                   <th>Page views</th>

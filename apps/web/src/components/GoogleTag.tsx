@@ -1,8 +1,9 @@
+import { googleTagInitScript, googleTagSrc, isValidGoogleTagId } from "@/lib/google-tag";
 import { GOOGLE_ADS_ID } from "@/lib/site";
 
 /**
  * Google tag (gtag.js) for Google Ads, rendered as plain <script> elements
- * inside the root layout's <head>.
+ * inside the root layout's <head>, with the same text as Google's snippet.
  *
  * It must be in the server-rendered HTML exactly like Google's snippet:
  * next/script (afterInteractive) only emitted a preload link and injected the
@@ -10,22 +11,13 @@ import { GOOGLE_ADS_ID } from "@/lib/site";
  * source and reported the installation as failed.
  */
 export function GoogleTagHead() {
-  if (!GOOGLE_ADS_ID) return null;
-  const id = JSON.stringify(GOOGLE_ADS_ID);
+  if (!GOOGLE_ADS_ID || !isValidGoogleTagId(GOOGLE_ADS_ID)) return null;
   return (
     <>
-      <script
-        async
-        src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GOOGLE_ADS_ID)}`}
-      />
+      <script async src={googleTagSrc(GOOGLE_ADS_ID)} />
       <script
         id="google-tag-init"
-        dangerouslySetInnerHTML={{
-          __html: `window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', ${id});`,
-        }}
+        dangerouslySetInnerHTML={{ __html: googleTagInitScript(GOOGLE_ADS_ID) }}
       />
     </>
   );
