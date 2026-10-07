@@ -21,9 +21,10 @@ export async function generateMetadata(): Promise<Metadata> {
     locale,
     keywords:
       locale === "ko"
-        ? [SITE_NAME, "아마존 딜", "딜 큐레이션", "미국 쇼핑", "Amazon.com"]
+        ? [SITE_NAME, "아마존 구매 가이드", "아마존 딜", "미국 쇼핑", "Amazon.com"]
         : [
             SITE_NAME,
+            "Amazon buying guides",
             "Amazon deals",
             "Amazon Associate",
             "deal curation",
@@ -34,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  const { t } = await getI18n();
+  const { locale, t } = await getI18n();
   const faqs = getAboutFaqs();
   const faqJsonLd = buildFaqJsonLd(faqs);
   const vars = { site: SITE_NAME, domain: SITE_DOMAIN };
@@ -47,21 +48,29 @@ export default async function AboutPage() {
           {formatMessage(t.aboutTitle, vars)}
         </h1>
         <p className={styles.updated}>{t.aboutLead}</p>
-        <p>{formatMessage(t.aboutP1, vars)}</p>
+        <p>{formatMessage(t.aboutIntro, vars)}</p>
 
-        <h2>{t.aboutMissionTitle}</h2>
-        <p>{formatMessage(t.aboutMission, vars)}</p>
+        <h2>{t.aboutWhyTitle}</h2>
+        <p>{t.aboutWhy}</p>
 
         <h2>{t.aboutFindTitle}</h2>
         <ul>
+          <li>
+            <a href={locale === "ko" ? "/guides?hl=ko" : "/guides"}>
+              {t.guidesTitle}
+            </a>
+            : {t.aboutGuidesItem}
+          </li>
           <li>{t.aboutFeaturedItem}</li>
           <li>{t.aboutTopViewsItem}</li>
           <li>{t.aboutCategoryItem}</li>
           <li>{t.aboutProductItem}</li>
         </ul>
 
-        <h2>{t.aboutChooseTitle}</h2>
-        <p>{formatMessage(t.aboutChoose, vars)}</p>
+        <h2>{t.aboutHowTitle}</h2>
+        <p>{t.aboutHowPick}</p>
+        <p>{t.aboutHowAi}</p>
+        <p>{formatMessage(t.aboutHowPrices, vars)}</p>
 
         <h2>{t.aboutAffiliateTitle}</h2>
         <p>
@@ -69,12 +78,12 @@ export default async function AboutPage() {
           <a href="/disclosure">{t.disclosure}</a>
         </p>
 
-        <FaqSection items={faqs} />
-
-        <h2>{t.contact}</h2>
+        <h2>{t.aboutFeedbackTitle}</h2>
         <p>
-          <a href="/contact">{t.contact}</a>
+          {t.aboutFeedback} <a href="/contact">{t.contact}</a>
         </p>
+
+        <FaqSection items={faqs} />
       </article>
     </main>
   );

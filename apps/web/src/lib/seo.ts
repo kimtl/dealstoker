@@ -209,14 +209,14 @@ export function searchMetaDescription(q: string, locale: Locale = "en"): string 
 
 export function aboutMetaTitle(locale: Locale = "en"): string {
   return locale === "ko"
-    ? `${SITE_NAME} 소개 — 미국 쇼핑객을 위한 아마존 딜 큐레이션`
-    : `About ${SITE_NAME} — Amazon Deal Curation for US Shoppers`;
+    ? `${SITE_NAME} 소개 — 미국 쇼핑객을 위한 아마존 구매 가이드`
+    : `About ${SITE_NAME} — Amazon Buying Guides for US Shoppers`;
 }
 
 export function aboutMetaDescription(locale: Locale = "en"): string {
   return locale === "ko"
-    ? `${SITE_NAME}는 미국 온라인 쇼핑객을 위한 아마존 딜 큐레이션 사이트입니다. 잡음을 줄이고 살펴볼 만한 Amazon.com 딜을 모읍니다.`
-    : "DealStoker is an Amazon deal curation site for US online shoppers. Since 2026 we cut the noise and highlight practical Amazon.com deals worth your attention.";
+    ? `${SITE_NAME}는 미국 쇼핑객을 위해 Amazon.com 구매 가이드와 살펴볼 만한 상품을 정리하는 작은 독립 사이트입니다. 상품 선정 방식과 수익 구조를 소개합니다.`
+    : `${SITE_NAME} is a small, independent site with Amazon.com buying guides and products worth a look for US shoppers. How we pick products and how we make money.`;
 }
 
 export function contactMetaTitle(locale: Locale = "en"): string {

@@ -206,12 +206,12 @@ export function getAboutFaqs(): FaqItem[] {
   return [
     {
       question: `What is ${SITE_NAME}?`,
-      answer: `${SITE_NAME} is an Amazon deal curation site for US online shoppers. We highlight practical Amazon.com products with clear prices and useful context so you can compare options faster.`,
+      answer: `${SITE_NAME} is a small, independent site for US shoppers. We publish buying guides on what to check before you buy on Amazon.com, plus a short list of products we think are worth a look, each shown with the time its price was last checked.`,
     },
     {
       question: "How do you choose which deals to publish?",
       answer:
-        "Editors review ratings, review volume, usefulness, and price positioning. We favor clear use cases over hype, and we can update or unpublish listings when quality or availability signals change.",
+        "Every product starts as a draft and goes live only after we choose to publish it. We look at price, rating, review volume, and whether the product has a clear everyday use. AI writing tools help with some first drafts; we decide what is published and correct or remove listings that turn out to be wrong or out of date.",
     },
     {
       question: "Is DealStoker an Amazon Associate?",
