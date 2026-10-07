@@ -2,6 +2,8 @@ package com.dealstoker.api.web.dto;
 
 import com.dealstoker.api.domain.Guide;
 import com.dealstoker.api.domain.GuideStatus;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -25,6 +27,8 @@ public final class GuideDtos {
             String categorySlug,
             String categoryName,
             GuideStatus status,
+            boolean featured,
+            int featuredRank,
             Instant publishedAt,
             Instant updatedAt,
             /** Human page views, all time (admin list only; null elsewhere). */
@@ -50,6 +54,8 @@ public final class GuideDtos {
                     guide.getCategory() != null ? guide.getCategory().getSlug() : null,
                     guide.getCategory() != null ? guide.getCategory().getName() : null,
                     guide.getStatus(),
+                    guide.isFeatured(),
+                    guide.getFeaturedRank(),
                     guide.getPublishedAt(),
                     guide.getUpdatedAt(),
                     viewCount,
@@ -73,6 +79,8 @@ public final class GuideDtos {
             String categorySlug,
             String categoryName,
             GuideStatus status,
+            boolean featured,
+            int featuredRank,
             String seoTitle,
             String seoDescription,
             Instant publishedAt,
@@ -95,6 +103,8 @@ public final class GuideDtos {
                     guide.getCategory() != null ? guide.getCategory().getSlug() : null,
                     guide.getCategory() != null ? guide.getCategory().getName() : null,
                     guide.getStatus(),
+                    guide.isFeatured(),
+                    guide.getFeaturedRank(),
                     guide.getSeoTitle(),
                     guide.getSeoDescription(),
                     guide.getPublishedAt(),
@@ -117,7 +127,11 @@ public final class GuideDtos {
             @Size(max = 120) String authorName,
             GuideStatus status,
             @Size(max = 255) String seoTitle,
-            @Size(max = 500) String seoDescription
+            @Size(max = 500) String seoDescription,
+            /** Null keeps the current value. */
+            Boolean featured,
+            /** Null keeps the current value; lower ranks lead the homepage. */
+            @Min(0) @Max(999) Integer featuredRank
     ) {}
 
     /** AI first draft: category and/or topic, optional product slugs to embed. */

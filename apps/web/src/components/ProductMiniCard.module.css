@@ -1,0 +1,106 @@
+.listWrap {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.list,
+.listTwo {
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.listTwo {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.card {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: center;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--text);
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+.card:hover,
+.card:focus-visible {
+  background: var(--row-hover);
+  border-color: rgba(31, 111, 235, 0.35);
+}
+
+.thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--white);
+}
+
+.main {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 0.88rem;
+  line-height: 1.35;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.priceRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.5rem;
+  font-size: 0.84rem;
+}
+
+.price {
+  font-weight: 800;
+  color: var(--price);
+}
+
+.listPrice {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  font-size: 0.78rem;
+}
+
+.rating {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.updated {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}

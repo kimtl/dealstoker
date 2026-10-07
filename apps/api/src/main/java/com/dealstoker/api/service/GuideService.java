@@ -146,6 +146,12 @@ public class GuideService {
         guide.setSeoTitle(blankToNull(request.seoTitle()));
         guide.setSeoDescription(blankToNull(request.seoDescription()));
         guide.setCategory(request.categoryId() != null ? categoryService.requireById(request.categoryId()) : null);
+        if (request.featured() != null) {
+            guide.setFeatured(request.featured());
+        }
+        if (request.featuredRank() != null) {
+            guide.setFeaturedRank(request.featuredRank());
+        }
 
         applyStatus(guide, request.status() != null ? request.status() : guide.getStatus());
     }

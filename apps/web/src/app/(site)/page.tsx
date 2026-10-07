@@ -3,9 +3,11 @@ import Link from "next/link";
 import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { DealList } from "@/components/DealList";
 import { JsonLd } from "@/components/JsonLd";
-import { getGuides, getHome, getProducts } from "@/lib/api";
+import { getGuides, getHome, getMagazine, getProducts } from "@/lib/api";
 import { GuideCard } from "@/components/GuideCard";
-import type { GuideSummary } from "@/lib/types";
+import { GuideLead } from "@/components/GuideLead";
+import { ProductMiniList } from "@/components/ProductMiniCard";
+import type { GuideSummary, MagazineResponse } from "@/lib/types";
 import { formatMessage, getI18n, getLocale, localizeCategoryName } from "@/lib/i18n";
 import {
   buildItemListJsonLd,
@@ -19,6 +21,9 @@ import {
 import { SITE_NAME } from "@/lib/site";
 import type { ProductSummary } from "@/lib/types";
 import styles from "./page.module.css";
+
+/** Below this many published guides the homepage keeps the deal-first layout. */
+const MIN_GUIDES_FOR_MAGAZINE = 4;
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -67,11 +72,24 @@ export default async function HomePage() {
     }
   }
 
-  let guides: GuideSummary[] = [];
+  let magazine: MagazineResponse | null = null;
   try {
-    guides = (await getGuides({ size: 3 })).items;
+    magazine = await getMagazine();
   } catch {
-    guides = [];
+    magazine = null;
+  }
+  const isMagazine =
+    magazine !== null &&
+    magazine.publishedGuides >= MIN_GUIDES_FOR_MAGAZINE &&
+    magazine.stories.length > 0;
+
+  let guides: GuideSummary[] = [];
+  if (!isMagazine) {
+    try {
+      guides = (await getGuides({ size: 3 })).items;
+    } catch {
+      guides = [];
+    }
   }
 
   const listedForSchema = [
@@ -89,6 +107,88 @@ export default async function HomePage() {
     { id: 2, slug: "electronics", name: "Electronics" },
     { id: 3, slug: "outdoor-sports", name: "Outdoor & Sports" },
   ];
+  const guidesHref = locale === "ko" ? "/guides?hl=ko" : "/guides";
+
+  const intro = (
+    <section className={styles.intro} aria-label={t.about}>
+      <p>{formatMessage(t.homeIntro1, { site: SITE_NAME })}</p>
+      <p>{t.homeIntro2}</p>
+    </section>
+  );
+
+  const featuredSection = (
+    <section
+      id="featured"
+      className={styles.feed}
+      aria-labelledby="featured-heading"
+    >
+      <div className={styles.feedHeader}>
+        <div>
+          <h2 id="featured-heading" className={styles.feedTitle}>
+            {t.featuredDeals}
+          </h2>
+          <p className={styles.feedMeta}>{t.featuredMeta}</p>
+        </div>
+        <span className={styles.pill}>{t.featured}</span>
+      </div>
+      <DealList
+        products={recommended}
+        showNewBadge={false}
+        emptyMessage={t.emptyFeatured}
+      />
+    </section>
+  );
+
+  const topViewsSection = (
+    <section
+      id="top-views"
+      className={styles.feed}
+      aria-labelledby="top-views-heading"
+    >
+      <div className={styles.feedHeader}>
+        <div>
+          <h2 id="top-views-heading" className={styles.feedTitle}>
+            {t.topViews}
+          </h2>
+          <p className={styles.feedMeta}>{t.topViewsMeta}</p>
+        </div>
+        <span className={styles.pillHot}>{t.trending}</span>
+      </div>
+      <DealList
+        products={topViews}
+        showNewBadge={false}
+        showViewRank
+        emptyMessage={t.emptyTopViews}
+      />
+    </section>
+  );
+
+  const dealFeedSection = (
+    <section
+      id="deal-feed"
+      className={styles.feed}
+      aria-labelledby="feed-heading"
+    >
+      <div className={styles.feedHeader}>
+        <div>
+          <h2 id="feed-heading" className={styles.feedTitle}>
+            {t.latestDeals}
+          </h2>
+          <p className={styles.feedMeta}>
+            {formatMessage(t.latestMeta, {
+              count: deals.length,
+              suffix: deals.length === 1 ? t.livePick : t.livePicks,
+            })}
+          </p>
+        </div>
+        <span className={styles.live}>
+          <span className={styles.liveDot} aria-hidden />
+          {t.updated}
+        </span>
+      </div>
+      <DealList products={deals} emptyMessage={t.emptyLatest} />
+    </section>
+  );
 
   return (
     <main className={styles.main}>
@@ -111,13 +211,23 @@ export default async function HomePage() {
             <p id="hero-brand" className={styles.brand}>
               {SITE_NAME}
             </p>
-            <h1 className={styles.headline}>{t.homeHeadline}</h1>
-            <p className={styles.support}>{t.homeSupport}</p>
+            <h1 className={styles.headline}>
+              {isMagazine ? t.magazineHeadline : t.homeHeadline}
+            </h1>
+            <p className={styles.support}>
+              {isMagazine ? t.magazineSupport : t.homeSupport}
+            </p>
           </div>
           <div className={styles.ctaGroup}>
-            <Link href="#featured" className={styles.ctaPrimary}>
-              {t.featuredDeals}
-            </Link>
+            {isMagazine ? (
+              <Link href="#stories" className={styles.ctaPrimary}>
+                {t.guidesTitle}
+              </Link>
+            ) : (
+              <Link href="#featured" className={styles.ctaPrimary}>
+                {t.featuredDeals}
+              </Link>
+            )}
             <Link href="#deal-feed" className={styles.ctaSecondary}>
               {t.allDeals}
             </Link>
@@ -125,7 +235,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <div className={styles.shell}>
+      <div
+        className={
+          isMagazine ? `${styles.shell} ${styles.shellMagazine}` : styles.shell
+        }
+      >
         <aside className={styles.sidebar} aria-label={t.categories}>
           <h2 className={styles.sideTitle}>{t.categories}</h2>
           <ul className={styles.catList}>
@@ -140,115 +254,173 @@ export default async function HomePage() {
             )}
           </ul>
           <nav className={styles.jumpNav} aria-label={t.frontpageSections}>
-            <a href="#featured">{t.featured}</a>
-            <a href="#top-views">{t.topViews}</a>
-            <a href="#deal-feed">{t.latestDeals}</a>
+            {isMagazine ? (
+              <>
+                <a href="#stories">{t.guidesTitle}</a>
+                {magazine && magazine.sections.length > 0 ? (
+                  <a href="#by-category">{t.byCategory}</a>
+                ) : null}
+                <a href="#top-views">{t.topViews}</a>
+                <a href="#featured">{t.featured}</a>
+                <a href="#deal-feed">{t.latestDeals}</a>
+              </>
+            ) : (
+              <>
+                <a href="#featured">{t.featured}</a>
+                <a href="#top-views">{t.topViews}</a>
+                <a href="#deal-feed">{t.latestDeals}</a>
+              </>
+            )}
           </nav>
           <AffiliateDisclosure className={styles.sideDisclosure} />
         </aside>
 
-        <div className={styles.feedStack}>
-          <section className={styles.intro} aria-label={t.about}>
-            <p>{formatMessage(t.homeIntro1, { site: SITE_NAME })}</p>
-            <p>{t.homeIntro2}</p>
-          </section>
-
-          <section
-            id="featured"
-            className={styles.feed}
-            aria-labelledby="featured-heading"
-          >
-            <div className={styles.feedHeader}>
-              <div>
-                <h2 id="featured-heading" className={styles.feedTitle}>
-                  {t.featuredDeals}
-                </h2>
-                <p className={styles.feedMeta}>{t.featuredMeta}</p>
-              </div>
-              <span className={styles.pill}>{t.featured}</span>
-            </div>
-            <DealList
-              products={recommended}
-              showNewBadge={false}
-              emptyMessage={t.emptyFeatured}
-            />
-          </section>
-
-          <section
-            id="top-views"
-            className={styles.feed}
-            aria-labelledby="top-views-heading"
-          >
-            <div className={styles.feedHeader}>
-              <div>
-                <h2 id="top-views-heading" className={styles.feedTitle}>
-                  {t.topViews}
-                </h2>
-                <p className={styles.feedMeta}>{t.topViewsMeta}</p>
-              </div>
-              <span className={styles.pillHot}>{t.trending}</span>
-            </div>
-            <DealList
-              products={topViews}
-              showNewBadge={false}
-              showViewRank
-              emptyMessage={t.emptyTopViews}
-            />
-          </section>
-
-          {guides.length > 0 ? (
+        {isMagazine && magazine ? (
+          <div className={styles.feedStack}>
+            <AffiliateDisclosure className={styles.mobileDisclosure} />
             <section
-              id="guides"
+              id="stories"
               className={styles.feed}
-              aria-labelledby="guides-heading"
+              aria-labelledby="stories-heading"
             >
               <div className={styles.feedHeader}>
                 <div>
-                  <h2 id="guides-heading" className={styles.feedTitle}>
-                    {t.latestGuides}
+                  <h2 id="stories-heading" className={styles.feedTitle}>
+                    {t.guidesTitle}
                   </h2>
-                  <p className={styles.feedMeta}>{t.latestGuidesMeta}</p>
+                  <p className={styles.feedMeta}>{t.storiesMeta}</p>
                 </div>
-                <Link
-                  href={locale === "ko" ? "/guides?hl=ko" : "/guides"}
-                  className={styles.feedMore}
-                >
+                <Link href={guidesHref} className={styles.feedMore}>
                   {t.allGuides} →
                 </Link>
               </div>
-              <div className={styles.guideGrid}>
-                {guides.map((guide) => (
-                  <GuideCard key={guide.id} guide={guide} />
-                ))}
+              <div className={styles.stories}>
+                <GuideLead story={magazine.stories[0]} />
+                {magazine.stories.length > 1 ? (
+                  <div className={styles.storyPair}>
+                    {magazine.stories.slice(1).map((story) => (
+                      <GuideCard key={story.guide.id} guide={story.guide}>
+                        <ProductMiniList
+                          products={story.products.slice(0, 2)}
+                          label={t.guidePicks}
+                        />
+                      </GuideCard>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </section>
-          ) : null}
 
-          <section
-            id="deal-feed"
-            className={styles.feed}
-            aria-labelledby="feed-heading"
-          >
-            <div className={styles.feedHeader}>
-              <div>
-                <h2 id="feed-heading" className={styles.feedTitle}>
-                  {t.latestDeals}
-                </h2>
-                <p className={styles.feedMeta}>
-                  {formatMessage(t.latestMeta, {
-                    count: deals.length,
-                    suffix: deals.length === 1 ? t.livePick : t.livePicks,
-                  })}
-                </p>
+            {magazine.sections.length > 0 ? (
+              <div id="by-category" className={styles.sectionStack}>
+                {magazine.sections.map((section) => {
+                  const name = localizeCategoryName(section.categoryName, locale);
+                  const headingId = `cat-${section.categorySlug}-heading`;
+                  return (
+                    <section
+                      key={section.categoryId}
+                      className={styles.categorySection}
+                      aria-labelledby={headingId}
+                    >
+                      <div className={styles.feedHeader}>
+                        <div>
+                          <h2 id={headingId} className={styles.feedTitle}>
+                            {name}
+                          </h2>
+                          <p className={styles.feedMeta}>
+                            {formatMessage(t.categorySectionMeta, { name })}
+                          </p>
+                        </div>
+                        <Link
+                          href={`/c/${section.categorySlug}`}
+                          className={styles.feedMore}
+                        >
+                          {formatMessage(t.guideBrowseDeals, { name })} →
+                        </Link>
+                      </div>
+                      {section.guides.length > 0 ? (
+                        <div className={styles.categoryBody}>
+                          <div className={styles.categoryGuides}>
+                            {section.guides.map((guide) => (
+                              <GuideCard
+                                key={guide.id}
+                                guide={guide}
+                                showCategory={false}
+                              />
+                            ))}
+                          </div>
+                          <ProductMiniList products={section.products} />
+                        </div>
+                      ) : (
+                        <ProductMiniList products={section.products} columns={2} />
+                      )}
+                    </section>
+                  );
+                })}
               </div>
-              <span className={styles.live}>
-                <span className={styles.liveDot} aria-hidden />
-                {t.updated}
-              </span>
-            </div>
-            <DealList products={deals} emptyMessage={t.emptyLatest} />
-          </section>
-        </div>
+            ) : null}
+
+            {magazine.moreGuides.length > 0 ? (
+              <section
+                id="more-guides"
+                className={styles.feed}
+                aria-labelledby="more-guides-heading"
+              >
+                <div className={styles.feedHeader}>
+                  <h2 id="more-guides-heading" className={styles.feedTitle}>
+                    {t.moreGuides}
+                  </h2>
+                  <Link href={guidesHref} className={styles.feedMore}>
+                    {t.allGuides} →
+                  </Link>
+                </div>
+                <div className={styles.guideGrid}>
+                  {magazine.moreGuides.map((guide) => (
+                    <GuideCard key={guide.id} guide={guide} />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {topViewsSection}
+            {featuredSection}
+            {dealFeedSection}
+            {intro}
+          </div>
+        ) : (
+          <div className={styles.feedStack}>
+            {intro}
+            {featuredSection}
+            {topViewsSection}
+
+            {guides.length > 0 ? (
+              <section
+                id="guides"
+                className={styles.feed}
+                aria-labelledby="guides-heading"
+              >
+                <div className={styles.feedHeader}>
+                  <div>
+                    <h2 id="guides-heading" className={styles.feedTitle}>
+                      {t.latestGuides}
+                    </h2>
+                    <p className={styles.feedMeta}>{t.latestGuidesMeta}</p>
+                  </div>
+                  <Link href={guidesHref} className={styles.feedMore}>
+                    {t.allGuides} →
+                  </Link>
+                </div>
+                <div className={styles.guideGrid}>
+                  {guides.map((guide) => (
+                    <GuideCard key={guide.id} guide={guide} />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {dealFeedSection}
+          </div>
+        )}
       </div>
     </main>
   );

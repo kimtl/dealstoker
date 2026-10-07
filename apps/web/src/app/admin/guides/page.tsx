@@ -85,6 +85,7 @@ export default function AdminGuidesPage() {
               <th>Title</th>
               <th>Category</th>
               <th>Status</th>
+              <th title="Featured on the homepage (rank)">Home</th>
               <th>KO</th>
               <th>Published</th>
               <th title="Human page views (bots excluded), English and Korean combined">
@@ -97,7 +98,7 @@ export default function AdminGuidesPage() {
           <tbody>
             {items.length === 0 ? (
               <tr>
-                <td colSpan={9} className={styles.muted}>
+                <td colSpan={10} className={styles.muted}>
                   No guides yet.
                 </td>
               </tr>
@@ -111,6 +112,7 @@ export default function AdminGuidesPage() {
                   </td>
                   <td>{guide.categoryName || "—"}</td>
                   <td>{guide.status}</td>
+                  <td>{guide.featured ? `★ ${guide.featuredRank ?? 0}` : "—"}</td>
                   <td>{guide.titleKo ? "✓" : "—"}</td>
                   <td>
                     {guide.publishedAt

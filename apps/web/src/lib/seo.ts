@@ -99,20 +99,20 @@ export function productMetaDescription(
 
 export function homeMetaTitle(locale: Locale = "en"): string {
   if (locale === "ko") {
-    return `${SITE_NAME} — 아마존 딜 & 할인 (미국)`;
+    return `${SITE_NAME} — 아마존 딜 & 구매 가이드 (미국)`;
   }
-  return `${SITE_NAME} — Amazon Deals & Price Drops (US)`;
+  return `${SITE_NAME} — Amazon Deals & Buying Guides (US)`;
 }
 
 export function homeMetaDescription(locale: Locale = "en"): string {
   if (locale === "ko") {
     return clampText(
-      `${SITE_NAME}에서 오늘의 Amazon.com 추천 딜·할인·인기 조회를 확인하세요. 홈·전자·아웃도어 등 미국 쇼핑객을 위한 큐레이션.`,
+      `${SITE_NAME}의 Amazon.com 구매 가이드와 오늘의 딜. 사기 전에 확인할 점, 가이드별 추천 상품, 인기 조회와 할인을 미국 쇼핑객을 위해 정리했습니다.`,
       160,
     );
   }
   return clampText(
-    `Find today's best Amazon.com deals on ${SITE_NAME}. Featured deals, top views, and curated home, electronics, and outdoor products with clear prices for US shoppers.`,
+    `Practical Amazon.com buying guides and today's best deals on ${SITE_NAME}: what to check before you buy, the picks we recommend, top views and price drops.`,
     160,
   );
 }
@@ -123,6 +123,7 @@ export function homeMetaKeywords(locale: Locale = "en"): string[] {
       "아마존 딜",
       "아마존 할인",
       "추천 딜",
+      "아마존 구매 가이드",
       "미국 아마존",
       "Amazon deals",
       SITE_NAME,
@@ -134,6 +135,7 @@ export function homeMetaKeywords(locale: Locale = "en"): string[] {
     "Amazon price drops",
     "US Amazon discounts",
     "featured deals",
+    "Amazon buying guides",
     SITE_NAME,
   ];
 }

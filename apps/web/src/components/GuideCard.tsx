@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { formatUpdatedAt } from "@/lib/format";
 import { guideHref, localizeGuide } from "@/lib/guides";
 import { formatMessage, getI18n, localizeCategoryName } from "@/lib/i18n";
@@ -8,9 +9,11 @@ import styles from "./GuideCard.module.css";
 type Props = {
   guide: GuideSummary;
   showCategory?: boolean;
+  /** Extra content under the meta row, e.g. the products this guide recommends. */
+  children?: ReactNode;
 };
 
-export async function GuideCard({ guide, showCategory = true }: Props) {
+export async function GuideCard({ guide, showCategory = true, children }: Props) {
   const { locale, t } = await getI18n();
   const localized = localizeGuide(guide, locale);
   const href = guideHref(guide.slug, locale);
@@ -46,6 +49,7 @@ export async function GuideCard({ guide, showCategory = true }: Props) {
             {t.readGuide} →
           </Link>
         </p>
+        {children}
       </div>
     </article>
   );
