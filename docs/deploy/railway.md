@@ -54,10 +54,12 @@ If you skip `api.` subdomain, use the Railway-generated API URL (`*.up.railway.a
 | `CORS_ALLOWED_ORIGINS` | `https://dealstoker.com,https://www.dealstoker.com` |
 | `ADMIN_USERNAME` | strong username |
 | `ADMIN_PASSWORD` | strong password |
+| `IP_HASH_SECRET` | long random value (`openssl rand -hex 32`); keys the IP hashes used in analytics. Keep it stable — changing it only resets click de-duplication |
 | `AMAZON_MARKETPLACE` | `www.amazon.com` |
 | `AMAZON_PARTNER_TAG` | `dealstoker01-20` (Associates Store ID — API service) |
 | `OPENAI_API_KEY` | OpenAI (or compatible) key for “Why we recommend” AI blurbs |
 | `OPENAI_MODEL` | optional, default `gpt-4o-mini` |
+| `OPENAI_GUIDE_MODEL` | optional; model used only for guide drafts, rewrites and Korean translations (falls back to `OPENAI_MODEL`). A stronger long-form model noticeably improves guides |
 | `OPENAI_BASE_URL` | optional, default `https://api.openai.com/v1` |
 
 `PORT` is set by Railway automatically. The API converts Railway’s `postgresql://…` URL into a JDBC URL at startup (Docker entrypoint + DataSource config). You can also set `DATABASE_URL` to a JDBC URL yourself if preferred.

@@ -4,6 +4,7 @@ import com.dealstoker.api.affiliate.AffiliateLinkBuilder;
 import com.dealstoker.api.domain.Product;
 import com.dealstoker.api.domain.ProductStatus;
 import com.dealstoker.api.repository.ClickEventRepository;
+import com.dealstoker.api.util.IpHasher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -45,7 +46,7 @@ class ClickTrackingServiceTest {
         when(products.requireBySlug("cosori")).thenReturn(product);
         when(links.buildOutboundUrl(anyString(), anyString())).thenReturn(TARGET);
 
-        service = new ClickTrackingService(products, clicks, links);
+        service = new ClickTrackingService(products, clicks, links, new IpHasher("test-secret-test-secret-test-secret"));
     }
 
     private MockHttpServletRequest request(String method, String userAgent) {

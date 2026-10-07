@@ -98,18 +98,23 @@ export type Messages = {
 
   aboutTitle: string;
   aboutLead: string;
-  aboutP1: string;
-  aboutMissionTitle: string;
-  aboutMission: string;
+  aboutIntro: string;
+  aboutWhyTitle: string;
+  aboutWhy: string;
   aboutFindTitle: string;
+  aboutGuidesItem: string;
   aboutFeaturedItem: string;
   aboutTopViewsItem: string;
   aboutCategoryItem: string;
   aboutProductItem: string;
-  aboutChooseTitle: string;
-  aboutChoose: string;
+  aboutHowTitle: string;
+  aboutHowPick: string;
+  aboutHowAi: string;
+  aboutHowPrices: string;
   aboutAffiliateTitle: string;
   aboutAffiliate: string;
+  aboutFeedbackTitle: string;
+  aboutFeedback: string;
 
   contactTitle: string;
   contactLead: string;
@@ -124,7 +129,6 @@ export type Messages = {
 
   privacyTitle: string;
   privacyLead: string;
-  privacyBody: string;
 
   noDealsYet: string;
   closeBuyingGuide: string;
@@ -269,27 +273,37 @@ const en: Messages = {
   unitedStates: "United States",
 
   aboutTitle: "About {site}",
-  aboutLead: "Amazon deal curation for online shoppers in the United States.",
-  aboutP1:
-    "{site} ({domain}) is an Amazon deal curation site built for US online shoppers. Since 2026, we have helped shoppers find practical products faster — and thousands of people visit {site} every day looking for the best deals.",
-  aboutMissionTitle: "Our mission",
-  aboutMission:
-    "Cut the noise. Show shoppers only the deals worth their time. Amazon is full of options; {site} focuses on clear prices, useful context, and products that make sense for everyday US buyers.",
-  aboutFindTitle: "What you will find",
+  aboutLead:
+    "A small, independent site that helps US shoppers decide what is worth buying on Amazon.com.",
+  aboutIntro:
+    "{site} ({domain}) launched in 2026. We pick Amazon.com products that are worth a closer look, write buying guides about what to check before you buy, and show every price together with the time we last checked it. We are not part of Amazon and we do not sell anything ourselves: when you decide to buy, checkout, shipping, and returns all happen on Amazon.com.",
+  aboutWhyTitle: "Why we started",
+  aboutWhy:
+    "Shopping on Amazon often means scrolling past sponsored results, near-identical listings, and \"discounts\" measured against list prices nobody actually pays. We wanted a calmer place to start: a short list of products with a clear reason to consider each one, and guides that explain the trade-offs in plain language so you can make your own call, including the call not to buy at all.",
+  aboutFindTitle: "What you will find here",
+  aboutGuidesItem:
+    "What matters in a category, the common trade-offs, and the products we would put on a shortlist. Some guides are also available in Korean.",
   aboutFeaturedItem:
-    "Featured deals — editor-selected products we think are worth a look right now.",
+    "Featured deals: a handful of products we think are worth a look right now.",
   aboutTopViewsItem:
-    "Top views — deals shoppers browse most often on product pages.",
+    "Top views: the product pages visitors opened most over the last 7 days.",
   aboutCategoryItem:
-    "Category pages — curated lists across Home & Kitchen, Electronics, Outdoor & Sports, Health & Household, Pets, and more.",
+    "Category pages: products and guides grouped by area, such as Home & Kitchen, Electronics, and Outdoor & Sports.",
   aboutProductItem:
-    "Product pages — why we recommend the pick, key features when available, and a clear path to view the item on Amazon.com.",
-  aboutChooseTitle: "How we choose products",
-  aboutChoose:
-    "Editors review ratings, review volume, usefulness, and price positioning before a product is published. We favor clear use cases over hype. Listings can be updated or unpublished when availability or quality signals change. Prices shown on {site} may differ from the live price on Amazon.com at the moment you buy.",
-  aboutAffiliateTitle: "Affiliate relationship",
+    "Product pages: the current price and rating snapshot, a short note on who the product suits, and a link to see it on Amazon.com.",
+  aboutHowTitle: "How we work",
+  aboutHowPick:
+    "Every product starts as a draft and appears on the site only after one of us decides to publish it. We look at the price, the rating and how many reviews stand behind it, and whether the product has a clear everyday use. A high score from a handful of reviews, or a big markdown from an inflated list price, is not enough on its own.",
+  aboutHowAi:
+    "We use AI writing tools to help with first drafts of some guides and short product notes. We decide what goes live, and we fix or remove anything that turns out to be wrong or out of date. We have not personally tested most of the products we list; when a recommendation comes from our own use, we will say so.",
+  aboutHowPrices:
+    "Prices and ratings on {site} are snapshots, and each one shows when it was last updated. Amazon changes prices often, so the price you see at checkout on Amazon.com is the one that counts.",
+  aboutAffiliateTitle: "How we make money",
   aboutAffiliate:
-    "{site} is a participant in the Amazon Services LLC Associates Program. When you buy through our links, Amazon pays us a small referral fee out of its own revenue. You are never charged for this: your price, shipping, and returns are exactly the same as when you shop on Amazon.com directly.",
+    "{site} is a participant in the Amazon Services LLC Associates Program. When you buy through our links, Amazon pays us a small referral fee out of its own revenue. You are never charged for this: your price, shipping, and returns are exactly the same as when you shop on Amazon.com directly. Referral fees do not decide which products we list or how we describe them.",
+  aboutFeedbackTitle: "Tell us when we get something wrong",
+  aboutFeedback:
+    "Spotted an outdated price, a broken link, or a product that let you down? Let us know through the contact page. Corrections like these make the site better for the next reader.",
 
   contactTitle: "Contact",
   contactLead: "Get in touch with the DealStoker team.",
@@ -307,9 +321,7 @@ const en: Messages = {
     "Referral fees do not influence which products we list or how we describe them. We choose deals based on price, ratings, and review volume, and we say so when a product has caveats.",
 
   privacyTitle: "Privacy Policy",
-  privacyLead: "How we handle information on DealStoker.",
-  privacyBody:
-    "We collect limited analytics such as page views and outbound clicks to improve DealStoker. We also use the Google Ads tag (gtag.js), which sets cookies so Google can measure whether visits from our ads lead to actions on this site; see Google's privacy policy for how Google handles that data. We do not sell personal information. Contact privacy@{domain} for privacy requests.",
+  privacyLead: "Last updated {date}",
 
   noDealsYet: "No deals yet.",
   closeBuyingGuide: "Close buying guide",
@@ -454,25 +466,35 @@ const ko: Messages = {
   unitedStates: "미국",
 
   aboutTitle: "{site} 소개",
-  aboutLead: "미국 온라인 쇼핑객을 위한 아마존 딜 큐레이션.",
-  aboutP1:
-    "{site}({domain})는 미국 온라인 쇼핑객을 위한 아마존 딜 큐레이션 사이트입니다. 2026년부터 실용적인 상품을 더 빨리 찾도록 돕고 있으며, 매일 수천 명이 좋은 딜을 찾아 {site}를 방문합니다.",
-  aboutMissionTitle: "미션",
-  aboutMission:
-    "잡음을 줄이고, 시간 들일 가치가 있는 딜만 보여 줍니다. 아마존에는 선택지가 많습니다. {site}는 명확한 가격, 유용한 맥락, 일상적인 미국 구매자에게 맞는 상품에 집중합니다.",
-  aboutFindTitle: "무엇을 볼 수 있나요",
-  aboutFeaturedItem: "추천 딜 — 지금 살펴볼 만한 편집자 선정 상품.",
-  aboutTopViewsItem: "인기 조회 — 상품 페이지에서 가장 많이 본 딜.",
+  aboutLead:
+    "미국 쇼핑객이 Amazon.com에서 무엇을 살지 결정하도록 돕는 작은 독립 사이트입니다.",
+  aboutIntro:
+    "{site}({domain})는 2026년에 문을 열었습니다. Amazon.com에서 한 번 더 살펴볼 만한 상품을 고르고, 사기 전에 확인할 점을 정리한 구매 가이드를 쓰며, 모든 가격은 마지막으로 확인한 시각과 함께 보여 드립니다. {site}는 Amazon의 일부가 아니고 직접 상품을 판매하지도 않습니다. 구매를 결정하시면 결제, 배송, 반품은 모두 Amazon.com에서 이루어집니다.",
+  aboutWhyTitle: "왜 시작했나요",
+  aboutWhy:
+    "아마존에서 쇼핑하다 보면 광고 상품, 거의 똑같은 상품 목록, 아무도 그 가격에 사지 않는 정가를 기준으로 한 '할인'을 한참 지나쳐야 합니다. 저희는 좀 더 차분한 출발점을 만들고 싶었습니다. 고려할 이유가 분명한 상품만 짧게 추리고, 장단점을 쉬운 말로 설명하는 가이드를 함께 두어 직접 판단하실 수 있도록요. 사지 않기로 하는 것도 좋은 판단입니다.",
+  aboutFindTitle: "여기서 볼 수 있는 것",
+  aboutGuidesItem:
+    "카테고리별로 중요한 기준, 흔히 고민하는 선택지 간의 차이, 그리고 저희가 후보로 꼽는 상품. 일부 가이드는 한국어로도 제공됩니다.",
+  aboutFeaturedItem: "추천 딜: 지금 살펴볼 만하다고 생각하는 몇 가지 상품.",
+  aboutTopViewsItem: "인기 조회: 최근 7일 동안 방문자가 가장 많이 연 상품 페이지.",
   aboutCategoryItem:
-    "카테고리 페이지 — 홈&키친, 전자제품, 아웃도어&스포츠, 건강&생활, 반려동물 등.",
+    "카테고리 페이지: 홈&키친, 전자제품, 아웃도어&스포츠 등 분야별로 모은 상품과 가이드.",
   aboutProductItem:
-    "상품 페이지 — 추천 이유, 주요 특징, Amazon.com에서 바로 확인하는 경로.",
-  aboutChooseTitle: "상품 선정 방식",
-  aboutChoose:
-    "편집자가 평점, 리뷰 수, 실용성, 가격 포지션을 검토한 뒤 공개합니다. 과대광고보다 명확한 사용 상황을 우선합니다. 재고·품질 신호가 바뀌면 목록을 수정하거나 비공개할 수 있습니다. {site}에 표시된 가격은 구매 시점의 Amazon.com 가격과 다를 수 있습니다.",
-  aboutAffiliateTitle: "제휴 관계",
+    "상품 페이지: 현재 가격과 평점, 어떤 분께 맞는 상품인지에 대한 짧은 메모, Amazon.com에서 확인하는 링크.",
+  aboutHowTitle: "이렇게 일합니다",
+  aboutHowPick:
+    "모든 상품은 초안으로 시작하며, 저희가 직접 공개하기로 한 상품만 사이트에 나타납니다. 가격, 평점과 그 평점을 뒷받침하는 리뷰 수, 일상에서 쓰임새가 분명한지를 봅니다. 리뷰 몇 개뿐인 높은 평점이나 부풀려진 정가 대비 큰 할인율만으로는 고르지 않습니다.",
+  aboutHowAi:
+    "일부 가이드와 짧은 상품 메모의 초안을 쓸 때 AI 글쓰기 도구의 도움을 받습니다. 무엇을 공개할지는 저희가 정하며, 틀렸거나 오래된 내용은 바로잡거나 내립니다. 소개하는 상품 대부분은 저희가 직접 써 본 것이 아닙니다. 직접 사용해 본 경험에 기반한 추천이라면 그렇다고 밝히겠습니다.",
+  aboutHowPrices:
+    "{site}의 가격과 평점은 특정 시점의 정보이며, 각각 마지막 업데이트 시각을 함께 표시합니다. Amazon의 가격은 자주 바뀌므로 Amazon.com 결제 화면의 가격이 최종 가격입니다.",
+  aboutAffiliateTitle: "수익 구조",
   aboutAffiliate:
-    "{site}는 Amazon Services LLC Associates Program 참여자입니다. 링크를 통해 구매하시면 Amazon이 자사 수익에서 소액의 소개 수수료를 {site}에 지급합니다. 구매자가 부담하는 금액은 없으며, 가격·배송·반품 조건은 Amazon.com에서 직접 구매할 때와 완전히 동일합니다.",
+    "{site}는 Amazon Services LLC Associates Program 참여자입니다. 링크를 통해 구매하시면 Amazon이 자사 수익에서 소액의 소개 수수료를 {site}에 지급합니다. 구매자가 부담하는 금액은 없으며, 가격·배송·반품 조건은 Amazon.com에서 직접 구매할 때와 완전히 동일합니다. 소개 수수료는 어떤 상품을 소개하고 어떻게 설명할지를 정하지 않습니다.",
+  aboutFeedbackTitle: "잘못된 점을 알려 주세요",
+  aboutFeedback:
+    "오래된 가격, 깨진 링크, 기대에 못 미친 상품을 발견하셨나요? 문의 페이지로 알려 주세요. 이런 제보가 다음 방문자에게 더 나은 사이트를 만듭니다.",
 
   contactTitle: "문의",
   contactLead: "DealStoker 팀에 연락하세요.",
@@ -490,9 +512,7 @@ const ko: Messages = {
     "소개 수수료는 어떤 상품을 소개하고 어떻게 설명하는지에 영향을 주지 않습니다. 딜은 가격, 평점, 리뷰 수를 기준으로 선정하며, 단점이 있는 상품은 그 점을 함께 적습니다.",
 
   privacyTitle: "개인정보 처리방침",
-  privacyLead: "DealStoker의 정보 처리 안내.",
-  privacyBody:
-    "서비스 개선을 위해 페이지 조회·아웃바운드 클릭 등 제한된 분석 정보를 수집합니다. 또한 Google Ads 태그(gtag.js)를 사용하며, 이 태그는 광고를 통한 방문이 사이트에서의 행동으로 이어지는지 Google이 측정할 수 있도록 쿠키를 설정합니다. Google의 데이터 처리 방식은 Google 개인정보처리방침을 참고하세요. 개인정보를 판매하지 않습니다. 개인정보 관련 요청은 privacy@{domain}으로 연락해 주세요.",
+  privacyLead: "최종 업데이트: {date}",
 
   noDealsYet: "딜이 아직 없습니다.",
   closeBuyingGuide: "구매 가이드 닫기",

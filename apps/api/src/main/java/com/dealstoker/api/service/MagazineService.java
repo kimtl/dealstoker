@@ -8,6 +8,7 @@ import com.dealstoker.api.domain.ProductStatus;
 import com.dealstoker.api.repository.CategoryRepository;
 import com.dealstoker.api.repository.GuideRepository;
 import com.dealstoker.api.repository.ProductRepository;
+import com.dealstoker.api.util.GuideShortcodes;
 import com.dealstoker.api.web.dto.GuideDtos.GuideSummary;
 import com.dealstoker.api.web.dto.MagazineDtos.MagazineResponse;
 import com.dealstoker.api.web.dto.MagazineDtos.MagazineSection;
@@ -22,21 +23,14 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /** Builds the guide-led homepage in one call so the web app does not fan out per guide/product. */
 @Service
 public class MagazineService {
-
-    /** Same syntax as the web renderer (apps/web/src/lib/guides.ts PRODUCT_SHORTCODE). */
-    static final Pattern PRODUCT_SHORTCODE =
-            Pattern.compile("\\{\\{\\s*product:\\s*([a-z0-9][a-z0-9-]*)\\s*\\}\\}", Pattern.CASE_INSENSITIVE);
 
     static final int MAX_GUIDES = 60;
     static final int STORIES = 3;
@@ -68,7 +62,7 @@ public class MagazineService {
         Map<Guide, List<String>> slugsByGuide = new LinkedHashMap<>();
         Set<String> allSlugs = new LinkedHashSet<>();
         for (Guide guide : storyGuides) {
-            List<String> slugs = productSlugs(guide.getBody(), guide.getBodyKo());
+            List<String> slugs = GuideShortcodes.productSlugs(guide.getBody(), guide.getBodyKo());
             slugsByGuide.put(guide, slugs);
             allSlugs.addAll(slugs);
         }
@@ -142,20 +136,5 @@ public class MagazineService {
                 .toList();
 
         return new MagazineResponse(guides.size(), stories, sections, moreGuides);
-    }
-
-    /** Unique product slugs embedded in the English body, then any extra ones in the Korean body. */
-    static List<String> productSlugs(String... bodies) {
-        Set<String> slugs = new LinkedHashSet<>();
-        for (String body : bodies) {
-            if (body == null) {
-                continue;
-            }
-            Matcher matcher = PRODUCT_SHORTCODE.matcher(body);
-            while (matcher.find()) {
-                slugs.add(matcher.group(1).toLowerCase(Locale.ROOT));
-            }
-        }
-        return List.copyOf(slugs);
     }
 }

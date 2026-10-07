@@ -6,10 +6,12 @@ import com.dealstoker.api.service.CategoryService;
 import com.dealstoker.api.service.GuideGenerationService;
 import com.dealstoker.api.service.GuideService;
 import com.dealstoker.api.service.ProductService;
+import com.dealstoker.api.util.GuideShortcodes;
 import com.dealstoker.api.web.ApiExceptionHandler.NotFoundException;
 import com.dealstoker.api.web.dto.GuideDtos.GuideDetail;
 import com.dealstoker.api.web.dto.GuideDtos.GuideDraftRequest;
 import com.dealstoker.api.web.dto.GuideDtos.GuideDraftResponse;
+import com.dealstoker.api.web.dto.GuideDtos.GuideRewriteRequest;
 import com.dealstoker.api.web.dto.GuideDtos.GuideRequest;
 import com.dealstoker.api.web.dto.GuideDtos.GuideSummary;
 import com.dealstoker.api.web.dto.GuideDtos.GuideTranslateRequest;
@@ -106,6 +108,29 @@ public class AdminGuideController {
         }
         GuideGenerationService.Draft draft =
                 guideGenerationService.draft(category, request.topic(), products, request.prompt());
+        return new GuideDraftResponse(draft.title(), draft.excerpt(), draft.body());
+    }
+
+    /**
+     * AI rewrite of the current English fields into a fuller, more natural guide. Product data
+     * for every embedded shortcode is passed along. Nothing is saved.
+     */
+    @PostMapping("/rewrite")
+    public GuideDraftResponse rewrite(@Valid @RequestBody GuideRewriteRequest request) {
+        if (!guideGenerationService.isConfigured()) {
+            throw new IllegalArgumentException("AI is not configured. Set OPENAI_API_KEY on the API service.");
+        }
+        Category category = request.categoryId() != null ? categoryService.requireById(request.categoryId()) : null;
+        List<ProductDetail> products = new ArrayList<>();
+        for (String slug : GuideShortcodes.productSlugs(request.body())) {
+            try {
+                products.add(productService.getPublishedBySlug(slug));
+            } catch (NotFoundException ex) {
+                // Unpublished/removed products are dropped from the rewrite (their cards don't render anyway).
+            }
+        }
+        GuideGenerationService.Draft draft = guideGenerationService.rewrite(
+                request.title(), request.excerpt(), request.body(), category, products, request.prompt());
         return new GuideDraftResponse(draft.title(), draft.excerpt(), draft.body());
     }
 

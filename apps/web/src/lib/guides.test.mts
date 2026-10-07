@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { extractProductSlugs, splitGuideBody, stripShortcodes } from "./guides.ts";
+import { extractProductSlugs, splitGuideBody, stripShortcodes, wordCount } from "./guides.ts";
 
 test("splitGuideBody separates markdown and product shortcodes", () => {
   const body = "## Intro\n\nText.\n\n{{product:cosori-12-in-1-air-fryer-oven}}\n\nMore text {{ product: Anker-737-Power-Bank-24k }} end.";
@@ -31,4 +31,12 @@ test("stripShortcodes removes placeholders and collapses blank lines", () => {
 test("malformed shortcodes are left as text", () => {
   const body = "{{product:}} {{product: has space }} {{item:x}}";
   assert.deepEqual(splitGuideBody(body), [{ type: "markdown", markdown: body }]);
+});
+
+test("wordCount ignores shortcodes, markdown symbols and table rules", () => {
+  const body =
+    "## Pick the size first\n\nA 6-quart basket feeds four.\n\n{{product:cosori-oven}}\n\n| Model | Best for |\n| --- | --- |\n| Cosori | Families |";
+  assert.equal(wordCount(body), 15);
+  assert.equal(wordCount(""), 0);
+  assert.equal(wordCount(null), 0);
 });

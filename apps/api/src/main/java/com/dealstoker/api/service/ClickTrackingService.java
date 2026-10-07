@@ -6,16 +6,14 @@ import com.dealstoker.api.domain.Product;
 import com.dealstoker.api.domain.ProductStatus;
 import com.dealstoker.api.repository.ClickEventRepository;
 import com.dealstoker.api.util.BotUserAgents;
+import com.dealstoker.api.util.IpHasher;
 import com.dealstoker.api.web.ApiExceptionHandler.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HexFormat;
 
 @Service
 public class ClickTrackingService {
@@ -26,15 +24,18 @@ public class ClickTrackingService {
     private final ProductService productService;
     private final ClickEventRepository clickEventRepository;
     private final AffiliateLinkBuilder affiliateLinkBuilder;
+    private final IpHasher ipHasher;
 
     public ClickTrackingService(
             ProductService productService,
             ClickEventRepository clickEventRepository,
-            AffiliateLinkBuilder affiliateLinkBuilder
+            AffiliateLinkBuilder affiliateLinkBuilder,
+            IpHasher ipHasher
     ) {
         this.productService = productService;
         this.clickEventRepository = clickEventRepository;
         this.affiliateLinkBuilder = affiliateLinkBuilder;
+        this.ipHasher = ipHasher;
     }
 
     @Transactional
@@ -46,7 +47,7 @@ public class ClickTrackingService {
 
         // Everyone gets redirected; only real, first-in-window clicks are recorded.
         String userAgent = trimTo(request.getHeader("User-Agent"), 2000);
-        String ipHash = hashIp(clientIp(request));
+        String ipHash = ipHasher.hashClientIp(request);
         String sessionId = trimTo(request.getParameter("sid"), 128);
         if (shouldRecord(product, request.getMethod(), userAgent, sessionId, ipHash)) {
             ClickEvent event = new ClickEvent();
@@ -90,27 +91,6 @@ public class ClickTrackingService {
                     product.getId(), ipHash, since);
         }
         return true;
-    }
-
-    private String clientIp(HttpServletRequest request) {
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
-            return forwarded.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
-    }
-
-    private String hashIp(String ip) {
-        if (ip == null || ip.isBlank()) {
-            return null;
-        }
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashed = digest.digest(ip.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(hashed);
-        } catch (Exception ex) {
-            return null;
-        }
     }
 
     private String trimTo(String value, int max) {

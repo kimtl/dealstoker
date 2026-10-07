@@ -8,6 +8,7 @@ import {
   adminDraftGuide,
   adminListCategories,
   adminListCategoryProducts,
+  adminRewriteGuide,
   adminTranslateGuide,
   adminUpdateGuide,
 } from "@/lib/admin-api";
@@ -18,6 +19,7 @@ import type {
   GuideStatus,
   ProductSummary,
 } from "@/lib/types";
+import { wordCount } from "@/lib/guides";
 import styles from "../admin.module.css";
 
 type FormState = {
@@ -111,6 +113,7 @@ export function GuideForm({ guide }: { guide: GuideDetail | null }) {
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiSlugs, setAiSlugs] = useState<string[]>([]);
   const [drafting, setDrafting] = useState(false);
+  const [rewriting, setRewriting] = useState(false);
   const [translating, setTranslating] = useState(false);
   const [categoryProducts, setCategoryProducts] = useState<ProductSummary[]>([]);
   const [pickedSlug, setPickedSlug] = useState("");
@@ -198,6 +201,47 @@ export function GuideForm({ guide }: { guide: GuideDetail | null }) {
       setError(err instanceof Error ? err.message : "AI draft failed");
     } finally {
       setDrafting(false);
+    }
+  }
+
+  async function onRewrite() {
+    if (!form.body.trim()) {
+      setError("There is no English body to rewrite yet.");
+      return;
+    }
+    if (
+      !confirm(
+        "Rewrite the current English title, excerpt and body into a longer, more natural guide? " +
+          "Product cards are kept. Unsaved edits will be replaced (nothing is saved until you click Save).",
+      )
+    ) {
+      return;
+    }
+    setRewriting(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const draft = await adminRewriteGuide({
+        title: form.title || null,
+        excerpt: form.excerpt || null,
+        body: form.body,
+        categoryId: form.categoryId ? Number(form.categoryId) : null,
+        prompt: aiPrompt.trim() || null,
+      });
+      setForm((prev) => ({
+        ...prev,
+        title: draft.title || prev.title,
+        excerpt: draft.excerpt || prev.excerpt,
+        body: draft.body,
+      }));
+      setMessage(
+        `Rewritten (${wordCount(draft.body).toLocaleString("en-US")} words). Review every claim, ` +
+          "then save and re-run the Korean translation.",
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "AI rewrite failed");
+    } finally {
+      setRewriting(false);
     }
   }
 
@@ -306,11 +350,13 @@ export function GuideForm({ guide }: { guide: GuideDetail | null }) {
 
       <div className={styles.importBox}>
         <h3 className={styles.sectionTitle} style={{ marginTop: 0 }}>
-          AI first draft (optional)
+          AI writing help (optional)
         </h3>
         <p className={styles.hint}>
-          Uses the selected category below plus a topic. Pick products to embed as
-          cards; the draft places <code>{"{{product:slug}}"}</code> shortcodes for them.
+          <strong>Generate draft</strong> writes a new guide from a topic and the products you pick.{" "}
+          <strong>Rewrite &amp; expand</strong> turns the current body into a fuller guide (about
+          1,600–2,400 words) and keeps its product cards. The AI is told never to invent hands-on
+          testing, so the most human detail comes from your notes below.
         </p>
         <label>
           Topic
@@ -322,12 +368,17 @@ export function GuideForm({ guide }: { guide: GuideDetail | null }) {
           />
         </label>
         <label>
-          Extra instructions (optional)
+          Editor notes (optional, used by both buttons)
           <textarea
             value={aiPrompt}
             onChange={(e) => setAiPrompt(e.target.value)}
-            rows={2}
-            placeholder="e.g. budget under $100, compare basket vs oven style"
+            rows={4}
+            placeholder={
+              "Your own experience, angle and facts to include, e.g.\n" +
+              "- I use a 5.8 qt basket model for two people; anything smaller was a hassle\n" +
+              "- Readers keep asking whether oven-style models are harder to clean\n" +
+              "- Budget focus: most people should not spend over $120"
+            }
           />
         </label>
         {categoryProducts.length > 0 ? (
@@ -360,6 +411,14 @@ export function GuideForm({ guide }: { guide: GuideDetail | null }) {
           >
             {drafting ? "Drafting…" : "Generate draft with AI"}
           </button>
+          <button
+            type="button"
+            className={styles.buttonSecondary}
+            onClick={onRewrite}
+            disabled={rewriting || drafting || !form.body.trim()}
+          >
+            {rewriting ? "Rewriting… (up to 2 min)" : "Rewrite & expand current guide"}
+          </button>
         </div>
       </div>
 
@@ -375,6 +434,8 @@ export function GuideForm({ guide }: { guide: GuideDetail | null }) {
         />
       </label>
       <p className={styles.hint}>
+        <strong>{wordCount(form.body).toLocaleString("en-US")} words</strong>
+        {wordCount(form.body) < 1200 ? " · readers find guides under ~1,200 words thin" : ""}.{" "}
         Markdown (GFM) is supported: headings (##), lists, tables, links, images.
         Raw HTML is not rendered. Do not paste Amazon product descriptions verbatim.
         Put <code>{"{{product:slug}}"}</code> on its own line to embed a product card.

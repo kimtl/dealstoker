@@ -9,6 +9,7 @@ import type {
   GuideDetail,
   GuideDraftRequest,
   GuideDraftResponse,
+  GuideRewriteRequest,
   GuideRequest,
   GuideTranslateResponse,
   GuideStatus,
@@ -341,6 +342,14 @@ export async function adminDeleteGuide(id: number): Promise<void> {
 
 export async function adminDraftGuide(body: GuideDraftRequest): Promise<GuideDraftResponse> {
   return adminFetch("/api/v1/admin/guides/draft", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+/** AI rewrite of the current English guide into a fuller, more natural one. Nothing is saved. */
+export async function adminRewriteGuide(body: GuideRewriteRequest): Promise<GuideDraftResponse> {
+  return adminFetch("/api/v1/admin/guides/rewrite", {
     method: "POST",
     body: JSON.stringify(body),
   });
