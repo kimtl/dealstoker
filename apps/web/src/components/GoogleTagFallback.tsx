@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { googleTagSrc } from "@/components/GoogleTag";
+import { googleTagSrc } from "@/lib/google-tag";
 
 type GtagWindow = Window & {
   dataLayer?: unknown[];
