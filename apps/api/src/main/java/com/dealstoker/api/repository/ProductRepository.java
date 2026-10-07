@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,6 +56,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             ProductStatus status, Long categoryId, Long productId);
 
     List<Product> findByStatusOrderByPublishedAtDesc(ProductStatus status, Pageable pageable);
+
+    List<Product> findBySlugInAndStatus(Collection<String> slugs, ProductStatus status);
+
+    List<Product> findByStatusAndPrimaryCategoryIdOrderByFeaturedDescPublishedAtDesc(
+            ProductStatus status, Long categoryId, Pageable pageable);
 
     List<Product> findTop5ByStatusAndFeaturedTrueOrderByFeaturedRankAscPublishedAtDesc(ProductStatus status);
 

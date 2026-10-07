@@ -4,6 +4,7 @@ import type {
   GuideDetail,
   GuideSummary,
   HomeResponse,
+  MagazineResponse,
   PageResponse,
   ProductDetail,
   ProductSummary,
@@ -67,6 +68,10 @@ async function apiFetch<T>(
 
 export async function getHome(): Promise<HomeResponse> {
   return apiFetch<HomeResponse>("/api/v1/home", { revalidate: 60 });
+}
+
+export async function getMagazine(): Promise<MagazineResponse> {
+  return apiFetch<MagazineResponse>("/api/v1/home/magazine", { revalidate: 60 });
 }
 
 export async function getProducts(

@@ -75,4 +75,16 @@ public interface PageViewEventRepository extends JpaRepository<PageViewEvent, Lo
             @Param("productIds") List<Long> productIds,
             @Param("since") Instant since
     );
+
+    /** Total and recent (since {@code since}) human views per exact path, e.g. guide pages. */
+    @Query(value = """
+            SELECT p.path,
+                   COUNT(*) AS total_views,
+                   COUNT(*) FILTER (WHERE p.occurred_at >= :since) AS recent_views
+            FROM page_view_events p
+            WHERE p.path IN (:paths) AND
+            """ + HUMAN_P + """
+            GROUP BY p.path
+            """, nativeQuery = true)
+    List<Object[]> countByPaths(@Param("paths") List<String> paths, @Param("since") Instant since);
 }

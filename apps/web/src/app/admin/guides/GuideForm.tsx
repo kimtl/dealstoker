@@ -32,6 +32,8 @@ type FormState = {
   coverImageUrl: string;
   authorName: string;
   status: GuideStatus;
+  featured: boolean;
+  featuredRank: string;
   seoTitle: string;
   seoDescription: string;
 };
@@ -48,6 +50,8 @@ const EMPTY: FormState = {
   coverImageUrl: "",
   authorName: "DealStoker curation team",
   status: "DRAFT",
+  featured: false,
+  featuredRank: "0",
   seoTitle: "",
   seoDescription: "",
 };
@@ -66,6 +70,8 @@ function toForm(guide: GuideDetail | null): FormState {
     coverImageUrl: guide.coverImageUrl || "",
     authorName: guide.authorName || "",
     status: guide.status,
+    featured: Boolean(guide.featured),
+    featuredRank: String(guide.featuredRank ?? 0),
     seoTitle: guide.seoTitle || "",
     seoDescription: guide.seoDescription || "",
   };
@@ -85,6 +91,8 @@ function toRequest(form: FormState): GuideRequest {
     coverImageUrl: clean(form.coverImageUrl),
     authorName: clean(form.authorName),
     status: form.status,
+    featured: form.featured,
+    featuredRank: Math.min(999, Math.max(0, Math.trunc(Number(form.featuredRank) || 0))),
     seoTitle: clean(form.seoTitle),
     seoDescription: clean(form.seoDescription),
   };
@@ -413,6 +421,32 @@ export function GuideForm({ guide }: { guide: GuideDetail | null }) {
           </select>
         </label>
       </div>
+
+      <div className={styles.row}>
+        <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          <input
+            type="checkbox"
+            checked={form.featured}
+            onChange={(e) => update("featured", e.target.checked)}
+          />
+          Feature on homepage (leads the magazine section when published)
+        </label>
+        <label>
+          Homepage rank (lower shows first)
+          <input
+            type="number"
+            min={0}
+            max={999}
+            value={form.featuredRank}
+            onChange={(e) => update("featuredRank", e.target.value)}
+            disabled={!form.featured}
+          />
+        </label>
+      </div>
+      <p className={styles.hint}>
+        The homepage leads with featured guides by rank, then the newest published guides. The first
+        one becomes the large lead story, so give it a cover image if you can.
+      </p>
 
       <div className={styles.row}>
         <label>

@@ -85,15 +85,20 @@ export default function AdminGuidesPage() {
               <th>Title</th>
               <th>Category</th>
               <th>Status</th>
+              <th title="Featured on the homepage (rank)">Home</th>
               <th>KO</th>
               <th>Published</th>
+              <th title="Human page views (bots excluded), English and Korean combined">
+                Views
+              </th>
+              <th title="Human page views in the last 7 days">7d</th>
               <th />
             </tr>
           </thead>
           <tbody>
             {items.length === 0 ? (
               <tr>
-                <td colSpan={7} className={styles.muted}>
+                <td colSpan={10} className={styles.muted}>
                   No guides yet.
                 </td>
               </tr>
@@ -107,12 +112,15 @@ export default function AdminGuidesPage() {
                   </td>
                   <td>{guide.categoryName || "—"}</td>
                   <td>{guide.status}</td>
+                  <td>{guide.featured ? `★ ${guide.featuredRank ?? 0}` : "—"}</td>
                   <td>{guide.titleKo ? "✓" : "—"}</td>
                   <td>
                     {guide.publishedAt
                       ? new Date(guide.publishedAt).toLocaleDateString("en-US")
                       : "—"}
                   </td>
+                  <td>{(guide.viewCount ?? 0).toLocaleString("en-US")}</td>
+                  <td>{(guide.viewCount7d ?? 0).toLocaleString("en-US")}</td>
                   <td>
                     <div className={styles.actions}>
                       <button

@@ -231,8 +231,15 @@ export type GuideSummary = {
   categorySlug: string | null;
   categoryName: string | null;
   status: GuideStatus;
+  /** Editor-picked guides lead the homepage (lower featuredRank first). */
+  featured?: boolean;
+  featuredRank?: number;
   publishedAt: string | null;
   updatedAt: string | null;
+  /** Human page views, all time (admin list only). */
+  viewCount?: number | null;
+  /** Human page views in the last 7 days (admin list only). */
+  viewCount7d?: number | null;
 };
 
 export type GuideDetail = GuideSummary & {
@@ -257,6 +264,30 @@ export type GuideRequest = {
   status?: GuideStatus;
   seoTitle?: string | null;
   seoDescription?: string | null;
+  featured?: boolean;
+  featuredRank?: number;
+};
+
+/** A guide plus the published products its body embeds, in body order. */
+export type MagazineStory = {
+  guide: GuideSummary;
+  products: ProductSummary[];
+};
+
+export type MagazineSection = {
+  categoryId: number;
+  categorySlug: string;
+  categoryName: string;
+  guides: GuideSummary[];
+  products: ProductSummary[];
+};
+
+/** Guide-led homepage data from GET /api/v1/home/magazine. */
+export type MagazineResponse = {
+  publishedGuides: number;
+  stories: MagazineStory[];
+  sections: MagazineSection[];
+  moreGuides: GuideSummary[];
 };
 
 export type GuideDraftRequest = {

@@ -149,6 +149,15 @@ export type Messages = {
   guidesCount: string;
   latestGuides: string;
   latestGuidesMeta: string;
+
+  magazineHeadline: string;
+  magazineSupport: string;
+  storiesMeta: string;
+  editorsPick: string;
+  guidePicks: string;
+  byCategory: string;
+  categorySectionMeta: string;
+  moreGuides: string;
 };
 
 const en: Messages = {
@@ -325,6 +334,16 @@ const en: Messages = {
   guidesCount: "{count} guides",
   latestGuides: "Buying guides",
   latestGuidesMeta: "What to check before you buy · from the curation team",
+
+  magazineHeadline: "Amazon buying guides & deals",
+  magazineSupport:
+    "Practical buying guides from our curation team, with the Amazon.com picks each one recommends.",
+  storiesMeta: "Editor's picks · with the products each guide recommends",
+  editorsPick: "Editor's pick",
+  guidePicks: "Picks from this guide",
+  byCategory: "By category",
+  categorySectionMeta: "Guides and picks in {name}",
+  moreGuides: "More buying guides",
 };
 
 const ko: Messages = {
@@ -498,6 +517,16 @@ const ko: Messages = {
   guidesCount: "가이드 {count}개",
   latestGuides: "구매 가이드",
   latestGuidesMeta: "구매 전 확인할 점 · 큐레이션 팀 작성",
+
+  magazineHeadline: "아마존 구매 가이드 & 딜",
+  magazineSupport:
+    "큐레이션 팀이 직접 쓴 구매 가이드와, 가이드마다 추천하는 Amazon.com 상품을 함께 보여드립니다.",
+  storiesMeta: "에디터 추천 · 가이드별 추천 상품 포함",
+  editorsPick: "에디터 추천",
+  guidePicks: "이 가이드의 추천 상품",
+  byCategory: "카테고리별",
+  categorySectionMeta: "{name} 가이드와 추천 상품",
+  moreGuides: "가이드 더 보기",
 };
 
 export const dictionaries: Record<Locale, Messages> = { en, ko };

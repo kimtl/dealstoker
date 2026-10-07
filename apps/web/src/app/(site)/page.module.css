@@ -142,6 +142,11 @@
   font-size: 0.75rem;
 }
 
+/* Shown only when the sidebar (and its disclosure) drops below the content. */
+.feedStack .mobileDisclosure {
+  display: none;
+}
+
 .feed {
   min-width: 0;
   animation: slide-feed 560ms ease both;
@@ -157,6 +162,43 @@
 .guideGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.stories {
+  display: grid;
+  gap: 1rem;
+}
+
+.storyPair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.sectionStack {
+  display: grid;
+  gap: 1.35rem;
+  min-width: 0;
+}
+
+.categorySection {
+  min-width: 0;
+  padding-top: 1.1rem;
+  border-top: 2px solid var(--ink);
+  animation: slide-feed 560ms ease both;
+}
+
+.categoryBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.categoryGuides {
+  display: grid;
   gap: 1rem;
 }
 
@@ -272,7 +314,29 @@
     position: static;
   }
 
+  /* Magazine mode: lead with the guides on small screens; categories follow. */
+  .shellMagazine .sidebar {
+    order: 2;
+  }
+
+  .shellMagazine .mobileDisclosure {
+    display: block;
+    font-size: 0.75rem;
+  }
+
   .catList {
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .storyPair,
+  .categoryBody {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .feedHeader {
+    flex-wrap: wrap;
+    align-items: start;
   }
 }

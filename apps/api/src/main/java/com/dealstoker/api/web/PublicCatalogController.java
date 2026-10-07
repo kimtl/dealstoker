@@ -1,8 +1,10 @@
 package com.dealstoker.api.web;
 
 import com.dealstoker.api.service.CategoryService;
+import com.dealstoker.api.service.MagazineService;
 import com.dealstoker.api.service.ProductService;
 import com.dealstoker.api.web.dto.CategoryDtos.CategoryResponse;
+import com.dealstoker.api.web.dto.MagazineDtos.MagazineResponse;
 import com.dealstoker.api.web.dto.ProductDtos.PageResponse;
 import com.dealstoker.api.web.dto.ProductDtos.ProductDetail;
 import com.dealstoker.api.web.dto.ProductDtos.ProductSummary;
@@ -22,10 +24,16 @@ public class PublicCatalogController {
 
     private final CategoryService categoryService;
     private final ProductService productService;
+    private final MagazineService magazineService;
 
-    public PublicCatalogController(CategoryService categoryService, ProductService productService) {
+    public PublicCatalogController(
+            CategoryService categoryService,
+            ProductService productService,
+            MagazineService magazineService
+    ) {
         this.categoryService = categoryService;
         this.productService = productService;
+        this.magazineService = magazineService;
     }
 
     @GetMapping("/health")
@@ -97,5 +105,11 @@ public class PublicCatalogController {
                 "featuredProducts", productService.latestPublished(8),
                 "latestDeals", productService.latestPublished(40)
         );
+    }
+
+    /** Guide-led homepage sections (stories with their products, then category sections). */
+    @GetMapping("/home/magazine")
+    public MagazineResponse magazine() {
+        return magazineService.magazine();
     }
 }

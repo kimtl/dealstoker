@@ -1,0 +1,128 @@
+.lead {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-board);
+  animation: rise-in 420ms ease both;
+}
+
+.media {
+  display: block;
+  min-height: 15rem;
+  background: var(--surface);
+}
+
+.media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fallback {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  height: 100%;
+  padding: 1.25rem 1.35rem;
+  background:
+    radial-gradient(circle at 85% 15%, rgba(208, 176, 106, 0.35), transparent 45%),
+    linear-gradient(135deg, var(--ink) 0%, #123a63 60%, var(--accent-deep) 130%);
+  color: var(--white);
+}
+
+.fallbackKicker {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+
+.fallbackMark {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  opacity: 0.95;
+}
+
+.body {
+  display: grid;
+  align-content: center;
+  gap: 0.55rem;
+  padding: 1.25rem 1.35rem;
+}
+
+.kicker {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ember-deep);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 1.85rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.title a:hover,
+.title a:focus-visible {
+  color: var(--link);
+}
+
+.excerpt {
+  color: var(--text-muted);
+  font-size: 0.97rem;
+  line-height: 1.6;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.9rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.cta {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.3rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  background: var(--ember);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.cta:hover {
+  background: var(--ember-hot);
+}
+
+.picks {
+  grid-column: 1 / -1;
+  padding: 0.95rem 1.35rem 1.15rem;
+  border-top: 1px solid var(--line);
+  background: var(--surface-elevated);
+}
+
+@media (max-width: 700px) {
+  .lead {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .media {
+    min-height: 11rem;
+  }
+}

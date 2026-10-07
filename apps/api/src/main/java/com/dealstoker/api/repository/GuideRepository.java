@@ -5,6 +5,8 @@ import com.dealstoker.api.domain.GuideStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,4 +31,12 @@ public interface GuideRepository extends JpaRepository<Guide, Long> {
     Page<Guide> findByStatusOrderByUpdatedAtDesc(GuideStatus status, Pageable pageable);
 
     List<Guide> findByStatusOrderByPublishedAtDesc(GuideStatus status, Pageable pageable);
+
+    /** Homepage order: editor-featured guides by rank, then newest. */
+    @Query("""
+            SELECT g FROM Guide g LEFT JOIN FETCH g.category
+            WHERE g.status = :status
+            ORDER BY g.featured DESC, g.featuredRank ASC, g.publishedAt DESC NULLS LAST, g.id DESC
+            """)
+    List<Guide> findForHome(@Param("status") GuideStatus status, Pageable pageable);
 }

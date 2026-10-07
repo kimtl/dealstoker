@@ -60,6 +60,12 @@ public class Guide {
     @Column(nullable = false, length = 32)
     private GuideStatus status = GuideStatus.DRAFT;
 
+    @Column(nullable = false)
+    private boolean featured;
+
+    @Column(name = "featured_rank", nullable = false)
+    private int featuredRank;
+
     @Column(name = "seo_title", length = 255)
     private String seoTitle;
 
@@ -124,6 +130,12 @@ public class Guide {
 
     public GuideStatus getStatus() { return status; }
     public void setStatus(GuideStatus status) { this.status = status; }
+
+    public boolean isFeatured() { return featured; }
+    public void setFeatured(boolean featured) { this.featured = featured; }
+
+    public int getFeaturedRank() { return featuredRank; }
+    public void setFeaturedRank(int featuredRank) { this.featuredRank = featuredRank; }
 
     public String getSeoTitle() { return seoTitle; }
     public void setSeoTitle(String seoTitle) { this.seoTitle = seoTitle; }
