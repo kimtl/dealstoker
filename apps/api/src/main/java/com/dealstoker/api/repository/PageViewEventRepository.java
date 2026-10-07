@@ -2,6 +2,7 @@ package com.dealstoker.api.repository;
 
 import com.dealstoker.api.domain.PageViewEvent;
 import com.dealstoker.api.util.BotUserAgents;
+import com.dealstoker.api.util.SiteTime;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +17,9 @@ public interface PageViewEventRepository extends JpaRepository<PageViewEvent, Lo
             + BotUserAgents.UA_REGEX + "' ";
     String HUMAN_V = " v.user_agent IS NOT NULL AND v.user_agent <> '' AND v.user_agent !~* '"
             + BotUserAgents.UA_REGEX + "' ";
+
+    /** Calendar day in the site's reporting time zone (US Eastern). */
+    String DAY_P = " CAST(p.occurred_at AT TIME ZONE '" + SiteTime.ZONE_ID + "' AS date) ";
 
     @Query(value = "SELECT COUNT(*) FROM page_view_events p WHERE p.occurred_at >= :since AND" + HUMAN_P,
             nativeQuery = true)
@@ -34,7 +38,9 @@ public interface PageViewEventRepository extends JpaRepository<PageViewEvent, Lo
     long countDistinctSessionsSince(@Param("since") Instant since);
 
     @Query(value = """
-            SELECT CAST(p.occurred_at AT TIME ZONE 'UTC' AS date) AS day,
+            SELECT
+            """ + DAY_P + """
+            AS day,
                    COUNT(*) AS page_views,
                    COUNT(DISTINCT p.visitor_key) AS visitors,
                    COUNT(DISTINCT p.session_key) AS sessions,
@@ -42,7 +48,8 @@ public interface PageViewEventRepository extends JpaRepository<PageViewEvent, Lo
             FROM page_view_events p
             WHERE p.occurred_at >= :since AND
             """ + HUMAN_P + """
-            GROUP BY CAST(p.occurred_at AT TIME ZONE 'UTC' AS date)
+            GROUP BY
+            """ + DAY_P + """
             ORDER BY day ASC
             """, nativeQuery = true)
     List<Object[]> dailyStatsSince(@Param("since") Instant since);

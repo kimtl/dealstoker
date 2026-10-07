@@ -50,7 +50,24 @@ export function formatReviewCount(
   return new Intl.NumberFormat(intlLocale(locale)).format(count);
 }
 
-/** e.g. "Oct 2, 2026, 10:30 PM UTC" / "2026. 10. 2. 오후 10:30 UTC" */
+/**
+ * Times are shown in US Eastern time (most of our shoppers and Amazon.com deal timing are
+ * US-based). The abbreviation follows daylight saving: EDT in summer, EST in winter.
+ */
+export const SITE_TIME_ZONE = "America/New_York";
+
+/** "EDT" or "EST" for the given instant. */
+export function siteTimeZoneAbbr(date: Date): string {
+  const part = new Intl.DateTimeFormat("en-US", {
+    timeZone: SITE_TIME_ZONE,
+    timeZoneName: "short",
+  })
+    .formatToParts(date)
+    .find((p) => p.type === "timeZoneName");
+  return part?.value ?? "ET";
+}
+
+/** e.g. "Oct 2, 2026, 6:30 PM EDT" / "2026. 10. 2. 오후 6:30 EDT" */
 export function formatUpdatedAt(
   value: string | null | undefined,
   locale?: Locale | null,
@@ -59,15 +76,16 @@ export function formatUpdatedAt(
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
   try {
-    return new Intl.DateTimeFormat(intlLocale(locale), {
+    const formatted = new Intl.DateTimeFormat(intlLocale(locale), {
       month: "short",
       day: "numeric",
       year: "numeric",
       hour: "numeric",
       minute: "2-digit",
-      timeZone: "UTC",
-      timeZoneName: "short",
+      timeZone: SITE_TIME_ZONE,
     }).format(date);
+    // Korean Intl output would say "GMT-4"; use the same EDT/EST label in every language.
+    return `${formatted} ${siteTimeZoneAbbr(date)}`;
   } catch {
     return date.toISOString();
   }
