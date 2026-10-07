@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { Fraunces, Manrope, Noto_Sans_KR } from "next/font/google";
 import { headers } from "next/headers";
 import { GoogleTagHead, shouldRenderGoogleTag } from "@/components/GoogleTag";
+import { GoogleTagFallback } from "@/components/GoogleTagFallback";
 import { getLocale } from "@/lib/i18n";
 import { PATHNAME_HEADER } from "@/lib/i18n/locale";
+import { GOOGLE_ADS_ID } from "@/lib/site";
 import {
   buildPageMetadata,
   homeMetaDescription,
@@ -56,10 +58,15 @@ export default async function RootLayout({
     locale === "ko" ? "locale-ko" : "locale-en",
   ].join(" ");
 
+  const googleTag = shouldRenderGoogleTag(pathname);
+
   return (
     <html lang={locale}>
-      <head>{shouldRenderGoogleTag(pathname) ? <GoogleTagHead /> : null}</head>
-      <body className={fontClass}>{children}</body>
+      <head>{googleTag ? <GoogleTagHead /> : null}</head>
+      <body className={fontClass}>
+        {children}
+        {googleTag ? <GoogleTagFallback id={GOOGLE_ADS_ID} /> : null}
+      </body>
     </html>
   );
 }

@@ -14,10 +14,7 @@ export function GoogleTagHead() {
   const id = JSON.stringify(GOOGLE_ADS_ID);
   return (
     <>
-      <script
-        async
-        src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GOOGLE_ADS_ID)}`}
-      />
+      <script async src={googleTagSrc(GOOGLE_ADS_ID)} />
       <script
         id="google-tag-init"
         dangerouslySetInnerHTML={{
@@ -29,6 +26,10 @@ gtag('config', ${id});`,
       />
     </>
   );
+}
+
+export function googleTagSrc(id: string): string {
+  return `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
 }
 
 /** Admin screens and non-production builds never load the tag. */
