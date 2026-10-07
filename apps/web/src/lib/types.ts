@@ -290,6 +290,15 @@ export type MagazineResponse = {
   moreGuides: GuideSummary[];
 };
 
+export type GuideRewriteRequest = {
+  title?: string | null;
+  excerpt?: string | null;
+  body: string;
+  categoryId?: number | null;
+  /** Editor notes: first-hand experience, angle, facts to include. */
+  prompt?: string | null;
+};
+
 export type GuideDraftRequest = {
   categoryId?: number | null;
   topic?: string | null;

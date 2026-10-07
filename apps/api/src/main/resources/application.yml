@@ -43,6 +43,8 @@ dealstoker:
     api-key: ${OPENAI_API_KEY:}
     base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
     model: ${OPENAI_MODEL:gpt-4o-mini}
+    # Optional stronger model just for guide drafts/rewrites/translations (long-form writing).
+    guide-model: ${OPENAI_GUIDE_MODEL:}
   analytics:
     # Server-only secret for hashing visitor IPs (HMAC-SHA256). Use a long random value;
     # if unset, a random secret is generated on each start.

@@ -31,6 +31,13 @@ export function localizeGuide<T extends GuideSummary>(
   };
 }
 
+/** Words of prose in a guide body (shortcodes and Markdown symbols ignored). */
+export function wordCount(body: string | null | undefined): number {
+  if (!body) return 0;
+  const text = stripShortcodes(body).replace(/[#*_>`\[\]()|!-]/g, " ");
+  return text.split(/\s+/).filter((word) => /[\p{L}\p{N}]/u.test(word)).length;
+}
+
 /** Rough reading time in minutes (English ~220 wpm, Korean ~500 chars/min). */
 export function readingMinutes(body: string | null | undefined, locale: Locale): number {
   if (!body) return 1;

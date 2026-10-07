@@ -144,6 +144,15 @@ public final class GuideDtos {
 
     public record GuideDraftResponse(String title, String excerpt, String body) {}
 
+    /** AI rewrite of an existing English guide; products come from its shortcodes. */
+    public record GuideRewriteRequest(
+            @Size(max = 300) String title,
+            @Size(max = 600) String excerpt,
+            @NotBlank String body,
+            Long categoryId,
+            String prompt
+    ) {}
+
     public record GuideTranslateRequest(
             @Size(max = 300) String title,
             @Size(max = 600) String excerpt,
