@@ -16,7 +16,7 @@ DealStoker ({domain}) is a small, independent website. You can read everything o
 
 ## What we collect
 
-**Page views.** When a page loads, our own analytics records the page address, the page you came from (referrer), your browser's user-agent string, the time, a random visitor ID and session ID (see Cookies below), and a hashed version of your IP address. We store the hash, not the IP address itself.
+**Page views.** When a page loads, our own analytics records the page address, the page you came from (referrer), your browser's user-agent string, the time, a random visitor ID and session ID (see Cookies below), and a hashed version of your IP address, made with a secret key that only our server knows. We store that hash, not the IP address itself, and it cannot be turned back into your IP address without the key.
 
 **Clicks to Amazon.** When you follow one of our links to Amazon.com, we record which product it was, the time, the referrer, your user-agent string, the session ID, the hashed IP address, and any campaign tags in the link (such as \`utm_source\`). We use this to count clicks and to filter out bots and repeated clicks.
 
@@ -108,7 +108,7 @@ DealStoker({domain})는 작은 독립 웹사이트입니다. 계정 없이 모�
 
 ## 수집하는 정보
 
-**페이지 조회.** 페이지가 열리면 자체 분석 시스템이 페이지 주소, 이전 페이지(리퍼러), 브라우저의 사용자 에이전트 문자열, 시각, 무작위 방문자 ID와 세션 ID(아래 쿠키 참고), 그리고 IP 주소의 해시값을 기록합니다. IP 주소 자체가 아니라 해시값만 저장합니다.
+**페이지 조회.** 페이지가 열리면 자체 분석 시스템이 페이지 주소, 이전 페이지(리퍼러), 브라우저의 사용자 에이전트 문자열, 시각, 무작위 방문자 ID와 세션 ID(아래 쿠키 참고), 그리고 서버만 알고 있는 비밀 키로 만든 IP 주소의 해시값을 기록합니다. IP 주소 자체가 아니라 이 해시값만 저장하며, 비밀 키 없이는 해시값을 IP 주소로 되돌릴 수 없습니다.
 
 **Amazon으로 이동하는 클릭.** 저희 링크를 통해 Amazon.com으로 이동하면 어떤 상품인지, 시각, 리퍼러, 사용자 에이전트, 세션 ID, IP 해시값, 링크에 포함된 캠페인 태그(\`utm_source\` 등)를 기록합니다. 클릭 수를 세고 봇과 중복 클릭을 걸러내는 데 사용합니다.
 

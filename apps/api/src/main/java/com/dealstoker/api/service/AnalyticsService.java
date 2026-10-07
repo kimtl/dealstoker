@@ -5,6 +5,7 @@ import com.dealstoker.api.repository.ClickEventRepository;
 import com.dealstoker.api.repository.PageViewEventRepository;
 import com.dealstoker.api.repository.ProductRepository;
 import com.dealstoker.api.util.BotUserAgents;
+import com.dealstoker.api.util.IpHasher;
 import com.dealstoker.api.web.dto.AnalyticsDtos.AnalyticsSummary;
 import com.dealstoker.api.web.dto.AnalyticsDtos.DailyStat;
 import com.dealstoker.api.web.dto.AnalyticsDtos.PageViewRequest;
@@ -13,15 +14,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,15 +30,18 @@ public class AnalyticsService {
     private final PageViewEventRepository pageViewEventRepository;
     private final ClickEventRepository clickEventRepository;
     private final ProductRepository productRepository;
+    private final IpHasher ipHasher;
 
     public AnalyticsService(
             PageViewEventRepository pageViewEventRepository,
             ClickEventRepository clickEventRepository,
-            ProductRepository productRepository
+            ProductRepository productRepository,
+            IpHasher ipHasher
     ) {
         this.pageViewEventRepository = pageViewEventRepository;
         this.clickEventRepository = clickEventRepository;
         this.productRepository = productRepository;
+        this.ipHasher = ipHasher;
     }
 
     @Transactional
@@ -61,7 +62,7 @@ public class AnalyticsService {
             event.setReferrer(trimTo(httpRequest.getHeader("Referer"), 2000));
         }
         event.setUserAgent(trimTo(httpRequest.getHeader("User-Agent"), 2000));
-        event.setIpHash(hashIp(clientIp(httpRequest)));
+        event.setIpHash(ipHasher.hashClientIp(httpRequest));
         event.setVisitorKey(trimTo(request != null ? request.visitorKey() : null, 128));
         event.setSessionKey(trimTo(request != null ? request.sessionKey() : null, 128));
 
@@ -218,27 +219,6 @@ public class AnalyticsService {
             return blankToNull(slug);
         }
         return null;
-    }
-
-    private String clientIp(HttpServletRequest request) {
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
-            return forwarded.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
-    }
-
-    private String hashIp(String ip) {
-        if (ip == null || ip.isBlank()) {
-            return null;
-        }
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashed = digest.digest(ip.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(hashed);
-        } catch (Exception ex) {
-            return null;
-        }
     }
 
     private String trimTo(String value, int max) {

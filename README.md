@@ -84,6 +84,7 @@ See `.env.example`. Important knobs:
 | `APP_BASE_URL` | Canonical site URL for sitemap/robots |
 | `AMAZON_PARTNER_TAG` | Associates tag (empty until approved) |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Admin basic auth |
+| `IP_HASH_SECRET` | Secret for hashing visitor IPs (HMAC-SHA256); random per start if unset |
 | `API_BASE_URL` | Next.js → API base (web) |
 
 ## Deploy (Railway)
