@@ -129,7 +129,6 @@ export type Messages = {
 
   privacyTitle: string;
   privacyLead: string;
-  privacyBody: string;
 
   noDealsYet: string;
   closeBuyingGuide: string;
@@ -322,9 +321,7 @@ const en: Messages = {
     "Referral fees do not influence which products we list or how we describe them. We choose deals based on price, ratings, and review volume, and we say so when a product has caveats.",
 
   privacyTitle: "Privacy Policy",
-  privacyLead: "How we handle information on DealStoker.",
-  privacyBody:
-    "We collect limited analytics such as page views and outbound clicks to improve DealStoker. We also use the Google Ads tag (gtag.js), which sets cookies so Google can measure whether visits from our ads lead to actions on this site; see Google's privacy policy for how Google handles that data. We do not sell personal information. Contact privacy@{domain} for privacy requests.",
+  privacyLead: "Last updated {date}",
 
   noDealsYet: "No deals yet.",
   closeBuyingGuide: "Close buying guide",
@@ -515,9 +512,7 @@ const ko: Messages = {
     "소개 수수료는 어떤 상품을 소개하고 어떻게 설명하는지에 영향을 주지 않습니다. 딜은 가격, 평점, 리뷰 수를 기준으로 선정하며, 단점이 있는 상품은 그 점을 함께 적습니다.",
 
   privacyTitle: "개인정보 처리방침",
-  privacyLead: "DealStoker의 정보 처리 안내.",
-  privacyBody:
-    "서비스 개선을 위해 페이지 조회·아웃바운드 클릭 등 제한된 분석 정보를 수집합니다. 또한 Google Ads 태그(gtag.js)를 사용하며, 이 태그는 광고를 통한 방문이 사이트에서의 행동으로 이어지는지 Google이 측정할 수 있도록 쿠키를 설정합니다. Google의 데이터 처리 방식은 Google 개인정보처리방침을 참고하세요. 개인정보를 판매하지 않습니다. 개인정보 관련 요청은 privacy@{domain}으로 연락해 주세요.",
+  privacyLead: "최종 업데이트: {date}",
 
   noDealsYet: "딜이 아직 없습니다.",
   closeBuyingGuide: "구매 가이드 닫기",

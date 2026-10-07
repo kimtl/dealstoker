@@ -245,8 +245,8 @@ export function privacyMetaTitle(locale: Locale = "en"): string {
 
 export function privacyMetaDescription(locale: Locale = "en"): string {
   return locale === "ko"
-    ? `${SITE_NAME}의 개인정보 처리 안내입니다.`
-    : `Privacy practices for ${SITE_NAME}.`;
+    ? `${SITE_NAME}가 수집하는 정보, 사용하는 쿠키, Google Ads·AdSense 광고 쿠키와 맞춤 광고 해제 방법, 미국 주별 개인정보 권리를 안내합니다.`
+    : `What ${SITE_NAME} collects, the cookies we use, how Google Ads and AdSense cookies work, how to opt out of personalized ads, and your US state privacy rights.`;
 }
 
 export function buildProductJsonLd(product: ProductDetail): Record<string, unknown> {
