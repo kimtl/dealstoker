@@ -22,7 +22,7 @@ class ProductDetailNullSerializationTest {
                 1L, "AMAZON", "B0001", "www.amazon.com", "Test", "test",
                 "desc", null, null, null, "USD", null, null, null, null,
                 "https://amazon.com/dp/B0001", null, List.of(), ProductStatus.DRAFT,
-                null, null, 1L, null, null, null, null, null, false, 0
+                null, null, 1L, null, null, null, null, null, false, 0, null
         );
         String out = jsonMapper.writeValueAsString(detail);
         System.out.println(out);

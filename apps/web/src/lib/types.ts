@@ -39,6 +39,8 @@ export type ProductSummary = {
   viewCount?: number | null;
   publishedAt?: string | null;
   updatedAt?: string | null;
+  /** When the price was last confirmed (Amazon refresh or manual edit). */
+  priceCheckedAt?: string | null;
 };
 
 export type AnalyticsDailyStat = {
@@ -99,6 +101,30 @@ export type ProductDetail = {
   updatedAt?: string | null;
   featured?: boolean;
   featuredRank?: number;
+  /** When the price was last confirmed (Amazon refresh or manual edit). */
+  priceCheckedAt?: string | null;
+};
+
+export type PriceRefreshRun = {
+  trigger: string;
+  startedAt: string;
+  finishedAt: string;
+  attempted: number;
+  updated: number;
+  noPrice: number;
+  failed: number;
+  aborted: boolean;
+  message: string;
+};
+
+export type PriceRefreshStatus = {
+  enabled: boolean;
+  schedule: string;
+  running: boolean;
+  lastRun: PriceRefreshRun | null;
+  total: number;
+  freshWithin24h: number;
+  stale: number;
 };
 
 export type PageResponse<T> = {

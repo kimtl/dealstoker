@@ -29,6 +29,8 @@ export type Messages = {
   featured: string;
   trending: string;
   updated: string;
+  priceAsOf: string;
+  priceMayHaveChanged: string;
   frontpageSections: string;
   homeHeadline: string;
   homeSupport: string;
@@ -195,6 +197,8 @@ const en: Messages = {
   featured: "Featured",
   trending: "Trending",
   updated: "Updated",
+  priceAsOf: "Price as of",
+  priceMayHaveChanged: "may have changed since",
   frontpageSections: "Frontpage sections",
   homeHeadline: "Amazon deals, price drops & featured deals",
   homeSupport:
@@ -389,6 +393,8 @@ const ko: Messages = {
   featured: "추천",
   trending: "인기",
   updated: "업데이트",
+  priceAsOf: "가격 확인",
+  priceMayHaveChanged: "이후 변동 가능",
   frontpageSections: "메인 섹션",
   homeHeadline: "아마존 딜, 할인 & 추천 딜",
   homeSupport:

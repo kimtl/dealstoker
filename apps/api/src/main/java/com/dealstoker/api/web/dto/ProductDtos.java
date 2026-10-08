@@ -40,7 +40,9 @@ public final class ProductDtos {
             Long buyClickCount,
             Long viewCount,
             Instant publishedAt,
-            Instant updatedAt
+            Instant updatedAt,
+            /** When the price was last confirmed (Amazon refresh or manual edit). */
+            Instant priceCheckedAt
     ) {
         public static ProductSummary from(Product product) {
             return from(product, null, null);
@@ -70,7 +72,8 @@ public final class ProductDtos {
                     buyClickCount,
                     viewCount,
                     product.getPublishedAt(),
-                    product.getUpdatedAt()
+                    product.getUpdatedAt(),
+                    product.getPriceCheckedAt()
             );
         }
     }
@@ -104,7 +107,9 @@ public final class ProductDtos {
             Instant lastSyncedAt,
             Instant updatedAt,
             boolean featured,
-            int featuredRank
+            int featuredRank,
+            /** When the price was last confirmed (Amazon refresh or manual edit). */
+            Instant priceCheckedAt
     ) {
         public static ProductDetail from(Product product) {
             return new ProductDetail(
@@ -136,7 +141,8 @@ public final class ProductDtos {
                     product.getLastSyncedAt(),
                     product.getUpdatedAt(),
                     product.isFeatured(),
-                    product.getFeaturedRank()
+                    product.getFeaturedRank(),
+                    product.getPriceCheckedAt()
             );
         }
     }

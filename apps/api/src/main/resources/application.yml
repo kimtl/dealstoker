@@ -45,6 +45,13 @@ dealstoker:
     model: ${OPENAI_MODEL:gpt-4o-mini}
     # Optional stronger model just for guide drafts/rewrites/translations (long-form writing).
     guide-model: ${OPENAI_GUIDE_MODEL:}
+  prices:
+    # Daily Amazon price refresh for published products (US Eastern time).
+    refresh-enabled: ${PRICE_REFRESH_ENABLED:true}
+    refresh-cron: ${PRICE_REFRESH_CRON:0 17 5 * * *}
+    max-per-run: ${PRICE_REFRESH_MAX_PER_RUN:300}
+    pause-ms: ${PRICE_REFRESH_PAUSE_MS:8000}
+    max-consecutive-failures: ${PRICE_REFRESH_MAX_FAILURES:3}
   analytics:
     # Server-only secret for hashing visitor IPs (HMAC-SHA256). Use a long random value;
     # if unset, a random secret is generated on each start.

@@ -97,6 +97,30 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     long countByStatus(ProductStatus status);
 
+    /** Published Amazon products with an ASIN, least recently checked first. */
+    @Query("""
+            SELECT p.id FROM Product p
+            WHERE p.status = :status AND p.source = 'AMAZON'
+              AND p.externalId IS NOT NULL AND p.externalId <> ''
+            ORDER BY p.lastSyncedAt ASC NULLS FIRST, p.id ASC
+            """)
+    List<Long> findPriceRefreshCandidates(@Param("status") ProductStatus status, Pageable pageable);
+
+    @Query("""
+            SELECT COUNT(p) FROM Product p
+            WHERE p.status = :status AND p.source = 'AMAZON'
+              AND p.externalId IS NOT NULL AND p.externalId <> ''
+            """)
+    long countPriceRefreshCandidates(@Param("status") ProductStatus status);
+
+    @Query("""
+            SELECT COUNT(p) FROM Product p
+            WHERE p.status = :status AND p.source = 'AMAZON'
+              AND p.externalId IS NOT NULL AND p.externalId <> ''
+              AND p.lastSyncedAt >= :since
+            """)
+    long countPricesCheckedSince(@Param("status") ProductStatus status, @Param("since") Instant since);
+
     @Query("""
             SELECT p FROM Product p
             WHERE p.recommendation IS NULL OR p.recommendation = ''

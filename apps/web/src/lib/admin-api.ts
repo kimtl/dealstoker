@@ -9,14 +9,15 @@ import type {
   GuideDetail,
   GuideDraftRequest,
   GuideDraftResponse,
-  GuideRewriteRequest,
   GuideRequest,
-  GuideTranslateResponse,
+  GuideRewriteRequest,
   GuideStatus,
   GuideSummary,
+  GuideTranslateResponse,
   KeywordRegisterResponse,
   KeywordSearchResponse,
   PageResponse,
+  PriceRefreshStatus,
   ProductDetail,
   ProductRequest,
   ProductStatus,
@@ -175,6 +176,15 @@ export async function adminImportAmazonProduct(body: {
     method: "POST",
     body: JSON.stringify(body),
   });
+}
+
+export async function adminPriceRefreshStatus(): Promise<PriceRefreshStatus> {
+  return adminFetch("/api/v1/admin/prices/status");
+}
+
+/** Starts the Amazon price refresh in the background (409 if one is already running). */
+export async function adminStartPriceRefresh(): Promise<PriceRefreshStatus> {
+  return adminFetch("/api/v1/admin/prices/refresh", { method: "POST" });
 }
 
 export async function adminResyncAmazonProduct(

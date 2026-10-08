@@ -54,6 +54,9 @@ If you skip `api.` subdomain, use the Railway-generated API URL (`*.up.railway.a
 | `CORS_ALLOWED_ORIGINS` | `https://dealstoker.com,https://www.dealstoker.com` |
 | `ADMIN_USERNAME` | strong username |
 | `ADMIN_PASSWORD` | strong password |
+| `PRICE_REFRESH_ENABLED` | optional, default `true`; daily Amazon price refresh for published products |
+| `PRICE_REFRESH_CRON` | optional, default `0 17 5 * * *` (5:17 AM US Eastern, Spring cron with seconds) |
+| `PRICE_REFRESH_MAX_PER_RUN` / `PRICE_REFRESH_PAUSE_MS` / `PRICE_REFRESH_MAX_FAILURES` | optional, defaults `300` / `8000` / `3`; the run stops after that many products in a row could not be crawled |
 | `IP_HASH_SECRET` | long random value (`openssl rand -hex 32`); keys the IP hashes used in analytics. Keep it stable — changing it only resets click de-duplication |
 | `AMAZON_MARKETPLACE` | `www.amazon.com` |
 | `AMAZON_PARTNER_TAG` | `dealstoker01-20` (Associates Store ID — API service) |

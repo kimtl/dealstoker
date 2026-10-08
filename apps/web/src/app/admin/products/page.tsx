@@ -7,10 +7,13 @@ import {
   adminFeatureProduct,
   adminGenerateMissingRecommendations,
   adminListProducts,
+  adminPriceRefreshStatus,
   adminPublishProduct,
+  adminStartPriceRefresh,
   adminUnpublishProduct,
 } from "@/lib/admin-api";
-import type { ProductStatus, ProductSummary } from "@/lib/types";
+import { formatUpdatedAt, isPriceStale } from "@/lib/format";
+import type { PriceRefreshStatus, ProductStatus, ProductSummary } from "@/lib/types";
 import styles from "../admin.module.css";
 
 export default function AdminProductsPage() {
@@ -20,6 +23,45 @@ export default function AdminProductsPage() {
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [prices, setPrices] = useState<PriceRefreshStatus | null>(null);
+
+  async function loadPrices() {
+    setPrices(await adminPriceRefreshStatus());
+  }
+
+  async function onRefreshPrices() {
+    if (
+      !confirm(
+        "Refresh Amazon prices for all published products now? It runs in the background " +
+          "with a pause between products, so it can take a while.",
+      )
+    ) {
+      return;
+    }
+    setError(null);
+    try {
+      setPrices(await adminStartPriceRefresh());
+      setNote("Price refresh started. This panel updates every few seconds.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not start the price refresh");
+      await loadPrices().catch(() => undefined);
+    }
+  }
+
+  // Poll while a refresh is running, then reload the table once it finishes.
+  useEffect(() => {
+    if (!prices?.running) return;
+    const timer = setInterval(() => {
+      adminPriceRefreshStatus()
+        .then((next) => {
+          setPrices(next);
+          if (!next.running) load().catch(() => undefined);
+        })
+        .catch(() => undefined);
+    }, 5000);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prices?.running]);
 
   async function load(nextStatus: ProductStatus | "" = status) {
     const data = await adminListProducts({
@@ -35,6 +77,7 @@ export default function AdminProductsPage() {
     load().catch((err) =>
       setError(err instanceof Error ? err.message : "Failed to load"),
     );
+    loadPrices().catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -139,6 +182,41 @@ export default function AdminProductsPage() {
       {error ? <p className={styles.error}>{error}</p> : null}
       {note ? <p className={styles.okNote}>{note}</p> : null}
 
+      {prices ? (
+        <div className={styles.importBox} style={{ marginBottom: "1rem" }}>
+          <div className={styles.actions} style={{ justifyContent: "space-between" }}>
+            <div>
+              <strong>Amazon prices</strong>{" "}
+              <span className={styles.muted}>
+                {prices.freshWithin24h} of {prices.total} published checked in the last 24h
+                {prices.stale > 0 ? ` · ${prices.stale} stale` : ""}
+              </span>
+              <div className={styles.muted}>
+                {prices.enabled
+                  ? `Daily refresh: ${prices.schedule}`
+                  : "Daily refresh is turned off (PRICE_REFRESH_ENABLED=false)."}
+                {prices.lastRun
+                  ? ` · Last run (${prices.lastRun.trigger}) ${formatUpdatedAt(prices.lastRun.finishedAt)}: ` +
+                    `${prices.lastRun.updated} updated, ${prices.lastRun.noPrice} without price, ` +
+                    `${prices.lastRun.failed} failed${prices.lastRun.aborted ? " (stopped early)" : ""}`
+                  : " · No run since the API last started."}
+              </div>
+              {prices.lastRun?.aborted ? (
+                <div className={styles.error}>{prices.lastRun.message}</div>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              className={styles.buttonSecondary}
+              onClick={onRefreshPrices}
+              disabled={prices.running}
+            >
+              {prices.running ? "Refreshing prices…" : "Refresh all prices now"}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
@@ -151,6 +229,7 @@ export default function AdminProductsPage() {
               <th>Views</th>
               <th>Clicks</th>
               <th>Price</th>
+              <th title="When the price was last confirmed (US Eastern)">Price checked</th>
               <th />
             </tr>
           </thead>
@@ -175,6 +254,12 @@ export default function AdminProductsPage() {
                   {product.priceAmount != null
                     ? `${product.currency || "USD"} ${product.priceAmount}`
                     : "—"}
+                </td>
+                <td
+                  className={isPriceStale(product.priceCheckedAt) ? styles.error : undefined}
+                  title={isPriceStale(product.priceCheckedAt) ? "Older than 36 hours" : undefined}
+                >
+                  {formatUpdatedAt(product.priceCheckedAt) ?? "—"}
                 </td>
                 <td>
                   <div className={styles.actions}>
