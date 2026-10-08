@@ -329,6 +329,14 @@ public class Product {
         return createdAt;
     }
 
+    /**
+     * When the shown price was last confirmed: the last successful Amazon refresh or manual
+     * price edit. Rows from before that was tracked fall back to when they were created.
+     */
+    public Instant getPriceCheckedAt() {
+        return lastSyncedAt != null ? lastSyncedAt : createdAt;
+    }
+
     public Instant getUpdatedAt() {
         return updatedAt;
     }

@@ -5,6 +5,7 @@ import {
   formatRating,
   formatReviewCount,
   formatUpdatedAt,
+  isPriceStale,
 } from "@/lib/format";
 import { canOptimizeImage } from "@/lib/images";
 import { getI18n, localizeCategoryName } from "@/lib/i18n";
@@ -32,7 +33,9 @@ export async function DealListItem({
   const listPrice = formatMoney(product.listPrice, product.currency, locale);
   const rating = formatRating(product.rating);
   const reviews = formatReviewCount(product.reviewCount, locale);
-  const updated = formatUpdatedAt(product.updatedAt, locale);
+  const priceCheckedAt = product.priceCheckedAt ?? product.updatedAt;
+  const updated = formatUpdatedAt(priceCheckedAt, locale);
+  const stale = isPriceStale(priceCheckedAt);
   const delay = Math.min(index, 12) * 35;
   const alt = productImageAlt(product);
   const showList =
@@ -110,9 +113,10 @@ export async function DealListItem({
           {categoryName ? (
             <p className={styles.category}>{categoryName}</p>
           ) : null}
-          {updated ? (
+          {updated && price ? (
             <p className={styles.updated}>
-              {t.updated} {updated}
+              {t.priceAsOf} {updated}
+              {stale ? ` · ${t.priceMayHaveChanged}` : ""}
             </p>
           ) : null}
         </div>

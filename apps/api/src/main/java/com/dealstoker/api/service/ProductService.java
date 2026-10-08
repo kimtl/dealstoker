@@ -318,13 +318,19 @@ public class ProductService {
         product.setDescription(request.description());
         product.setRecommendation(blankToNull(request.recommendation()));
         product.setImageUrl(request.imageUrl());
-        product.setPriceAmount(request.priceAmount());
-        product.setCurrency(blankToDefault(request.currency(), "USD"));
         BigDecimal listPrice = request.listPrice();
         if (listPrice != null && request.priceAmount() != null
                 && listPrice.compareTo(request.priceAmount()) <= 0) {
             listPrice = null;
         }
+        // A price typed in (or imported) now counts as checked now.
+        if (creating
+                || !sameAmount(product.getPriceAmount(), request.priceAmount())
+                || !sameAmount(product.getListPrice(), listPrice)) {
+            product.setLastSyncedAt(Instant.now());
+        }
+        product.setPriceAmount(request.priceAmount());
+        product.setCurrency(blankToDefault(request.currency(), "USD"));
         product.setListPrice(listPrice);
         product.setAvailability(request.availability());
         product.setRating(request.rating());
@@ -350,7 +356,6 @@ public class ProductService {
                 product.setPublishedAt(Instant.now());
             }
         }
-        product.setLastSyncedAt(Instant.now());
     }
 
     private String uniqueSlug(String base, Long currentId) {
@@ -447,6 +452,13 @@ public class ProductService {
                 page.getTotalElements(),
                 page.getTotalPages()
         );
+    }
+
+    private static boolean sameAmount(BigDecimal a, BigDecimal b) {
+        if (a == null || b == null) {
+            return a == b;
+        }
+        return a.compareTo(b) == 0;
     }
 
     private String blankToNull(String value) {

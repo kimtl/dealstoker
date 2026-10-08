@@ -14,6 +14,7 @@ import {
   formatRating,
   formatReviewCount,
   formatUpdatedAt,
+  isPriceStale,
 } from "@/lib/format";
 import {
   buildBreadcrumbJsonLd,
@@ -122,10 +123,10 @@ export default async function ProductPage({ params }: PageProps) {
   const faqJsonLd = buildFaqJsonLd(faqs);
   const recommendationParagraphs = splitIntoParagraphs(product.recommendation);
   const categoryLabel = localizedCategory?.trim();
-  const updatedLabel = formatUpdatedAt(
-    product.updatedAt || product.lastSyncedAt || product.publishedAt,
-    locale,
-  );
+  const priceCheckedAt =
+    product.priceCheckedAt || product.lastSyncedAt || product.updatedAt || product.publishedAt;
+  const updatedLabel = formatUpdatedAt(priceCheckedAt, locale);
+  const priceStale = isPriceStale(priceCheckedAt);
   const intro =
     locale === "ko"
       ? [
@@ -234,7 +235,8 @@ export default async function ProductPage({ params }: PageProps) {
             </div>
             {updatedLabel ? (
               <p className={styles.updated}>
-                {t.updated} {updatedLabel}
+                {t.priceAsOf} {updatedLabel}
+                {priceStale ? ` · ${t.priceMayHaveChanged}` : ""}
               </p>
             ) : null}
             <p className={styles.intro}>{intro}</p>

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { formatMoney, formatRating, formatUpdatedAt } from "@/lib/format";
+import { formatMoney, formatRating, formatUpdatedAt, isPriceStale } from "@/lib/format";
 import { canOptimizeImage } from "@/lib/images";
 import { getI18n } from "@/lib/i18n";
 import { productImageAlt } from "@/lib/seo";
@@ -17,7 +17,9 @@ export async function ProductMiniCard({ product }: Props) {
   const price = formatMoney(product.priceAmount, product.currency, locale);
   const listPrice = formatMoney(product.listPrice, product.currency, locale);
   const rating = formatRating(product.rating);
-  const updated = formatUpdatedAt(product.updatedAt, locale);
+  const priceCheckedAt = product.priceCheckedAt ?? product.updatedAt;
+  const updated = formatUpdatedAt(priceCheckedAt, locale);
+  const stale = isPriceStale(priceCheckedAt);
   const showList =
     listPrice &&
     price &&
@@ -50,9 +52,10 @@ export async function ProductMiniCard({ product }: Props) {
           {showList ? <span className={styles.listPrice}>{listPrice}</span> : null}
           {rating ? <span className={styles.rating}>{rating}★</span> : null}
         </span>
-        {updated ? (
+        {updated && price ? (
           <span className={styles.updated}>
-            {t.updated} {updated}
+            {t.priceAsOf} {updated}
+            {stale ? ` · ${t.priceMayHaveChanged}` : ""}
           </span>
         ) : null}
       </span>

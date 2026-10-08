@@ -90,3 +90,17 @@ export function formatUpdatedAt(
     return date.toISOString();
   }
 }
+
+/** Prices older than this are flagged as possibly changed (daily refresh + slack). */
+export const PRICE_STALE_HOURS = 36;
+
+/** True when the price check time is missing or older than {@link PRICE_STALE_HOURS}. */
+export function isPriceStale(
+  checkedAt: string | null | undefined,
+  now: Date = new Date(),
+): boolean {
+  if (!checkedAt) return true;
+  const time = new Date(checkedAt).getTime();
+  if (Number.isNaN(time)) return true;
+  return now.getTime() - time > PRICE_STALE_HOURS * 60 * 60 * 1000;
+}

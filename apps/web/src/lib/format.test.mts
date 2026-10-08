@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { formatUpdatedAt, siteTimeZoneAbbr } from "./format.ts";
+import { formatUpdatedAt, isPriceStale, siteTimeZoneAbbr } from "./format.ts";
 
 test("formatUpdatedAt shows US Eastern daylight time in summer", () => {
   // 02:10 UTC on Oct 7 is still Oct 6 in New York (UTC-4).
@@ -23,4 +23,13 @@ test("formatUpdatedAt handles empty and invalid input", () => {
 test("siteTimeZoneAbbr follows daylight saving", () => {
   assert.equal(siteTimeZoneAbbr(new Date("2026-07-01T12:00:00Z")), "EDT");
   assert.equal(siteTimeZoneAbbr(new Date("2026-01-15T12:00:00Z")), "EST");
+});
+
+test("isPriceStale flags prices older than 36 hours or missing", () => {
+  const now = new Date("2026-10-08T12:00:00Z");
+  assert.equal(isPriceStale("2026-10-08T00:00:00Z", now), false);
+  assert.equal(isPriceStale("2026-10-07T01:00:00Z", now), false);
+  assert.equal(isPriceStale("2026-10-06T23:00:00Z", now), true);
+  assert.equal(isPriceStale(null, now), true);
+  assert.equal(isPriceStale("garbage", now), true);
 });

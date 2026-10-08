@@ -134,6 +134,6 @@ class GuideGenerationServiceTest {
                 new BigDecimal("119.99"), "USD", new BigDecimal("173.99"), null,
                 new BigDecimal("4.6"), 21000, null, "COSORI", List.of("12 cooking functions", "26-quart capacity"),
                 null, null, null, null, "home-kitchen", "Home & Kitchen",
-                null, null, null, false, 0);
+                null, null, null, false, 0, null);
     }
 }

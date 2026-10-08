@@ -84,7 +84,8 @@ class ProductRequestJacksonTest {
                 null,
                 null,
                 false,
-                0
+                0,
+                null
         );
         String out = jsonMapper.writeValueAsString(detail);
         assertThat(out).contains("\"recommendation\":\"why buy\"");

@@ -169,6 +169,35 @@ public class AmazonImportService {
         return transactionTemplate.execute(status -> applyResync(productId, asin.trim(), canonical, scraped));
     }
 
+    /** Result of one scheduled price refresh. */
+    public enum RefreshOutcome {
+        /** Price found and saved; lastSyncedAt moved to now. */
+        UPDATED,
+        /** The page loaded but had no price (e.g. unavailable); nothing saved. */
+        NO_PRICE,
+        /** Amazon could not be crawled (blocked, CAPTCHA, HTTP error). */
+        FAILED
+    }
+
+    /**
+     * Refresh used by the daily job. Unlike {@link #resyncPricing(Long)} it never throws for
+     * crawl problems, and it only marks the price as checked when a price was actually found.
+     */
+    public RefreshOutcome refreshPrice(Long productId) {
+        Product snapshot = productService.requireById(productId);
+        String asin = snapshot.getExternalId() == null ? "" : snapshot.getExternalId().trim();
+        if (asin.isBlank()) {
+            return RefreshOutcome.NO_PRICE;
+        }
+        String canonical = AmazonAsinParser.canonicalProductUrl(asin);
+        ScrapedProduct scraped = pageFetcher.fetch(asin, canonical);
+        if (scraped.priceAmount() == null) {
+            return scraped.fetched() ? RefreshOutcome.NO_PRICE : RefreshOutcome.FAILED;
+        }
+        transactionTemplate.execute(status -> applyResync(productId, asin, canonical, scraped));
+        return RefreshOutcome.UPDATED;
+    }
+
     private ProductDetail applyResync(Long productId, String asin, String canonical, ScrapedProduct scraped) {
         Product product = productService.requireById(productId);
         if (scraped.priceAmount() != null) {
@@ -197,7 +226,10 @@ public class AmazonImportService {
                         : product.getDetailPageUrl(),
                 asin
         ));
-        product.setLastSyncedAt(java.time.Instant.now());
+        // Only a page that actually showed a price confirms the price.
+        if (scraped.priceAmount() != null) {
+            product.setLastSyncedAt(java.time.Instant.now());
+        }
         return ProductDetail.from(productRepository.save(product));
     }
 
