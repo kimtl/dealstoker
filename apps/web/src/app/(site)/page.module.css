@@ -159,9 +159,10 @@
   white-space: nowrap;
 }
 
+/* auto-fit: one or two guides stretch to fill the row instead of leaving empty columns. */
 .guideGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1rem;
 }
 
@@ -170,11 +171,16 @@
   gap: 1rem;
 }
 
+/* Equal-height cards so a short story doesn't leave a hole under it. */
 .storyPair {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
-  align-items: start;
+  align-items: stretch;
+}
+
+.storyPair > :only-child {
+  grid-column: 1 / -1;
 }
 
 .sectionStack {
@@ -190,16 +196,18 @@
   animation: slide-feed 560ms ease both;
 }
 
+/* Guides column stretches to the product list's height; its cards share that height. */
 .categoryBody {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
   gap: 1rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 .categoryGuides {
   display: grid;
   gap: 1rem;
+  grid-auto-rows: 1fr;
 }
 
 .feedStack {
