@@ -9,6 +9,7 @@ import { getCategory, getCategoryProducts, getGuides, isApiNotFound } from "@/li
 import { GuideCard } from "@/components/GuideCard";
 import type { GuideSummary } from "@/lib/types";
 import { getCategoryFaqs } from "@/lib/faq";
+import { formatMoney, formatRating } from "@/lib/format";
 import {
   buildBreadcrumbJsonLd,
   buildFaqJsonLd,
@@ -141,6 +142,27 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       : [seoLead, description]
     : [seoLead];
   const faqJsonLd = buildFaqJsonLd(faqs);
+
+  // "At a glance" card next to the intro, computed over the whole category (not just this page).
+  const firstOf = (sortBy: string) =>
+    getCategoryProducts(slug, { sort: sortBy, page: 0, size: 1 })
+      .then((r) => r.items[0] ?? null)
+      .catch(() => null);
+  const [cheapest, priciest, topRatedCandidates] = await Promise.all([
+    firstOf("price_asc"),
+    firstOf("price_desc"),
+    getCategoryProducts(slug, { sort: "rating", page: 0, size: 10 })
+      .then((r) => r.items)
+      .catch(() => []),
+  ]);
+  // A 5.0 from a handful of reviews shouldn't beat a 4.7 from thousands.
+  const topRated =
+    topRatedCandidates.find((p) => p.rating != null && (p.reviewCount ?? 0) >= 50) ??
+    topRatedCandidates.find((p) => p.rating != null) ??
+    null;
+  const minPrice = cheapest ? formatMoney(cheapest.priceAmount, cheapest.currency, locale) : null;
+  const maxPrice = priciest ? formatMoney(priciest.priceAmount, priciest.currency, locale) : null;
+
   const jsonLd = [
     buildBreadcrumbJsonLd([
       { name: t.breadcrumbHome, path: "/" },
@@ -184,7 +206,47 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
               />
             ) : null}
           </div>
-          <AffiliateDisclosure />
+          <aside className={styles.glance} aria-label={t.atAGlance}>
+            <p className={styles.glanceTitle}>{t.atAGlance}</p>
+            <dl className={styles.glanceList}>
+              <div>
+                <dt>{t.glanceDeals}</dt>
+                <dd>{products.totalElements.toLocaleString(locale === "ko" ? "ko-KR" : "en-US")}</dd>
+              </div>
+              {minPrice && maxPrice ? (
+                <div>
+                  <dt>{t.glancePriceRange}</dt>
+                  <dd>{minPrice === maxPrice ? minPrice : `${minPrice} – ${maxPrice}`}</dd>
+                </div>
+              ) : null}
+              {topRated ? (
+                <div>
+                  <dt>{t.glanceTopRated}</dt>
+                  <dd>
+                    <Link href={`/p/${topRated.slug}`} className={styles.glanceLink}>
+                      {topRated.title}
+                    </Link>
+                    <span className={styles.glanceMeta}>
+                      {formatRating(topRated.rating)}★
+                    </span>
+                  </dd>
+                </div>
+              ) : null}
+              {guides.length > 0 ? (
+                <div>
+                  <dt>{t.glanceGuides}</dt>
+                  <dd>
+                    <a href="#guides" className={styles.glanceLink}>
+                      {formatMessage(guides.length === 1 ? t.guideCount : t.guidesCount, {
+                        count: guides.length,
+                      })}
+                    </a>
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
+          </aside>
+          <AffiliateDisclosure className={styles.headerDisclosure} />
         </header>
 
         <div className={styles.toolbar}>
