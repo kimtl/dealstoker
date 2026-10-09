@@ -176,11 +176,13 @@ public class AmazonImportService {
         /** The page loaded but had no price (e.g. unavailable); nothing saved. */
         NO_PRICE,
         /** Amazon could not be crawled (blocked, CAPTCHA, HTTP error). */
-        FAILED
+        FAILED,
+        /** Amazon says the item is no longer sold; the product was unpublished. */
+        UNAVAILABLE
     }
 
     /**
-     * Refresh used by the daily job. Unlike {@link #resyncPricing(Long)} it never throws for
+     * Refresh used by the daily job (published products only; see PriceRefreshService). Unlike {@link #resyncPricing(Long)} it never throws for
      * crawl problems, and it only marks the price as checked when a price was actually found.
      */
     public RefreshOutcome refreshPrice(Long productId) {
@@ -191,11 +193,27 @@ public class AmazonImportService {
         }
         String canonical = AmazonAsinParser.canonicalProductUrl(asin);
         ScrapedProduct scraped = pageFetcher.fetch(asin, canonical);
+        // Only a page that loaded, says "currently unavailable" and shows no price counts as
+        // discontinued; a temporary out-of-stock or a failed crawl never unpublishes anything.
+        if (scraped.fetched() && scraped.unavailable() && scraped.priceAmount() == null) {
+            transactionTemplate.executeWithoutResult(status -> markUnavailable(productId));
+            return RefreshOutcome.UNAVAILABLE;
+        }
         if (scraped.priceAmount() == null) {
             return scraped.fetched() ? RefreshOutcome.NO_PRICE : RefreshOutcome.FAILED;
         }
         transactionTemplate.execute(status -> applyResync(productId, asin, canonical, scraped));
         return RefreshOutcome.UPDATED;
+    }
+
+    private void markUnavailable(Long productId) {
+        Product product = productService.requireById(productId);
+        if (product.getStatus() != ProductStatus.PUBLISHED) {
+            return;
+        }
+        product.setStatus(ProductStatus.UNPUBLISHED);
+        product.setAvailability("Unavailable");
+        productRepository.save(product);
     }
 
     private ProductDetail applyResync(Long productId, String asin, String canonical, ScrapedProduct scraped) {

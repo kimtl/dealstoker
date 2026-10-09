@@ -113,6 +113,8 @@ export type PriceRefreshRun = {
   updated: number;
   noPrice: number;
   failed: number;
+  /** Products Amazon reported as no longer sold, now unpublished. */
+  unpublished: number;
   aborted: boolean;
   message: string;
 };

@@ -131,4 +131,25 @@ class PriceRefreshServiceTest {
         assertThat(status.stale()).isEqualTo(3);
         assertThat(status.schedule()).contains("America/New_York");
     }
+
+    @Test
+    void countsUnpublishedProductsAndKeepsGoing() {
+        candidates(1L, 2L, 3L);
+        when(amazon.refreshPrice(1L)).thenReturn(RefreshOutcome.FAILED);
+        when(amazon.refreshPrice(2L)).thenReturn(RefreshOutcome.UNAVAILABLE);
+        when(amazon.refreshPrice(3L)).thenReturn(RefreshOutcome.UPDATED);
+
+        PriceRefreshService.RunSummary run = service(2, 0).refreshAll("schedule");
+
+        assertThat(run.unpublished()).isEqualTo(1);
+        assertThat(run.updated()).isEqualTo(1);
+        assertThat(run.aborted()).isFalse();
+    }
+
+    @Test
+    void onlyPublishedProductsAreSelected() {
+        candidates();
+        service(3, 0).refreshAll("schedule");
+        verify(products).findPriceRefreshCandidates(eq(ProductStatus.PUBLISHED), any(Pageable.class));
+    }
 }

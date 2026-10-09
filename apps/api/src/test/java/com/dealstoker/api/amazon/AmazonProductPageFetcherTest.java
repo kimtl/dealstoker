@@ -178,4 +178,38 @@ class AmazonProductPageFetcherTest {
         );
         assertFalse(scraped.title() != null && scraped.priceAmount() != null);
     }
+
+    private static String page(String availabilityBlock, String extraBody) {
+        return """
+                <html><head><meta property="og:title" content="Test Kettle" />
+                <meta property="og:image" content="https://m.media-amazon.com/images/I/k.jpg" /></head>
+                <body><span id="productTitle">Test Kettle</span>
+                %s
+                %s
+                </body></html>
+                """.formatted(availabilityBlock, extraBody);
+    }
+
+    @Test
+    void detectsCurrentlyUnavailable() {
+        String html = page("<div id=\"availability\"><span>Currently unavailable.</span>"
+                + "<span>We don't know when or if this item will be back in stock.</span></div>", "");
+        assertTrue(fetcher.parseHtml(html).unavailable());
+    }
+
+    @Test
+    void inStockAndTemporaryOutOfStockAreNotUnavailable() {
+        assertFalse(fetcher.parseHtml(page("<div id=\"availability\"><span>In Stock</span></div>", ""))
+                .unavailable());
+        assertFalse(fetcher.parseHtml(page(
+                "<div id=\"availability\"><span>Temporarily out of stock. Order now and we'll deliver when available.</span></div>",
+                "")).unavailable());
+    }
+
+    @Test
+    void ignoresUnavailableTextOutsideTheBuyBox() {
+        String html = page("<div id=\"availability\"><span>In Stock</span></div>",
+                "<div class=\"carousel\"><span>Other product: Currently unavailable.</span></div>");
+        assertFalse(fetcher.parseHtml(html).unavailable());
+    }
 }
