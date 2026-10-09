@@ -52,6 +52,17 @@ dealstoker:
     max-per-run: ${PRICE_REFRESH_MAX_PER_RUN:300}
     pause-ms: ${PRICE_REFRESH_PAUSE_MS:8000}
     max-consecutive-failures: ${PRICE_REFRESH_MAX_FAILURES:3}
+  newsletter:
+    # Resend (https://resend.com) API key and verified sender, e.g. "DealStoker <deals@dealstoker.com>".
+    resend-api-key: ${RESEND_API_KEY:}
+    from: ${NEWSLETTER_FROM:}
+    # Required by CAN-SPAM in every newsletter (a PO box or registered mailbox is fine).
+    postal-address: ${NEWSLETTER_POSTAL_ADDRESS:}
+    # Weekly draft (US Eastern); auto-send also sends it without review.
+    schedule-enabled: ${NEWSLETTER_SCHEDULE_ENABLED:true}
+    cron: ${NEWSLETTER_CRON:0 13 8 * * THU}
+    auto-send: ${NEWSLETTER_AUTO_SEND:false}
+    send-pause-ms: ${NEWSLETTER_SEND_PAUSE_MS:600}
   analytics:
     # Server-only secret for hashing visitor IPs (HMAC-SHA256). Use a long random value;
     # if unset, a random secret is generated on each start.

@@ -21,3 +21,5 @@ dealstoker:
     allowed-origins: http://localhost:3000
   prices:
     refresh-enabled: false
+  newsletter:
+    schedule-enabled: false

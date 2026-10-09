@@ -4,6 +4,7 @@ import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { GuideCard } from "@/components/GuideCard";
 import { JsonLd } from "@/components/JsonLd";
 import { GuideBody } from "@/components/GuideBody";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { getGuide, getGuides, isApiNotFound } from "@/lib/api";
 import { formatUpdatedAt } from "@/lib/format";
 import { localizeGuide, readingMinutes, stripShortcodes } from "@/lib/guides";
@@ -168,6 +169,8 @@ export default async function GuidePage({ params }: PageProps) {
             </Link>
           </div>
         </footer>
+
+        <NewsletterSignup source="guide" />
 
         {related.length > 0 && categoryName ? (
           <section className={styles.related} aria-labelledby="related-guides">

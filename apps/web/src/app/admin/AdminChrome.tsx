@@ -72,6 +72,7 @@ export function AdminChrome({ children }: { children: React.ReactNode }) {
           <Link href="/admin/products">Products</Link>
           <Link href="/admin/products/keyword-import">Keyword import</Link>
           <Link href="/admin/guides">Guides</Link>
+          <Link href="/admin/newsletter">Newsletter</Link>
           <Link href="/">View site</Link>
           <button
             type="button"

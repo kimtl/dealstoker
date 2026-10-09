@@ -57,6 +57,10 @@ If you skip `api.` subdomain, use the Railway-generated API URL (`*.up.railway.a
 | `PRICE_REFRESH_ENABLED` | optional, default `true`; daily Amazon price refresh for published products |
 | `PRICE_REFRESH_CRON` | optional, default `0 17 5 * * *` (5:17 AM US Eastern, Spring cron with seconds) |
 | `PRICE_REFRESH_MAX_PER_RUN` / `PRICE_REFRESH_PAUSE_MS` / `PRICE_REFRESH_MAX_FAILURES` | optional, defaults `300` / `8000` / `3`; the run stops after that many products in a row could not be crawled |
+| `RESEND_API_KEY` | Resend API key for newsletter and confirmation emails (https://resend.com; verify the dealstoker.com domain there and add its SPF/DKIM DNS records) |
+| `NEWSLETTER_FROM` | verified sender, e.g. `DealStoker <deals@dealstoker.com>` |
+| `NEWSLETTER_POSTAL_ADDRESS` | postal address printed in every newsletter (required by CAN-SPAM; a PO box or registered mailbox works). Sending is refused until it is set |
+| `NEWSLETTER_SCHEDULE_ENABLED` / `NEWSLETTER_CRON` / `NEWSLETTER_AUTO_SEND` | optional; weekly draft on Thursdays 8:13 AM US Eastern by default; auto-send `false` means drafts wait for review in Admin → Newsletter |
 | `IP_HASH_SECRET` | long random value (`openssl rand -hex 32`); keys the IP hashes used in analytics. Keep it stable — changing it only resets click de-duplication |
 | `AMAZON_MARKETPLACE` | `www.amazon.com` |
 | `AMAZON_PARTNER_TAG` | `dealstoker01-20` (Associates Store ID — API service) |

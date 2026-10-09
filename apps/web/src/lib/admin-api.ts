@@ -74,8 +74,8 @@ async function adminFetch<T>(
     const text = await res.text().catch(() => "");
     let detail = text;
     try {
-      const json = JSON.parse(text) as { message?: string; error?: string };
-      detail = json.message || json.error || text;
+      const json = JSON.parse(text) as { message?: string; error?: string; detail?: string };
+      detail = json.detail || json.message || json.error || text;
     } catch {
       // keep raw text
     }
@@ -386,4 +386,100 @@ export async function adminListCategoryProducts(
   return adminFetch(
     `/api/v1/products?category=${encodeURIComponent(categorySlug)}&size=100&sort=newest`,
   );
+}
+
+// ---------- newsletter ----------
+
+export type NewsletterIssueSummary = {
+  id: number;
+  subject: string;
+  subjectKo: string | null;
+  status: "DRAFT" | "SENDING" | "SENT";
+  recipientCount: number;
+  sentCount: number;
+  failedCount: number;
+  createdAt: string;
+  sentAt: string | null;
+};
+
+export type NewsletterStatus = {
+  readiness: { emailConfigured: boolean; postalAddressSet: boolean; from: string; ready?: boolean };
+  scheduleEnabled: boolean;
+  autoSend: boolean;
+  active: number;
+  pending: number;
+  unsubscribed: number;
+  issues: NewsletterIssueSummary[];
+};
+
+export type NewsletterIssueDetail = {
+  summary: NewsletterIssueSummary;
+  intro: string | null;
+  introKo: string | null;
+};
+
+export type NewsletterSubscriberRow = {
+  id: number;
+  email: string;
+  status: "PENDING" | "ACTIVE" | "UNSUBSCRIBED";
+  locale: string;
+  source: string | null;
+  createdAt: string;
+  confirmedAt: string | null;
+  lastSentAt: string | null;
+};
+
+export async function adminNewsletterStatus(): Promise<NewsletterStatus> {
+  return adminFetch("/api/v1/admin/newsletter/status");
+}
+
+export async function adminNewsletterSubscribers(
+  status?: string,
+): Promise<{ items: NewsletterSubscriberRow[]; totalElements: number }> {
+  return adminFetch(`/api/v1/admin/newsletter/subscribers${status ? `?status=${status}` : ""}`);
+}
+
+export async function adminCreateNewsletterDraft(): Promise<NewsletterIssueSummary> {
+  return adminFetch("/api/v1/admin/newsletter/issues", { method: "POST" });
+}
+
+export async function adminNewsletterIssue(id: number): Promise<NewsletterIssueDetail> {
+  return adminFetch(`/api/v1/admin/newsletter/issues/${id}`);
+}
+
+export async function adminUpdateNewsletterIssue(
+  id: number,
+  body: { subject: string; subjectKo: string | null; intro: string | null; introKo: string | null },
+): Promise<NewsletterIssueSummary> {
+  return adminFetch(`/api/v1/admin/newsletter/issues/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function adminDeleteNewsletterIssue(id: number): Promise<void> {
+  await adminFetch(`/api/v1/admin/newsletter/issues/${id}`, { method: "DELETE" });
+}
+
+export async function adminSendNewsletterTest(id: number, email: string, locale: string): Promise<void> {
+  await adminFetch(`/api/v1/admin/newsletter/issues/${id}/test`, {
+    method: "POST",
+    body: JSON.stringify({ email, locale }),
+  });
+}
+
+export async function adminSendNewsletter(id: number): Promise<{ recipients: number }> {
+  return adminFetch(`/api/v1/admin/newsletter/issues/${id}/send`, { method: "POST" });
+}
+
+/** Rendered email HTML for the preview frame (needs the admin login, so it is fetched here). */
+export async function adminNewsletterPreviewHtml(id: number, locale: string): Promise<string> {
+  const auth = getStoredAuth();
+  if (!auth) throw new Error("Not authenticated");
+  const res = await fetch(
+    `${API_PROXY_PREFIX}/api/v1/admin/newsletter/issues/${id}/preview?locale=${locale}`,
+    { headers: { Authorization: `Basic ${auth}`, Accept: "text/html" } },
+  );
+  if (!res.ok) throw new Error(`Preview failed (${res.status})`);
+  return res.text();
 }
