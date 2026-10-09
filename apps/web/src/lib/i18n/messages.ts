@@ -49,6 +49,12 @@ export type Messages = {
   buyingGuide: string;
   buyingGuideTitle: string;
   dealsCount: string;
+  atAGlance: string;
+  glanceDeals: string;
+  glancePriceRange: string;
+  glanceBiggestDiscount: string;
+  biggestDiscount: string;
+  glanceGuides: string;
   dealCount: string;
   newest: string;
   priceAsc: string;
@@ -221,6 +227,12 @@ const en: Messages = {
   buyingGuide: "Buying guide",
   buyingGuideTitle: "{name} buying guide",
   dealsCount: "{count} deals",
+  atAGlance: "At a glance",
+  glanceDeals: "Deals",
+  glancePriceRange: "Price range",
+  glanceBiggestDiscount: "Biggest discount",
+  biggestDiscount: "Biggest discount",
+  glanceGuides: "Buying guides",
   dealCount: "{count} deal",
   newest: "Newest",
   priceAsc: "Price ↑",
@@ -416,6 +428,12 @@ const ko: Messages = {
   buyingGuide: "구매 가이드",
   buyingGuideTitle: "{name} 구매 가이드",
   dealsCount: "딜 {count}개",
+  atAGlance: "한눈에 보기",
+  glanceDeals: "딜",
+  glancePriceRange: "가격대",
+  glanceBiggestDiscount: "최고 할인",
+  biggestDiscount: "할인율순",
+  glanceGuides: "구매 가이드",
   dealCount: "딜 {count}개",
   newest: "최신순",
   priceAsc: "가격 ↑",

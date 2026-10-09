@@ -19,6 +19,7 @@ import com.dealstoker.api.web.dto.ProductDtos.ProductSummary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -399,6 +400,12 @@ public class ProductService {
         }
         if ("price_desc".equalsIgnoreCase(sort)) {
             return Sort.by(Sort.Order.desc("priceAmount").nullsLast(), Sort.Order.desc("publishedAt"));
+        }
+        if ("discount".equalsIgnoreCase(sort)) {
+            // Biggest saving vs. list price first; items without a list price count as 0%.
+            return JpaSort.unsafe(Sort.Direction.DESC,
+                            "COALESCE((p.listPrice - p.priceAmount) / p.listPrice, 0)")
+                    .and(Sort.by(Sort.Direction.DESC, "publishedAt"));
         }
         if ("rating".equalsIgnoreCase(sort)) {
             return Sort.by(

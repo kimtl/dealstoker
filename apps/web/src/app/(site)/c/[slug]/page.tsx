@@ -9,6 +9,7 @@ import { getCategory, getCategoryProducts, getGuides, isApiNotFound } from "@/li
 import { GuideCard } from "@/components/GuideCard";
 import type { GuideSummary } from "@/lib/types";
 import { getCategoryFaqs } from "@/lib/faq";
+import { discountPercentOf, formatMoney } from "@/lib/format";
 import {
   buildBreadcrumbJsonLd,
   buildFaqJsonLd,
@@ -117,6 +118,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     { value: "newest", label: t.newest },
     { value: "price_asc", label: t.priceAsc },
     { value: "price_desc", label: t.priceDesc },
+    { value: "discount", label: t.biggestDiscount },
     { value: "rating", label: t.topRated },
   ];
 
@@ -141,6 +143,23 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       : [seoLead, description]
     : [seoLead];
   const faqJsonLd = buildFaqJsonLd(faqs);
+
+  // "At a glance" card next to the intro, computed over the whole category (not just this page).
+  const firstOf = (sortBy: string) =>
+    getCategoryProducts(slug, { sort: sortBy, page: 0, size: 1 })
+      .then((r) => r.items[0] ?? null)
+      .catch(() => null);
+  const [cheapest, priciest, biggestDeal] = await Promise.all([
+    firstOf("price_asc"),
+    firstOf("price_desc"),
+    firstOf("discount"),
+  ]);
+  const discountPercent = discountPercentOf(biggestDeal);
+  // Only call out a real saving; tiny markdowns from list prices aren't worth highlighting.
+  const showDiscount = biggestDeal != null && discountPercent != null && discountPercent >= 5;
+  const minPrice = cheapest ? formatMoney(cheapest.priceAmount, cheapest.currency, locale) : null;
+  const maxPrice = priciest ? formatMoney(priciest.priceAmount, priciest.currency, locale) : null;
+
   const jsonLd = [
     buildBreadcrumbJsonLd([
       { name: t.breadcrumbHome, path: "/" },
@@ -184,7 +203,45 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
               />
             ) : null}
           </div>
-          <AffiliateDisclosure />
+          <aside className={styles.glance} aria-label={t.atAGlance}>
+            <p className={styles.glanceTitle}>{t.atAGlance}</p>
+            <dl className={styles.glanceList}>
+              <div>
+                <dt>{t.glanceDeals}</dt>
+                <dd>{products.totalElements.toLocaleString(locale === "ko" ? "ko-KR" : "en-US")}</dd>
+              </div>
+              {minPrice && maxPrice ? (
+                <div>
+                  <dt>{t.glancePriceRange}</dt>
+                  <dd>{minPrice === maxPrice ? minPrice : `${minPrice} – ${maxPrice}`}</dd>
+                </div>
+              ) : null}
+              {showDiscount && biggestDeal ? (
+                <div>
+                  <dt>{t.glanceBiggestDiscount}</dt>
+                  <dd>
+                    <Link href={`/p/${biggestDeal.slug}`} className={styles.glanceLink}>
+                      {biggestDeal.title}
+                    </Link>
+                    <span className={styles.glanceDiscount}>-{discountPercent}%</span>
+                  </dd>
+                </div>
+              ) : null}
+              {guides.length > 0 ? (
+                <div>
+                  <dt>{t.glanceGuides}</dt>
+                  <dd>
+                    <a href="#guides" className={styles.glanceLink}>
+                      {formatMessage(guides.length === 1 ? t.guideCount : t.guidesCount, {
+                        count: guides.length,
+                      })}
+                    </a>
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
+          </aside>
+          <AffiliateDisclosure className={styles.headerDisclosure} />
         </header>
 
         <div className={styles.toolbar}>
