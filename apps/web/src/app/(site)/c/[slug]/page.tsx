@@ -9,7 +9,7 @@ import { getCategory, getCategoryProducts, getGuides, isApiNotFound } from "@/li
 import { GuideCard } from "@/components/GuideCard";
 import type { GuideSummary } from "@/lib/types";
 import { getCategoryFaqs } from "@/lib/faq";
-import { formatMoney, formatRating } from "@/lib/format";
+import { discountPercentOf, formatMoney } from "@/lib/format";
 import {
   buildBreadcrumbJsonLd,
   buildFaqJsonLd,
@@ -118,6 +118,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     { value: "newest", label: t.newest },
     { value: "price_asc", label: t.priceAsc },
     { value: "price_desc", label: t.priceDesc },
+    { value: "discount", label: t.biggestDiscount },
     { value: "rating", label: t.topRated },
   ];
 
@@ -148,18 +149,14 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     getCategoryProducts(slug, { sort: sortBy, page: 0, size: 1 })
       .then((r) => r.items[0] ?? null)
       .catch(() => null);
-  const [cheapest, priciest, topRatedCandidates] = await Promise.all([
+  const [cheapest, priciest, biggestDeal] = await Promise.all([
     firstOf("price_asc"),
     firstOf("price_desc"),
-    getCategoryProducts(slug, { sort: "rating", page: 0, size: 10 })
-      .then((r) => r.items)
-      .catch(() => []),
+    firstOf("discount"),
   ]);
-  // A 5.0 from a handful of reviews shouldn't beat a 4.7 from thousands.
-  const topRated =
-    topRatedCandidates.find((p) => p.rating != null && (p.reviewCount ?? 0) >= 50) ??
-    topRatedCandidates.find((p) => p.rating != null) ??
-    null;
+  const discountPercent = discountPercentOf(biggestDeal);
+  // Only call out a real saving; tiny markdowns from list prices aren't worth highlighting.
+  const showDiscount = biggestDeal != null && discountPercent != null && discountPercent >= 5;
   const minPrice = cheapest ? formatMoney(cheapest.priceAmount, cheapest.currency, locale) : null;
   const maxPrice = priciest ? formatMoney(priciest.priceAmount, priciest.currency, locale) : null;
 
@@ -219,16 +216,14 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                   <dd>{minPrice === maxPrice ? minPrice : `${minPrice} – ${maxPrice}`}</dd>
                 </div>
               ) : null}
-              {topRated ? (
+              {showDiscount && biggestDeal ? (
                 <div>
-                  <dt>{t.glanceTopRated}</dt>
+                  <dt>{t.glanceBiggestDiscount}</dt>
                   <dd>
-                    <Link href={`/p/${topRated.slug}`} className={styles.glanceLink}>
-                      {topRated.title}
+                    <Link href={`/p/${biggestDeal.slug}`} className={styles.glanceLink}>
+                      {biggestDeal.title}
                     </Link>
-                    <span className={styles.glanceMeta}>
-                      {formatRating(topRated.rating)}★
-                    </span>
+                    <span className={styles.glanceDiscount}>-{discountPercent}%</span>
                   </dd>
                 </div>
               ) : null}

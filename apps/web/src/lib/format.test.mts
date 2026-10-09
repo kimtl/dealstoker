@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { formatUpdatedAt, isPriceStale, siteTimeZoneAbbr } from "./format.ts";
+import { discountPercentOf, formatUpdatedAt, isPriceStale, siteTimeZoneAbbr } from "./format.ts";
 
 test("formatUpdatedAt shows US Eastern daylight time in summer", () => {
   // 02:10 UTC on Oct 7 is still Oct 6 in New York (UTC-4).
@@ -32,4 +32,13 @@ test("isPriceStale flags prices older than 36 hours or missing", () => {
   assert.equal(isPriceStale("2026-10-06T23:00:00Z", now), true);
   assert.equal(isPriceStale(null, now), true);
   assert.equal(isPriceStale("garbage", now), true);
+});
+
+test("discountPercentOf rounds the saving vs. list price", () => {
+  assert.equal(discountPercentOf({ priceAmount: 119.99, listPrice: 173.99 }), 31);
+  assert.equal(discountPercentOf({ priceAmount: "34.99", listPrice: "50.74" }), 31);
+  assert.equal(discountPercentOf({ priceAmount: 50, listPrice: 50 }), null);
+  assert.equal(discountPercentOf({ priceAmount: 60, listPrice: 50 }), null);
+  assert.equal(discountPercentOf({ priceAmount: 10, listPrice: null }), null);
+  assert.equal(discountPercentOf(null), null);
 });

@@ -104,3 +104,14 @@ export function isPriceStale(
   if (Number.isNaN(time)) return true;
   return now.getTime() - time > PRICE_STALE_HOURS * 60 * 60 * 1000;
 }
+
+/** Whole-percent saving vs. list price, or null when there is no real list-price discount. */
+export function discountPercentOf(
+  product: { priceAmount?: number | string | null; listPrice?: number | string | null } | null,
+): number | null {
+  if (!product || product.priceAmount == null || product.listPrice == null) return null;
+  const price = Number(product.priceAmount);
+  const list = Number(product.listPrice);
+  if (!Number.isFinite(price) || !Number.isFinite(list) || list <= 0 || price >= list) return null;
+  return Math.round(((list - price) / list) * 100);
+}

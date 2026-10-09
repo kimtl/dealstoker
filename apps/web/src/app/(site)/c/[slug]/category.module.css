@@ -93,6 +93,16 @@
   color: var(--link-hover);
 }
 
+.glanceDiscount {
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--white);
+  background: var(--accent);
+  border-radius: 4px;
+  padding: 0.05rem 0.35rem;
+}
+
 .glanceMeta {
   flex-shrink: 0;
   font-size: 0.82rem;
