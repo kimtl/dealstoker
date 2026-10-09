@@ -1,7 +1,7 @@
 import type { Locale } from "@/lib/i18n/locale";
 
 /** Bump this whenever the policy text below changes. */
-export const PRIVACY_LAST_UPDATED = "2026-10-07";
+export const PRIVACY_LAST_UPDATED = "2026-10-09";
 
 const GOOGLE_PARTNER_SITES = "https://policies.google.com/technologies/partner-sites";
 const GOOGLE_PRIVACY = "https://policies.google.com/privacy";
@@ -20,6 +20,8 @@ DealStoker ({domain}) is a small, independent website. You can read everything o
 
 **Clicks to Amazon.** When you follow one of our links to Amazon.com, we record which product it was, the time, the referrer, your user-agent string, the session ID, the hashed IP address, and any campaign tags in the link (such as \`utm_source\`). We use this to count clicks and to filter out bots and repeated clicks.
 
+**Newsletter.** If you sign up for our weekly newsletter, we store your email address, your language, where on the site you signed up, and when you confirmed. We use it only to send the newsletter and the confirmation email. Your subscription starts only after you click the link in the confirmation email. Every newsletter has a one-click unsubscribe link; after you unsubscribe we keep your address only to make sure we don't email you again. We send these emails through our email provider, Resend, which processes your address on our behalf.
+
 **Messages you send us.** If you email us, we receive your email address and whatever you write, and we use them only to reply.
 
 **Server logs.** The companies that host the site may keep standard technical logs (such as IP address, requested URL, time, and browser) for security and troubleshooting.
@@ -33,6 +35,7 @@ We do not collect payment information. Purchases happen on Amazon.com, not on De
 - To keep the site secure and working.
 - To measure how well our own ads work (see Google below).
 - To answer messages you send us.
+- To send the newsletter, if you subscribed.
 
 We do not use this information to work out who you are, and we do not sell personal information for money.
 
@@ -70,6 +73,7 @@ DealStoker is a participant in the Amazon Services LLC Associates Program. When 
 
 - **Cookies:** block or delete cookies in your browser, or use a private window.
 - **Personalized ads:** use [My Ad Center](${GOOGLE_AD_CENTER}), [aboutads.info](${ABOUT_ADS_CHOICES}), or the [NAI opt-out](${NAI_OPT_OUT}). Blocking third-party cookies in your browser also stops most ad personalization.
+- **Newsletter:** use the unsubscribe link in any newsletter, or email us and we'll remove you.
 - **Questions or requests:** email [privacy@{domain}](mailto:privacy@{domain}). Our records are tied to random IDs rather than names, so we may not always be able to find data that belongs to you, but we will do what we reasonably can.
 
 ## US state privacy rights
@@ -112,6 +116,8 @@ DealStoker({domain})는 작은 독립 웹사이트입니다. 계정 없이 모�
 
 **Amazon으로 이동하는 클릭.** 저희 링크를 통해 Amazon.com으로 이동하면 어떤 상품인지, 시각, 리퍼러, 사용자 에이전트, 세션 ID, IP 해시값, 링크에 포함된 캠페인 태그(\`utm_source\` 등)를 기록합니다. 클릭 수를 세고 봇과 중복 클릭을 걸러내는 데 사용합니다.
 
+**뉴스레터.** 주간 뉴스레터를 구독하시면 이메일 주소, 언어, 사이트 내 구독 위치, 구독 확인 시각을 저장합니다. 이 정보는 뉴스레터와 구독 확인 메일을 보내는 데에만 사용합니다. 구독은 확인 메일의 링크를 누른 뒤에만 시작됩니다. 모든 뉴스레터에는 원클릭 구독 해지 링크가 있으며, 해지 후에는 다시 메일을 보내지 않기 위한 목적으로만 주소를 보관합니다. 메일은 발송 대행업체 Resend를 통해 보내며, Resend는 저희를 대신해 이메일 주소를 처리합니다.
+
 **보내 주신 메시지.** 이메일을 보내시면 이메일 주소와 내용을 받게 되며, 답장하는 데에만 사용합니다.
 
 **서버 로그.** 사이트를 호스팅하는 업체가 보안과 문제 해결을 위해 표준 기술 로그(IP 주소, 요청한 URL, 시각, 브라우저 등)를 보관할 수 있습니다.
@@ -125,6 +131,7 @@ DealStoker({domain})는 작은 독립 웹사이트입니다. 계정 없이 모�
 - 사이트를 안전하고 정상적으로 운영하기 위해
 - 저희 광고의 성과를 측정하기 위해(아래 Google 항목 참고)
 - 보내 주신 메시지에 답하기 위해
+- 구독하신 경우 뉴스레터를 보내기 위해
 
 이 정보로 방문자가 누구인지 알아내려 하지 않으며, 개인정보를 돈을 받고 판매하지 않습니다.
 
@@ -162,6 +169,7 @@ DealStoker는 Amazon Services LLC Associates Program 참여자입니다. 링크�
 
 - **쿠키:** 브라우저에서 쿠키를 차단·삭제하거나 시크릿 창을 사용하세요.
 - **맞춤 광고:** [내 광고 센터](${GOOGLE_AD_CENTER}), [aboutads.info](${ABOUT_ADS_CHOICES}), [NAI 해제 페이지](${NAI_OPT_OUT})를 이용하세요. 브라우저에서 제3자 쿠키를 차단해도 대부분의 맞춤 광고가 중단됩니다.
+- **뉴스레터:** 뉴스레터의 구독 해지 링크를 누르거나 이메일로 요청해 주시면 해지해 드립니다.
 - **문의와 요청:** [privacy@{domain}](mailto:privacy@{domain})로 이메일을 보내 주세요. 저희 기록은 이름이 아닌 무작위 ID에 연결되어 있어 본인의 데이터를 항상 찾을 수 있는 것은 아니지만, 합리적인 범위에서 최선을 다하겠습니다.
 
 ## 미국 주별 개인정보 권리

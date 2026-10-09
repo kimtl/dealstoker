@@ -47,3 +47,18 @@
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+.actionButton {
+  min-height: 2.5rem;
+  padding: 0.45rem 1.1rem;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--white);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.actionButton:hover {
+  background: var(--ember-hot);
+}

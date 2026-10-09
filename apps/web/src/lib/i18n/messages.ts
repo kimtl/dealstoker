@@ -50,6 +50,22 @@ export type Messages = {
   buyingGuideTitle: string;
   dealsCount: string;
   atAGlance: string;
+  newsletterTitle: string;
+  newsletterLead: string;
+  newsletterPlaceholder: string;
+  newsletterSubmit: string;
+  newsletterSending: string;
+  newsletterCheckInbox: string;
+  newsletterError: string;
+  newsletterPrivacyNote: string;
+  newsletterConfirmTitle: string;
+  newsletterConfirmBody: string;
+  newsletterConfirming: string;
+  newsletterInvalidLink: string;
+  newsletterUnsubTitle: string;
+  newsletterUnsubBody: string;
+  newsletterUnsubButton: string;
+  newsletterUnsubDone: string;
   glanceDeals: string;
   glancePriceRange: string;
   glanceBiggestDiscount: string;
@@ -228,6 +244,22 @@ const en: Messages = {
   buyingGuideTitle: "{name} buying guide",
   dealsCount: "{count} deals",
   atAGlance: "At a glance",
+  newsletterTitle: "Get the weekly picks",
+  newsletterLead: "New buying guides and the week's biggest discounts, once a week. No spam, and you can unsubscribe anytime.",
+  newsletterPlaceholder: "you@example.com",
+  newsletterSubmit: "Subscribe",
+  newsletterSending: "Sending…",
+  newsletterCheckInbox: "Almost done: check your inbox and tap the confirmation link.",
+  newsletterError: "Something went wrong. Please try again.",
+  newsletterPrivacyNote: "We only use your email for the newsletter.",
+  newsletterConfirmTitle: "You're subscribed",
+  newsletterConfirmBody: "You'll get the next weekly issue. Every email has a one-click unsubscribe link.",
+  newsletterConfirming: "Confirming your subscription…",
+  newsletterInvalidLink: "This link is invalid or has already been used.",
+  newsletterUnsubTitle: "Unsubscribe",
+  newsletterUnsubBody: "Stop receiving the DealStoker weekly newsletter?",
+  newsletterUnsubButton: "Unsubscribe",
+  newsletterUnsubDone: "You're unsubscribed. We won't send you any more newsletters.",
   glanceDeals: "Deals",
   glancePriceRange: "Price range",
   glanceBiggestDiscount: "Biggest discount",
@@ -429,6 +461,22 @@ const ko: Messages = {
   buyingGuideTitle: "{name} 구매 가이드",
   dealsCount: "딜 {count}개",
   atAGlance: "한눈에 보기",
+  newsletterTitle: "주간 추천 받아보기",
+  newsletterLead: "새 구매 가이드와 이번 주 할인 폭이 큰 상품을 주 1회 보내 드립니다. 스팸은 없으며 언제든 구독을 해지할 수 있습니다.",
+  newsletterPlaceholder: "이메일 주소",
+  newsletterSubmit: "구독하기",
+  newsletterSending: "보내는 중…",
+  newsletterCheckInbox: "거의 다 됐습니다. 받은편지함에서 확인 링크를 눌러 주세요.",
+  newsletterError: "문제가 발생했습니다. 다시 시도해 주세요.",
+  newsletterPrivacyNote: "이메일은 뉴스레터 발송에만 사용합니다.",
+  newsletterConfirmTitle: "구독이 완료되었습니다",
+  newsletterConfirmBody: "다음 주간 뉴스레터부터 받아보실 수 있습니다. 모든 메일에 원클릭 구독 해지 링크가 있습니다.",
+  newsletterConfirming: "구독을 확인하는 중입니다…",
+  newsletterInvalidLink: "유효하지 않거나 이미 사용된 링크입니다.",
+  newsletterUnsubTitle: "구독 해지",
+  newsletterUnsubBody: "DealStoker 주간 뉴스레터를 더 이상 받지 않으시겠습니까?",
+  newsletterUnsubButton: "구독 해지하기",
+  newsletterUnsubDone: "구독이 해지되었습니다. 더 이상 뉴스레터를 보내지 않습니다.",
   glanceDeals: "딜",
   glancePriceRange: "가격대",
   glanceBiggestDiscount: "최고 할인",

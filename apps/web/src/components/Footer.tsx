@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { getI18n } from "@/lib/i18n";
 import { SITE_DOMAIN, SITE_NAME } from "@/lib/site";
 import styles from "./Footer.module.css";
@@ -19,6 +20,7 @@ export async function Footer() {
             <LanguageSwitcher locale={locale} t={t} />
           </Suspense>
         </div>
+        <NewsletterSignup source="footer" variant="footer" />
         <nav className={styles.links} aria-label={t.footerNav}>
           <Link href={locale === "ko" ? "/guides?hl=ko" : "/guides"}>
             {t.guides}
