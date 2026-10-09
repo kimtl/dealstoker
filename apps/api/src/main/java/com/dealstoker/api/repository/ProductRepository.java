@@ -127,4 +127,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             ORDER BY p.updatedAt DESC
             """)
     List<Product> findMissingRecommendation(Pageable pageable);
+
+    /** Published products whose note still uses the old labelled template. */
+    @Query("""
+            SELECT p FROM Product p
+            WHERE p.status = :status AND p.recommendation LIKE 'One-line takeaway:%'
+            ORDER BY p.updatedAt ASC
+            """)
+    List<Product> findTemplatedRecommendation(@Param("status") ProductStatus status, Pageable pageable);
 }

@@ -10,6 +10,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -29,14 +30,18 @@ public class RecommendationGenerationService {
     private final DealStokerProperties properties;
     private final AmazonProductPageFetcher pageFetcher;
     private final RestClient restClient;
+    /** Optional stronger model for writing (shared with guides, OPENAI_GUIDE_MODEL). */
+    private final String writingModel;
 
     public RecommendationGenerationService(
             DealStokerProperties properties,
-            AmazonProductPageFetcher pageFetcher
+            AmazonProductPageFetcher pageFetcher,
+            @Value("${dealstoker.ai.guide-model:}") String writingModel
     ) {
         this.properties = properties;
         this.pageFetcher = pageFetcher;
         this.restClient = AiRestClients.create();
+        this.writingModel = writingModel == null || writingModel.isBlank() ? null : writingModel.trim();
     }
 
     public boolean isConfigured() {
@@ -44,6 +49,14 @@ public class RecommendationGenerationService {
     }
 
     public String generate(Product product) {
+        return generate(product, null);
+    }
+
+    /**
+     * @param editorNotes optional first-hand notes from the editor; the only source the write-up
+     *                    may present as personal experience.
+     */
+    public String generate(Product product, String editorNotes) {
         if (!isConfigured()) {
             throw new IllegalArgumentException(
                     "AI is not configured. Set OPENAI_API_KEY on the API service."
@@ -54,8 +67,8 @@ public class RecommendationGenerationService {
         }
 
         List<String> reviewSnippets = tryFetchReviewSnippets(product);
-        String prompt = buildUserPrompt(product, reviewSnippets);
-        return callChatCompletions(prompt);
+        String prompt = buildUserPrompt(product, reviewSnippets, editorNotes);
+        return cleanUp(callChatCompletions(prompt));
     }
 
     private List<String> tryFetchReviewSnippets(Product product) {
@@ -79,25 +92,58 @@ public class RecommendationGenerationService {
         }
     }
 
-    private String buildUserPrompt(Product product, List<String> reviewSnippets) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Write a DealStoker product recommendation in EXACTLY this structure (plain text, US English):\n\n");
-        sb.append("One-line takeaway: <core reason in 20-40 characters worth of meaning; one punchy sentence>\n");
-        sb.append("Why we recommend:\n");
-        sb.append("- <strength #1 vs similar price/category — compare, numbers, or facts>\n");
-        sb.append("- <strength #2 — repeated praise themes from reviews when available>\n");
-        sb.append("- <optional strength #3 — e.g. price vs list / near historic low if signals support it>\n");
-        sb.append("Best for: <specific shopper situation>\n");
-        sb.append("Skip if / caveats: <at least one concrete downside or who should avoid it>\n");
-        sb.append("Price take: <short opinion on whether the shown price looks fair/good/steep>\n\n");
-        sb.append("Rules:\n");
-        sb.append("- Follow the labels exactly as written above (including colons).\n");
-        sb.append("- 2-3 bullets under \"Why we recommend\" (no more than 3).\n");
-        sb.append("- Do NOT invent fake quotes, usernames, star counts, or testimonials.\n");
-        sb.append("- Do NOT copy Amazon product description verbatim.\n");
-        sb.append("- Prefer comparison/facts over hype. Keep under 1200 characters total.\n");
-        sb.append("- No markdown headings. No CTA (the page already has View on Amazon).\n\n");
+    /**
+     * Opening angles, picked per product, so recommendations across the catalog don't all start
+     * and flow the same way.
+     */
+    static final List<String> ANGLES = List.of(
+            "Open with the everyday situation this product fits (who reaches for it, and when).",
+            "Open with the one trade-off a shopper should understand before buying it.",
+            "Open with what owners keep bringing up in their reviews, good or bad.",
+            "Open with how it compares to the cheaper or pricier way to solve the same problem.",
+            "Open with the detail most people overlook when choosing this kind of product.",
+            "Open with whether the current price makes it worth buying now or waiting."
+    );
 
+    static String angleFor(Product product) {
+        long seed = product.getId() != null ? product.getId()
+                : (product.getTitle() == null ? 0 : product.getTitle().hashCode());
+        return ANGLES.get((int) Math.floorMod(seed, (long) ANGLES.size()));
+    }
+
+    static final String SYSTEM_PROMPT = """
+            You write the short "Why we recommend it" note on DealStoker product pages. DealStoker is \
+            a small independent site helping US shoppers decide what to buy on Amazon.com. Write like a \
+            knowledgeable friend: specific, plain-spoken, a little opinionated, never salesy.
+
+            Honesty rules (strict): never claim that you, DealStoker or "we" bought, tested, owned or \
+            used the product, and never invent anecdotes, quotes, numbers or what reviewers say. \
+            Experience-based detail may only come from (a) the review excerpts, described as what \
+            owners or buyers report, or (b) the editor notes, written in first person as the editor's \
+            own experience. Product facts come only from the data given. Output plain text only.
+            """;
+
+    String buildUserPrompt(Product product, List<String> reviewSnippets, String editorNotes) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Write the recommendation note for the product below.\n\n");
+        sb.append("Format:\n");
+        sb.append("- 120 to 200 words in two or three short paragraphs. No headings, no labels, no bullet lists.\n");
+        sb.append("- The first paragraph is a single sentence that works on its own as the takeaway ");
+        sb.append("(it is also used as the page summary).\n");
+        sb.append("- ").append(angleFor(product)).append('\n');
+        sb.append("- Say who it suits and give at least one concrete reason someone should skip it.\n");
+        sb.append("- Mention the price only if it helps the decision; never call a price current.\n\n");
+        sb.append("Voice:\n");
+        sb.append("- Second person, contractions, varied sentence length. Concrete details over adjectives ");
+        sb.append("(sizes, capacities, what it feels like to use day to day when the data supports it).\n");
+        sb.append("- Avoid stock phrases: \"game-changer\", \"look no further\", \"whether you're a\", ");
+        sb.append("\"elevate\", \"seamless\", \"must-have\", \"top-notch\", \"boasts\", \"in conclusion\", ");
+        sb.append("\"when it comes to\", \"overall\". No exclamation marks, no emojis, no call to action.\n");
+        if (!reviewSnippets.isEmpty()) {
+            sb.append("- Use the review excerpts for lived-in detail, attributed to owners or buyers ");
+            sb.append("(e.g. \"owners mention\", \"a common complaint is\"), never as quotes from named people.\n");
+        }
+        sb.append('\n');
         sb.append("Product title: ").append(product.getTitle().trim()).append('\n');
         if (product.getBrand() != null && !product.getBrand().isBlank()) {
             sb.append("Brand: ").append(product.getBrand().trim()).append('\n');
@@ -129,8 +175,18 @@ public class RecommendationGenerationService {
             }
         }
 
+        if (product.getRecommendation() != null && !product.getRecommendation().isBlank()) {
+            String previous = product.getRecommendation().trim();
+            sb.append("Previous note (rewrite it in the new style; keep only supported facts): ")
+                    .append(previous.length() > 1200 ? previous.substring(0, 1200) : previous).append('\n');
+        }
+        if (editorNotes != null && !editorNotes.isBlank()) {
+            sb.append("Editor notes (first-hand; may be written in first person as the editor's own experience): ")
+                    .append(editorNotes.trim()).append('\n');
+        }
+
         if (!reviewSnippets.isEmpty()) {
-            sb.append("Sample review excerpts (themes only — do not quote as named people):\n");
+            sb.append("Review excerpts from buyers (themes only; do not quote as named people):\n");
             for (String snippet : reviewSnippets) {
                 sb.append("- ").append(snippet).append('\n');
             }
@@ -150,17 +206,10 @@ public class RecommendationGenerationService {
         String url = ai.resolvedBaseUrl() + "/chat/completions";
 
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("model", ai.resolvedModel());
-        body.put("temperature", 0.5);
+        body.put("model", writingModel != null ? writingModel : ai.resolvedModel());
+        body.put("temperature", 0.8);
         List<Map<String, String>> messages = new ArrayList<>();
-        messages.add(Map.of(
-                "role", "system",
-                "content",
-                "You write structured affiliate-friendly product recommendations for DealStoker. "
-                        + "Always use the exact section labels requested by the user. "
-                        + "Summarize review themes without fabricating testimonials. "
-                        + "Output plain text only."
-        ));
+        messages.add(Map.of("role", "system", "content", SYSTEM_PROMPT));
         messages.add(Map.of("role", "user", "content", userPrompt));
         body.put("messages", messages);
 
@@ -213,5 +262,19 @@ public class RecommendationGenerationService {
         } catch (Exception ex) {
             return List.of();
         }
+    }
+
+    /** Strips stray headings/labels the model sometimes adds and normalises blank lines. */
+    static String cleanUp(String text) {
+        if (text == null) {
+            return null;
+        }
+        String cleaned = text.trim()
+                .replaceAll("(?im)^[ \\t]*(#+[ \\t]*)?why we recommend( it)?[ \\t]*:?[ \\t]*$", "")
+                .replaceAll("(?m)^[ \\t]*[*-][ \\t]+", "")
+                .replaceAll("\\*\\*", "")
+                .replaceAll("\n{3,}", "\n\n")
+                .trim();
+        return cleaned.length() > 2000 ? cleaned.substring(0, 2000).trim() : cleaned;
     }
 }

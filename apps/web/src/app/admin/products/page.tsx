@@ -116,12 +116,21 @@ export default function AdminProductsPage() {
     }
   }
 
-  async function onGenerateMissing() {
+  async function onGenerateMissing(rewriteTemplated = false) {
+    if (
+      rewriteTemplated &&
+      !confirm(
+        "Rewrite up to 20 published recommendations that still use the old labelled template " +
+          "(\"One-line takeaway: …\")? Missing ones are filled first.",
+      )
+    ) {
+      return;
+    }
     setGenerating(true);
     setError(null);
     setNote(null);
     try {
-      const result = await adminGenerateMissingRecommendations(20);
+      const result = await adminGenerateMissingRecommendations(20, rewriteTemplated);
       setNote(
         `AI recommendations: ${result.updated} updated, ${result.failed} failed (${result.attempted} attempted).`,
       );
@@ -153,12 +162,21 @@ export default function AdminProductsPage() {
         <button
           type="button"
           className={styles.buttonSecondary}
-          onClick={onGenerateMissing}
+          onClick={() => onGenerateMissing(false)}
           disabled={generating}
         >
           {generating
             ? "Generating…"
             : "AI fill missing recommendations"}
+        </button>
+        <button
+          type="button"
+          className={styles.buttonSecondary}
+          onClick={() => onGenerateMissing(true)}
+          disabled={generating}
+          title="Rewrites published notes that still start with 'One-line takeaway:'"
+        >
+          Rewrite old-style recommendations
         </button>
         <select
           value={status}

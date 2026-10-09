@@ -270,10 +270,11 @@ export async function adminDeleteProduct(id: number): Promise<void> {
 export async function adminGenerateRecommendation(
   id: number,
   save = true,
+  notes?: string | null,
 ): Promise<ProductDetail> {
   return adminFetch(
     `/api/v1/admin/products/${id}/recommendation/generate?save=${save ? "true" : "false"}`,
-    { method: "POST" },
+    { method: "POST", body: JSON.stringify({ notes: notes?.trim() || null }) },
   );
 }
 
@@ -289,11 +290,13 @@ export type GenerateMissingRecommendationsResult = {
   }>;
 };
 
+/** Fills missing notes; with rewriteTemplated, also rewrites published notes on the old template. */
 export async function adminGenerateMissingRecommendations(
   limit = 20,
+  rewriteTemplated = false,
 ): Promise<GenerateMissingRecommendationsResult> {
   return adminFetch(
-    `/api/v1/admin/products/recommendation/generate-missing?limit=${limit}`,
+    `/api/v1/admin/products/recommendation/generate-missing?limit=${limit}&rewriteTemplated=${rewriteTemplated}`,
     { method: "POST" },
   );
 }
