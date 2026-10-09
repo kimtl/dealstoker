@@ -96,7 +96,7 @@
   height: 1.35rem;
   padding: 0 0.4rem;
   border-radius: 4px;
-  background: rgba(232, 93, 59, 0.14);
+  background: rgba(var(--accent-rgb), 0.14);
   color: var(--ember-deep);
   font-size: 0.68rem;
   font-weight: 800;

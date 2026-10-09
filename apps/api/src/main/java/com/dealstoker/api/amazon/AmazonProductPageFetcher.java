@@ -79,8 +79,19 @@ public class AmazonProductPageFetcher {
             List<String> features,
             List<String> reviewSnippets,
             boolean fetched,
-            String fetchNote
+            String fetchNote,
+            /** Amazon's own availability box says the item can no longer be bought. */
+            boolean unavailable
     ) {}
+
+    /**
+     * Wording Amazon shows in the buy box when an item is no longer sold (as opposed to a
+     * temporary "out of stock", which we leave alone).
+     */
+    static final java.util.regex.Pattern UNAVAILABLE_TEXT = java.util.regex.Pattern.compile(
+            "currently unavailable|we don't know when or if this item will be back in stock"
+                    + "|this item is no longer available|no longer available for purchase",
+            java.util.regex.Pattern.CASE_INSENSITIVE);
 
     public ScrapedProduct fetch(String asin, String pageUrl) {
         List<String> urls = candidateUrls(asin, pageUrl);
@@ -252,8 +263,19 @@ public class AmazonProductPageFetcher {
                 features,
                 reviewSnippets,
                 hasSignal,
-                null
+                null,
+                isUnavailable(doc)
         );
+    }
+
+    /** Reads only the buy-box availability blocks, never carousels of other products. */
+    static boolean isUnavailable(Document doc) {
+        String availability = firstNonBlank(
+                text(doc, "#availability"),
+                text(doc, "#outOfStock"),
+                text(doc, "#availability_feature_div")
+        );
+        return availability != null && UNAVAILABLE_TEXT.matcher(availability).find();
     }
 
     private static List<String> extractFeatures(Document doc) {
@@ -740,13 +762,14 @@ public class AmazonProductPageFetcher {
                 scraped.features(),
                 scraped.reviewSnippets() == null ? List.of() : scraped.reviewSnippets(),
                 fetched,
-                note
+                note,
+                scraped.unavailable()
         );
     }
 
     private static ScrapedProduct empty(boolean fetched, String note) {
         return new ScrapedProduct(
-                null, null, null, null, null, null, null, null, List.of(), List.of(), fetched, note
+                null, null, null, null, null, null, null, null, List.of(), List.of(), fetched, note, false
         );
     }
 

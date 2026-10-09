@@ -23,7 +23,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.LongConsumer;
 
 /**
- * Daily refresh of Amazon prices for published products, least recently checked first.
+ * Daily refresh of Amazon prices for published products only, least recently checked first.
+ * Drafts and unpublished products are never crawled. Products Amazon reports as no longer
+ * sold are unpublished.
  * Prices shown on the site (and on future price landing pages) must stay current, and
  * Amazon's rules expect displayed prices to be refreshed at least daily.
  *
@@ -47,6 +49,8 @@ public class PriceRefreshService {
             int updated,
             int noPrice,
             int failed,
+            /** Products Amazon reported as no longer sold, now unpublished. */
+            int unpublished,
             boolean aborted,
             String message
     ) {}
@@ -148,6 +152,7 @@ public class PriceRefreshService {
         int updated = 0;
         int noPrice = 0;
         int failed = 0;
+        int unpublished = 0;
         int consecutiveFailures = 0;
         boolean aborted = false;
         String message;
@@ -180,6 +185,11 @@ public class PriceRefreshService {
                         failed++;
                         consecutiveFailures++;
                     }
+                    case UNAVAILABLE -> {
+                        unpublished++;
+                        consecutiveFailures = 0;
+                        log.info("Price refresh: product {} is no longer sold on Amazon; unpublished", id);
+                    }
                 }
                 if (consecutiveFailures >= maxConsecutiveFailures) {
                     aborted = true;
@@ -197,10 +207,10 @@ public class PriceRefreshService {
             running.set(false);
         }
         RunSummary summary = new RunSummary(trigger, startedAt, Instant.now(), attempted, updated,
-                noPrice, failed, aborted, message);
+                noPrice, failed, unpublished, aborted, message);
         lastRun = summary;
-        log.info("Price refresh ({}) done: attempted={} updated={} noPrice={} failed={} aborted={}",
-                trigger, attempted, updated, noPrice, failed, aborted);
+        log.info("Price refresh ({}) done: attempted={} updated={} noPrice={} failed={} unpublished={} aborted={}",
+                trigger, attempted, updated, noPrice, failed, unpublished, aborted);
         return summary;
     }
 

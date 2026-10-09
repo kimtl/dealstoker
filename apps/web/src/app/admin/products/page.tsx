@@ -198,7 +198,11 @@ export default function AdminProductsPage() {
                 {prices.lastRun
                   ? ` · Last run (${prices.lastRun.trigger}) ${formatUpdatedAt(prices.lastRun.finishedAt)}: ` +
                     `${prices.lastRun.updated} updated, ${prices.lastRun.noPrice} without price, ` +
-                    `${prices.lastRun.failed} failed${prices.lastRun.aborted ? " (stopped early)" : ""}`
+                    `${prices.lastRun.failed} failed` +
+                    (prices.lastRun.unpublished
+                      ? `, ${prices.lastRun.unpublished} unpublished (no longer sold)`
+                      : "") +
+                    (prices.lastRun.aborted ? " (stopped early)" : "")
                   : " · No run since the API last started."}
               </div>
               {prices.lastRun?.aborted ? (

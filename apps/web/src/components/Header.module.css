@@ -30,18 +30,17 @@
 }
 
 .mark {
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 3px;
-  background: linear-gradient(140deg, var(--ember-hot), var(--accent));
-  animation: pulse-dot 2.4s ease infinite;
+  display: block;
+  flex-shrink: 0;
 }
 
+/* Wordmark: heavy sans like the logo, sized to sit level with the mark. */
 .brandText {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.25rem;
-  letter-spacing: -0.02em;
+  font-family: var(--font-manrope), "Segoe UI", Arial, sans-serif;
+  font-weight: 800;
+  font-size: 1.32rem;
+  line-height: 1;
+  letter-spacing: -0.035em;
   color: var(--ink);
 }
 
@@ -57,8 +56,8 @@
 }
 
 .search:focus-within {
-  border-color: rgba(31, 111, 235, 0.45);
-  box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.12);
+  border-color: rgba(var(--accent-rgb), 0.45);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12);
 }
 
 .searchInput {
@@ -90,7 +89,7 @@
 
 .searchButton:hover,
 .searchButton:focus-visible {
-  background: #dce9ff;
+  background: var(--accent-soft);
 }
 
 .nav {

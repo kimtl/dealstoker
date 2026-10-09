@@ -30,8 +30,8 @@
   height: 100%;
   padding: 1.25rem 1.35rem;
   background:
-    radial-gradient(circle at 85% 15%, rgba(208, 176, 106, 0.35), transparent 45%),
-    linear-gradient(135deg, var(--ink) 0%, #123a63 60%, var(--accent-deep) 130%);
+    radial-gradient(circle at 85% 15%, rgba(var(--accent-rgb), 0.45), transparent 45%),
+    linear-gradient(135deg, var(--ink) 0%, #262626 60%, var(--accent-deep) 140%);
   color: var(--white);
 }
 

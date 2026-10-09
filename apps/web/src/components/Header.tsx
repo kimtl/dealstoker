@@ -4,6 +4,7 @@ import { getI18n, localizeCategoryName } from "@/lib/i18n";
 import { SITE_NAME } from "@/lib/site";
 import type { Category } from "@/lib/types";
 import { HeaderSearch } from "./HeaderSearch";
+import { LogoMark } from "./LogoMark";
 import styles from "./Header.module.css";
 
 type HeaderProps = {
@@ -22,7 +23,7 @@ export async function Header({ categories = [], compact = false }: HeaderProps) 
           className={styles.brand}
           aria-label={`${SITE_NAME} ${t.homeAria}`}
         >
-          <span className={styles.mark} aria-hidden />
+          <LogoMark className={styles.mark} size={30} />
           <span className={styles.brandText}>{SITE_NAME}</span>
         </Link>
 
