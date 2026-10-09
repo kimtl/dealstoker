@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { Fraunces, Manrope, Noto_Sans_KR } from "next/font/google";
 import { headers } from "next/headers";
 import { GoogleTagHead, shouldRenderGoogleTag } from "@/components/GoogleTag";
+import { GoogleEvents } from "@/components/GoogleEvents";
 import { GoogleTagFallback } from "@/components/GoogleTagFallback";
 import { getLocale } from "@/lib/i18n";
 import { PATHNAME_HEADER } from "@/lib/i18n/locale";
-import { GOOGLE_ADS_ID } from "@/lib/site";
+import { GOOGLE_TAG_IDS } from "@/lib/site";
 import {
   buildPageMetadata,
   homeMetaDescription,
@@ -65,7 +66,8 @@ export default async function RootLayout({
       <head>{googleTag ? <GoogleTagHead /> : null}</head>
       <body className={fontClass}>
         {children}
-        {googleTag ? <GoogleTagFallback id={GOOGLE_ADS_ID} /> : null}
+        {googleTag ? <GoogleTagFallback ids={GOOGLE_TAG_IDS} /> : null}
+        {googleTag ? <GoogleEvents /> : null}
       </body>
     </html>
   );

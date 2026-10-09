@@ -16,6 +16,10 @@ ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 # Google Ads tag ID (public). Pass "off" to build without the tag.
 ARG NEXT_PUBLIC_GOOGLE_ADS_ID=AW-18495871546
 ENV NEXT_PUBLIC_GOOGLE_ADS_ID=$NEXT_PUBLIC_GOOGLE_ADS_ID
+# GA4 measurement ID (G-XXXXXXX); empty leaves Google Analytics off. Railway passes the
+# service variable of the same name as a build argument.
+ARG NEXT_PUBLIC_GA_MEASUREMENT_ID=
+ENV NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
 
 RUN npm run build
 

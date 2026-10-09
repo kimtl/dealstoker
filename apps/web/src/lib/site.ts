@@ -75,5 +75,18 @@ export const GOOGLE_ADS_ID: string = resolveGoogleAdsId(
   process.env.NEXT_PUBLIC_GOOGLE_ADS_ID,
 );
 
+/** GA4 measurement ID ("G-XXXXXXX") from NEXT_PUBLIC_GA_MEASUREMENT_ID; empty disables GA. */
+export function resolveGaMeasurementId(raw: string | undefined): string {
+  const value = (raw ?? "").trim();
+  return /^G-[A-Z0-9]+$/i.test(value) ? value.toUpperCase() : "";
+}
+
+export const GA_MEASUREMENT_ID: string = resolveGaMeasurementId(
+  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
+);
+
+/** Every Google tag ID the site loads: Google Ads first (its snippet text is kept exact), then GA4. */
+export const GOOGLE_TAG_IDS: string[] = [GOOGLE_ADS_ID, GA_MEASUREMENT_ID].filter(Boolean);
+
 /** Browser-safe proxy prefix that rewrites to the API. */
 export const API_PROXY_PREFIX = "/api/backend";

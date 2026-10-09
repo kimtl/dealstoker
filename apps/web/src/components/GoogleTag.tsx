@@ -1,9 +1,10 @@
 import { googleTagInitScript, googleTagSrc, isValidGoogleTagId } from "@/lib/google-tag";
-import { GOOGLE_ADS_ID } from "@/lib/site";
+import { GOOGLE_TAG_IDS } from "@/lib/site";
 
 /**
- * Google tag (gtag.js) for Google Ads, rendered as plain <script> elements
- * inside the root layout's <head>, with the same text as Google's snippet.
+ * Google tag (gtag.js) for Google Ads and, when configured, Google Analytics 4, rendered as
+ * plain <script> elements inside the root layout's <head>, with the same text as Google's
+ * snippet. One gtag.js load serves every ID.
  *
  * It must be in the server-rendered HTML exactly like Google's snippet:
  * next/script (afterInteractive) only emitted a preload link and injected the
@@ -11,13 +12,15 @@ import { GOOGLE_ADS_ID } from "@/lib/site";
  * source and reported the installation as failed.
  */
 export function GoogleTagHead() {
-  if (!GOOGLE_ADS_ID || !isValidGoogleTagId(GOOGLE_ADS_ID)) return null;
+  const ids = GOOGLE_TAG_IDS.filter(isValidGoogleTagId);
+  if (ids.length === 0) return null;
+  const [primary, ...extra] = ids;
   return (
     <>
-      <script async src={googleTagSrc(GOOGLE_ADS_ID)} />
+      <script async src={googleTagSrc(primary)} />
       <script
         id="google-tag-init"
-        dangerouslySetInnerHTML={{ __html: googleTagInitScript(GOOGLE_ADS_ID) }}
+        dangerouslySetInnerHTML={{ __html: googleTagInitScript(primary, extra) }}
       />
     </>
   );
@@ -25,6 +28,6 @@ export function GoogleTagHead() {
 
 /** Admin screens and non-production builds never load the tag. */
 export function shouldRenderGoogleTag(pathname: string | null): boolean {
-  if (!GOOGLE_ADS_ID || process.env.NODE_ENV !== "production") return false;
+  if (GOOGLE_TAG_IDS.length === 0 || process.env.NODE_ENV !== "production") return false;
   return !(pathname ?? "").startsWith("/admin");
 }

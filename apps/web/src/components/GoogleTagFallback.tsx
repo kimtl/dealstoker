@@ -16,7 +16,7 @@ type GtagWindow = Window & {
  * On normal pages the inline snippet in <head> has already defined window.gtag and
  * this does nothing.
  */
-export function GoogleTagFallback({ id }: { id: string }) {
+export function GoogleTagFallback({ ids }: { ids: string[] }) {
   useEffect(() => {
     const w = window as GtagWindow;
     if (typeof w.gtag === "function") return;
@@ -27,13 +27,15 @@ export function GoogleTagFallback({ id }: { id: string }) {
       w.dataLayer!.push(arguments);
     };
     w.gtag("js", new Date());
-    w.gtag("config", id);
-    if (!document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
+    for (const id of ids) w.gtag("config", id);
+    if (ids.length > 0 && !document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
       const script = document.createElement("script");
       script.async = true;
-      script.src = googleTagSrc(id);
+      script.src = googleTagSrc(ids[0]);
       document.head.appendChild(script);
     }
-  }, [id]);
+    // ids is a build-time constant list; join keeps the dependency stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ids.join(",")]);
   return null;
 }
