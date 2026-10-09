@@ -103,6 +103,7 @@ export function ProductForm({ product, onProductSaved }: Props) {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState<FormState>(() => toForm(product));
+  const [editorNotes, setEditorNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -245,7 +246,7 @@ export function ProductForm({ product, onProductSaved }: Props) {
     setError(null);
     setNote(null);
     try {
-      const updated = await adminGenerateRecommendation(product.id, true);
+      const updated = await adminGenerateRecommendation(product.id, true, editorNotes);
       if (!Object.prototype.hasOwnProperty.call(updated, "recommendation")) {
         setError(
           "API build is missing recommendation support. Redeploy the Railway API service on latest main, then retry.",
@@ -546,12 +547,22 @@ export function ProductForm({ product, onProductSaved }: Props) {
             setForm({ ...form, recommendation: e.target.value })
           }
           rows={10}
-          placeholder={`One-line takeaway: …\nWhy we recommend:\n- …\nBest for: …\nSkip if / caveats: …\nPrice take: …`}
+          placeholder={"One-sentence takeaway.\n\nA short paragraph on who it suits, what owners report, and who should skip it."}
         />
         <span className={styles.hint}>
-          Structured takeaway: one-line conclusion, 2–3 reasons, best for,
-          caveats, and price take. Requires OPENAI_API_KEY for AI generate.
+          Two or three short paragraphs; the first sentence doubles as the page summary.
+          AI writing uses buyer review themes and never claims hands-on testing — add your
+          own experience below if you have it. Requires OPENAI_API_KEY.
         </span>
+      </label>
+      <label>
+        Your notes for the AI (optional, not shown publicly)
+        <textarea
+          value={editorNotes}
+          onChange={(e) => setEditorNotes(e.target.value)}
+          rows={3}
+          placeholder={"Only real first-hand experience, e.g. \"I've used it daily for 2 months; the basket fits 4 chicken thighs; the fan is noticeable but not loud.\""}
+        />
       </label>
       <div className={styles.importActions}>
         <button

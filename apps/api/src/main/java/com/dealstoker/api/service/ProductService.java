@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -263,6 +264,23 @@ public class ProductService {
             product.getPrimaryCategory().getName();
         }
         return product;
+    }
+
+    /** Missing notes first; with rewriteTemplated, also published notes still on the old template. */
+    @Transactional(readOnly = true)
+    public List<Product> listRecommendationTargets(int limit, boolean rewriteTemplated) {
+        int size = Math.max(1, Math.min(limit, 50));
+        List<Product> products = new ArrayList<>(listMissingRecommendation(size));
+        if (rewriteTemplated && products.size() < size) {
+            for (Product product : productRepository.findTemplatedRecommendation(
+                    ProductStatus.PUBLISHED, PageRequest.of(0, size - products.size()))) {
+                if (product.getPrimaryCategory() != null) {
+                    product.getPrimaryCategory().getName();
+                }
+                products.add(product);
+            }
+        }
+        return products;
     }
 
     @Transactional(readOnly = true)

@@ -189,10 +189,11 @@ public class AdminCatalogController {
     @PostMapping("/products/{id}/recommendation/generate")
     public ProductDetail generateRecommendation(
             @PathVariable Long id,
-            @RequestParam(defaultValue = "true") boolean save
+            @RequestParam(defaultValue = "true") boolean save,
+            @RequestBody(required = false) RecommendationNotes notes
     ) {
         Product product = productService.requireByIdWithCategory(id);
-        String text = recommendationGenerationService.generate(product);
+        String text = recommendationGenerationService.generate(product, notes == null ? null : notes.notes());
         if (!save) {
             product.setRecommendation(text);
             return ProductDetail.from(product);
@@ -202,14 +203,15 @@ public class AdminCatalogController {
 
     @PostMapping("/products/recommendation/generate-missing")
     public Map<String, Object> generateMissingRecommendations(
-            @RequestParam(defaultValue = "20") int limit
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "false") boolean rewriteTemplated
     ) {
         if (!recommendationGenerationService.isConfigured()) {
             throw new IllegalArgumentException(
                     "AI is not configured. Set OPENAI_API_KEY on the API service."
             );
         }
-        List<Product> missing = productService.listMissingRecommendation(limit);
+        List<Product> missing = productService.listRecommendationTargets(limit, rewriteTemplated);
         List<Map<String, Object>> results = new ArrayList<>();
         int updated = 0;
         int failed = 0;
@@ -242,4 +244,7 @@ public class AdminCatalogController {
         productService.delete(id);
         return Map.of("deleted", true);
     }
+
+    /** Optional first-hand notes from the editor for one recommendation. */
+    public record RecommendationNotes(String notes) {}
 }
