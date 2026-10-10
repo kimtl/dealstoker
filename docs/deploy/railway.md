@@ -86,6 +86,7 @@ If the API fails with `'url' must start with "jdbc"`, redeploy the latest API im
 |----------|--------|
 | `API_BASE_URL` | Public API URL, e.g. `https://api.dealstoker.com` or `https://<api>.up.railway.app` (**runtime** variable — required) |
 | `NEXT_PUBLIC_SITE_URL` | `https://www.dealstoker.com` (**build** arg / variable — **www**, not apex) |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Optional GA4 measurement ID `G-XXXXXXXXXX` (**build** arg / variable — redeploy after changing). Unset = no Google Analytics; the Google Ads tag is unaffected. |
 
 `/api/backend/*` and `/go/*` are **runtime proxies** (not build-time rewrites). Set `API_BASE_URL` on the Web service and redeploy; no rebuild-arg needed for the API host.
 

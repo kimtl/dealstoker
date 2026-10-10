@@ -8,6 +8,7 @@ const GOOGLE_PRIVACY = "https://policies.google.com/privacy";
 const GOOGLE_AD_CENTER = "https://myadcenter.google.com/";
 const ABOUT_ADS_CHOICES = "https://optout.aboutads.info/";
 const NAI_OPT_OUT = "https://optout.networkadvertising.org/";
+const GA_OPT_OUT = "https://tools.google.com/dlpage/gaoptout";
 const AMAZON_PRIVACY =
   "https://www.amazon.com/gp/help/customer/display.html?nodeId=GX7NJQ4ZB8MHFRNJ";
 
@@ -33,7 +34,7 @@ We do not collect payment information. Purchases happen on Amazon.com, not on De
 - To see which pages, guides, and products are useful, and to build lists such as "Top views".
 - To keep statistics honest by filtering out bots and duplicate clicks.
 - To keep the site secure and working.
-- To measure how well our own ads work (see Google below).
+- To measure how people find and use the site, and how well our own ads work (see Google below).
 - To answer messages you send us.
 - To send the newsletter, if you subscribed.
 
@@ -51,7 +52,9 @@ Cookies are small files your browser stores for a website. DealStoker sets these
 
 Google may also set cookies on our pages, as described in the next section. You can block or delete cookies in your browser settings. The site still works without them; it just forgets your language choice.
 
-## Google advertising services
+## Google analytics and advertising services
+
+**Google Analytics.** We use Google Analytics to understand, in aggregate, how people find and use DealStoker: which pages they visit, how they arrived (for example from a search engine), roughly where they are, and what device and browser they use. We also send Google Analytics two events of our own: when someone clicks through to Amazon and when someone signs up for the newsletter. It uses cookies such as \`_ga\` that last up to two years. We do not send Google Analytics your email address or anything else that identifies you by name. You can stop Google Analytics from measuring your visits with the [Google Analytics opt-out browser add-on](${GA_OPT_OUT}).
 
 **Google Ads.** We advertise DealStoker through Google Ads and load the Google Ads tag (gtag.js) on our pages. It uses cookies so Google can tell us whether people who clicked our ads went on to use the site (conversion measurement), and, where enabled in our Google Ads account, to show our ads to people who have visited before (remarketing).
 
@@ -73,6 +76,7 @@ DealStoker is a participant in the Amazon Services LLC Associates Program. When 
 
 - **Cookies:** block or delete cookies in your browser, or use a private window.
 - **Personalized ads:** use [My Ad Center](${GOOGLE_AD_CENTER}), [aboutads.info](${ABOUT_ADS_CHOICES}), or the [NAI opt-out](${NAI_OPT_OUT}). Blocking third-party cookies in your browser also stops most ad personalization.
+- **Analytics:** install the [Google Analytics opt-out add-on](${GA_OPT_OUT}).
 - **Newsletter:** use the unsubscribe link in any newsletter, or email us and we'll remove you.
 - **Questions or requests:** email [privacy@{domain}](mailto:privacy@{domain}). Our records are tied to random IDs rather than names, so we may not always be able to find data that belongs to you, but we will do what we reasonably can.
 
@@ -129,7 +133,7 @@ DealStoker({domain})는 작은 독립 웹사이트입니다. 계정 없이 모�
 - 어떤 페이지, 가이드, 상품이 유용한지 파악하고 "인기 조회" 같은 목록을 만들기 위해
 - 봇과 중복 클릭을 걸러 통계를 정확하게 유지하기 위해
 - 사이트를 안전하고 정상적으로 운영하기 위해
-- 저희 광고의 성과를 측정하기 위해(아래 Google 항목 참고)
+- 사이트 유입·이용 현황과 저희 광고의 성과를 측정하기 위해(아래 Google 항목 참고)
 - 보내 주신 메시지에 답하기 위해
 - 구독하신 경우 뉴스레터를 보내기 위해
 
@@ -147,7 +151,9 @@ DealStoker({domain})는 작은 독립 웹사이트입니다. 계정 없이 모�
 
 다음 항목에서 설명하듯 Google도 저희 페이지에서 쿠키를 설정할 수 있습니다. 브라우저 설정에서 쿠키를 차단하거나 삭제할 수 있으며, 그래도 사이트는 정상적으로 동작합니다. 언어 선택만 기억하지 못합니다.
 
-## Google 광고 서비스
+## Google 분석 및 광고 서비스
+
+**Google Analytics.** 저희는 Google Analytics로 사람들이 DealStoker를 어떻게 찾아오고 이용하는지 전체 통계로 파악합니다. 방문한 페이지, 유입 경로(예: 검색엔진), 대략적인 지역, 사용 기기와 브라우저 같은 정보입니다. 또한 Amazon으로 이동하는 클릭과 뉴스레터 구독, 두 가지 이벤트를 Google Analytics에 보냅니다. 이 서비스는 최대 2년간 유지되는 \`_ga\` 등의 쿠키를 사용합니다. 이메일 주소처럼 개인을 식별할 수 있는 정보는 Google Analytics로 보내지 않습니다. [Google Analytics 차단 브라우저 부가기능](${GA_OPT_OUT})을 설치하면 방문 기록이 측정되지 않습니다.
 
 **Google Ads.** 저희는 Google Ads로 DealStoker를 광고하며, 페이지에 Google Ads 태그(gtag.js)를 불러옵니다. 이 태그는 쿠키를 사용해 광고를 클릭한 사람이 사이트를 이용했는지 Google이 측정할 수 있게 하고(전환 측정), Google Ads 계정에서 설정한 경우 이전 방문자에게 저희 광고를 보여 줍니다(리마케팅).
 
@@ -169,6 +175,7 @@ DealStoker는 Amazon Services LLC Associates Program 참여자입니다. 링크�
 
 - **쿠키:** 브라우저에서 쿠키를 차단·삭제하거나 시크릿 창을 사용하세요.
 - **맞춤 광고:** [내 광고 센터](${GOOGLE_AD_CENTER}), [aboutads.info](${ABOUT_ADS_CHOICES}), [NAI 해제 페이지](${NAI_OPT_OUT})를 이용하세요. 브라우저에서 제3자 쿠키를 차단해도 대부분의 맞춤 광고가 중단됩니다.
+- **분석:** [Google Analytics 차단 부가기능](${GA_OPT_OUT})을 설치하세요.
 - **뉴스레터:** 뉴스레터의 구독 해지 링크를 누르거나 이메일로 요청해 주시면 해지해 드립니다.
 - **문의와 요청:** [privacy@{domain}](mailto:privacy@{domain})로 이메일을 보내 주세요. 저희 기록은 이름이 아닌 무작위 ID에 연결되어 있어 본인의 데이터를 항상 찾을 수 있는 것은 아니지만, 합리적인 범위에서 최선을 다하겠습니다.
 

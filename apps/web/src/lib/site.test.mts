@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { canonicalizeSiteUrl, SITE_CANONICAL_URL } from "./site.ts";
+import { canonicalizeSiteUrl, resolveGaMeasurementId, SITE_CANONICAL_URL } from "./site.ts";
 
 test("apex becomes www canonical", () => {
   assert.equal(canonicalizeSiteUrl("https://dealstoker.com"), SITE_CANONICAL_URL);
@@ -33,4 +33,13 @@ test("Google Ads ID: explicit value wins, 'off' disables", async () => {
   assert.equal(resolveGoogleAdsId("AW-123"), "AW-123");
   assert.equal(resolveGoogleAdsId("off"), "");
   assert.equal(resolveGoogleAdsId("NONE"), "");
+});
+
+test("GA measurement ID accepts only G- IDs", () => {
+  assert.equal(resolveGaMeasurementId(" g-abc123 "), "G-ABC123");
+  assert.equal(resolveGaMeasurementId("G-ABC123"), "G-ABC123");
+  assert.equal(resolveGaMeasurementId(undefined), "");
+  assert.equal(resolveGaMeasurementId(""), "");
+  assert.equal(resolveGaMeasurementId("UA-12345-1"), "");
+  assert.equal(resolveGaMeasurementId("G-1');x"), "");
 });

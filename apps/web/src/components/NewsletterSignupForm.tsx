@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { trackEvent } from "@/lib/google-tag";
 import { API_PROXY_PREFIX } from "@/lib/site";
 import styles from "./NewsletterSignup.module.css";
 
@@ -42,6 +43,7 @@ export function NewsletterSignupForm({ labels, locale, source, privacyHref, vari
         body: JSON.stringify({ email, locale, source, website }),
       });
       if (res.ok) {
+        trackEvent("sign_up", { method: "newsletter", source });
         setState("done");
         setMessage(labels.checkInbox);
         return;

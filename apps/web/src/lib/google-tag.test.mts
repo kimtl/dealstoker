@@ -24,3 +24,11 @@ test("only real tag IDs are accepted, so nothing can break out of the script", (
   assert.ok(!isValidGoogleTagId(""));
   assert.throws(() => googleTagInitScript("AW-1'</script>"));
 });
+
+test("extra IDs (GA4) add config lines without changing the Ads snippet", () => {
+  const single = googleTagInitScript("AW-18495871546");
+  const both = googleTagInitScript("AW-18495871546", ["G-ABC123XYZ"]);
+  assert.ok(both.startsWith(single));
+  assert.ok(both.includes("gtag('config', 'G-ABC123XYZ');"));
+  assert.throws(() => googleTagInitScript("AW-18495871546", ["G-1');alert(1);//"]));
+});
