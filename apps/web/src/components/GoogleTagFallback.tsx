@@ -28,10 +28,12 @@ export function GoogleTagFallback({ ids }: { ids: string[] }) {
     };
     w.gtag("js", new Date());
     for (const id of ids) w.gtag("config", id);
-    if (ids.length > 0 && !document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
+    for (const id of ids) {
+      const src = googleTagSrc(id);
+      if (document.querySelector(`script[src="${src}"]`)) continue;
       const script = document.createElement("script");
       script.async = true;
-      script.src = googleTagSrc(ids[0]);
+      script.src = src;
       document.head.appendChild(script);
     }
     // ids is a build-time constant list; join keeps the dependency stable.
