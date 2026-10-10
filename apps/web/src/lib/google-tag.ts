@@ -17,7 +17,7 @@ export function googleTagSrc(id: string): string {
 /**
  * Body of the inline config script. The first ID keeps Google's snippet text exactly; extra
  * IDs (e.g. a GA4 measurement ID next to the Google Ads ID) get their own config line, so one
- * gtag.js load serves both. Every ID must pass {@link isValidGoogleTagId}.
+ * inline block configures both. Every ID must pass {@link isValidGoogleTagId}.
  */
 export function googleTagInitScript(id: string, extraIds: string[] = []): string {
   for (const value of [id, ...extraIds]) {
