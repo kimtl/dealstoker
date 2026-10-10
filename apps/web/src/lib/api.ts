@@ -1,5 +1,6 @@
 import { getApiBaseUrl } from "./site";
 import type {
+  PriceHistory,
   Category,
   GuideDetail,
   GuideSummary,
@@ -142,6 +143,14 @@ export async function getRelatedProducts(
   return apiFetch<ProductSummary[]>(
     `/api/v1/products/${encodeURIComponent(slug)}/related`,
     { revalidate: 120 },
+  );
+}
+
+/** Price history for a published product; refreshed at most every 10 minutes. */
+export async function getPriceHistory(slug: string): Promise<PriceHistory> {
+  return apiFetch<PriceHistory>(
+    `/api/v1/products/${encodeURIComponent(slug)}/price-history`,
+    { revalidate: 600 },
   );
 }
 

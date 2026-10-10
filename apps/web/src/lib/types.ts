@@ -345,3 +345,25 @@ export type GuideTranslateResponse = {
   excerptKo: string | null;
   bodyKo: string;
 };
+
+export type PriceVerdict =
+  | "TRACKING"
+  | "LOWEST"
+  | "BELOW_TYPICAL"
+  | "TYPICAL"
+  | "ABOVE_TYPICAL"
+  | "STEADY";
+
+/** Prices DealStoker recorded for one product (daily, last 90 days) and a verdict on today's. */
+export type PriceHistory = {
+  currency: string;
+  current: number | null;
+  points: { date: string; price: number }[];
+  trackedSince: string | null;
+  trackedDays: number;
+  windowDays: number;
+  lowest: number | null;
+  highest: number | null;
+  typical: number | null;
+  verdict: PriceVerdict;
+};

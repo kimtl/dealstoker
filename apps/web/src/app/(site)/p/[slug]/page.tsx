@@ -5,9 +5,10 @@ import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 import { DealList } from "@/components/DealList";
 import { FaqSection } from "@/components/FaqSection";
 import { JsonLd } from "@/components/JsonLd";
-import { getGuides, getProduct, getRelatedProducts, isApiNotFound } from "@/lib/api";
+import { getGuides, getPriceHistory, getProduct, getRelatedProducts, isApiNotFound } from "@/lib/api";
+import { PriceHistoryPanel } from "@/components/PriceHistoryPanel";
 import { GuideCard } from "@/components/GuideCard";
-import type { GuideSummary } from "@/lib/types";
+import type { GuideSummary, PriceHistory } from "@/lib/types";
 import { getProductFaqs } from "@/lib/faq";
 import {
   formatMoney,
@@ -90,6 +91,14 @@ export default async function ProductPage({ params }: PageProps) {
     related = await getRelatedProducts(slug);
   } catch {
     related = [];
+  }
+
+  // Optional extra: the page still renders if the history can't be loaded.
+  let priceHistory: PriceHistory | null = null;
+  try {
+    priceHistory = await getPriceHistory(slug);
+  } catch {
+    priceHistory = null;
   }
 
   let guides: GuideSummary[] = [];
@@ -238,6 +247,9 @@ export default async function ProductPage({ params }: PageProps) {
                 {t.priceAsOf} {updatedLabel}
                 {priceStale ? ` · ${t.priceMayHaveChanged}` : ""}
               </p>
+            ) : null}
+            {priceHistory ? (
+              <PriceHistoryPanel history={priceHistory} locale={locale} t={t} />
             ) : null}
             <p className={styles.intro}>{intro}</p>
             {recommendationParagraphs.length > 0 ? (

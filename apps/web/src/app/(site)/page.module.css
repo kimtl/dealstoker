@@ -21,7 +21,7 @@
 }
 
 .brandBlock {
-  max-width: 38rem;
+  max-width: 44rem;
 }
 
 .brand {
@@ -35,12 +35,11 @@
 
 .headline {
   font-family: var(--font-body);
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-  opacity: 0.92;
-  margin-bottom: 0.4rem;
+  font-size: clamp(1.2rem, 2.6vw, 1.55rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  margin-bottom: 0.45rem;
 }
 
 .support {
@@ -48,6 +47,41 @@
   font-size: 0.95rem;
   line-height: 1.5;
   max-width: 34rem;
+}
+
+.promises {
+  flex-basis: 100%;
+  list-style: none;
+  margin: 0.2rem 0 0;
+  padding: 0.85rem 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem 1.25rem;
+}
+
+.promises li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding-left: 0.7rem;
+  border-left: 3px solid var(--ember);
+}
+
+.promises strong {
+  font-size: 0.9rem;
+}
+
+.promises span {
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 720px) {
+  .promises {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .ctaGroup {
