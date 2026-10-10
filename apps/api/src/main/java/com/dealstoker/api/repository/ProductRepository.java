@@ -5,11 +5,13 @@ import com.dealstoker.api.domain.ProductStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -135,4 +137,43 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             ORDER BY p.updatedAt ASC
             """)
     List<Product> findTemplatedRecommendation(@Param("status") ProductStatus status, Pageable pageable);
+
+    /**
+     * Records the product's current price as today's (US Eastern) price; a later check on the
+     * same day replaces it. Products without a price are skipped.
+     */
+    @Modifying(flushAutomatically = true)
+    @Query(value = """
+            INSERT INTO product_price_history (product_id, observed_on, price_amount, list_price, currency, recorded_at)
+            SELECT p.id, CAST(NOW() AT TIME ZONE 'America/New_York' AS date), p.price_amount, p.list_price,
+                   COALESCE(p.currency, 'USD'), NOW()
+            FROM products p
+            WHERE p.id = :productId AND p.price_amount IS NOT NULL
+            ON CONFLICT (product_id, observed_on) DO UPDATE
+            SET price_amount = EXCLUDED.price_amount,
+                list_price = EXCLUDED.list_price,
+                currency = EXCLUDED.currency,
+                recorded_at = EXCLUDED.recorded_at
+            """, nativeQuery = true)
+    int recordPriceToday(@Param("productId") Long productId);
+
+    interface PricePoint {
+        LocalDate getObservedOn();
+
+        BigDecimal getPriceAmount();
+    }
+
+    /** Daily prices on or after {@code since}, oldest first. */
+    @Query(value = """
+            SELECT observed_on AS observedOn, price_amount AS priceAmount
+            FROM product_price_history
+            WHERE product_id = :productId AND observed_on >= :since
+            ORDER BY observed_on
+            """, nativeQuery = true)
+    List<PricePoint> findPriceHistory(@Param("productId") Long productId, @Param("since") LocalDate since);
+
+    /** First day this product has a recorded price, or null. */
+    @Query(value = "SELECT MIN(observed_on) FROM product_price_history WHERE product_id = :productId",
+            nativeQuery = true)
+    LocalDate findPriceTrackedSince(@Param("productId") Long productId);
 }

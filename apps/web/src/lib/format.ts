@@ -115,3 +115,19 @@ export function discountPercentOf(
   if (!Number.isFinite(price) || !Number.isFinite(list) || list <= 0 || price >= list) return null;
   return Math.round(((list - price) / list) * 100);
 }
+
+/** "2026-10-04" (a calendar day, no time) as "Oct 4, 2026" / "2026년 10월 4일". */
+export function formatCalendarDate(
+  isoDate: string | null | undefined,
+  locale?: Locale | null,
+): string | null {
+  if (!isoDate || !/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) return null;
+  const date = new Date(`${isoDate}T12:00:00Z`);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat(intlLocale(locale), {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}

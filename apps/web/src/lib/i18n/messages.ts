@@ -31,9 +31,29 @@ export type Messages = {
   updated: string;
   priceAsOf: string;
   priceMayHaveChanged: string;
+  priceHistoryTitle: string;
+  priceHistorySource: string;
+  verdictLowest: string;
+  verdictBelow: string;
+  verdictTypical: string;
+  verdictAbove: string;
+  verdictSteady: string;
+  verdictTracking: string;
+  verdictTrackingDetail: string;
+  priceRangeDetail: string;
+  priceUsual: string;
+  priceLow: string;
+  priceHigh: string;
+  priceChartLabel: string;
   frontpageSections: string;
   homeHeadline: string;
   homeSupport: string;
+  promiseDailyTitle: string;
+  promiseDailyBody: string;
+  promiseHistoryTitle: string;
+  promiseHistoryBody: string;
+  promisePickedTitle: string;
+  promisePickedBody: string;
   homeIntro1: string;
   homeIntro2: string;
   featuredMeta: string;
@@ -221,14 +241,36 @@ const en: Messages = {
   updated: "Updated",
   priceAsOf: "Price as of",
   priceMayHaveChanged: "may have changed since",
+  priceHistoryTitle: "Is this a good price?",
+  priceHistorySource:
+    "Based only on prices {site} recorded on Amazon.com; we check every day. Amazon's \"list price\" is not used.",
+  verdictLowest: "Lowest price we've seen in {days} days",
+  verdictBelow: "Below its usual price",
+  verdictTypical: "About its usual price",
+  verdictAbove: "Higher than usual: it may be worth waiting",
+  verdictSteady: "The price hasn't changed in {days} days",
+  verdictTracking: "We started tracking this price on {date}",
+  verdictTrackingDetail:
+    "We'll tell you whether it's a good price once we have about two weeks of daily prices.",
+  priceRangeDetail: "Over the last {days} days",
+  priceUsual: "Usual",
+  priceLow: "Low",
+  priceHigh: "High",
+  priceChartLabel: "Price chart from {from} to {to}",
   frontpageSections: "Frontpage sections",
-  homeHeadline: "Amazon deals, price drops & featured deals",
+  homeHeadline: "Know what to buy on Amazon, and whether now is a good time",
   homeSupport:
-    "Curated Amazon.com deals for US shoppers — featured deals, clear prices, and less noise.",
+    "Hand-picked products and buying guides, plus prices we check every day and keep a record of, so you can tell a real price drop from the usual price.",
+  promiseDailyTitle: "Prices checked daily",
+  promiseDailyBody: "Every product's Amazon.com price is re-checked each morning.",
+  promiseHistoryTitle: "Our own price history",
+  promiseHistoryBody: "We compare today's price with what we've actually seen, not a crossed-out list price.",
+  promisePickedTitle: "Hand-picked, explained",
+  promisePickedBody: "We choose each product ourselves and explain the picks in buying guides.",
   homeIntro1:
-    "{site} tracks Amazon deals and price drops across home, electronics, outdoor, and everyday categories so US shoppers can compare featured deals without hunting through noisy marketplaces.",
+    "{site} is a small, independent site for US shoppers on Amazon.com. We pick products across home, kitchen, electronics, outdoor, and everyday categories, write buying guides that explain the picks, and check every price daily.",
   homeIntro2:
-    "Each listing highlights the current Amazon.com price first, then adds rating signals and our short editorial notes when a product earns a featured deals slot or climbs the top-views ranking.",
+    "Because we keep a record of each day's price, product pages can tell you whether today's price is the lowest we've seen, about usual, or higher than normal, so you can decide to buy now or wait.",
   featuredMeta: "Featured by DealStoker · up to 5 deals",
   topViewsMeta: "Most-viewed product pages · last 7 days · top 5",
   latestMeta: "{count} live pick{suffix} · Amazon",
@@ -395,9 +437,9 @@ const en: Messages = {
   latestGuides: "Buying guides",
   latestGuidesMeta: "What to check before you buy · from the curation team",
 
-  magazineHeadline: "Amazon buying guides & deals",
+  magazineHeadline: "Know what to buy on Amazon, and whether now is a good time",
   magazineSupport:
-    "Practical buying guides from our curation team, with the Amazon.com picks each one recommends.",
+    "Hand-picked products and buying guides, plus prices we check every day and keep a record of, so you can tell a real price drop from the usual price.",
   storiesMeta: "Editor's picks · with the products each guide recommends",
   editorsPick: "Editor's pick",
   guidePicks: "Picks from this guide",
@@ -439,14 +481,35 @@ const ko: Messages = {
   updated: "업데이트",
   priceAsOf: "가격 확인",
   priceMayHaveChanged: "이후 변동 가능",
+  priceHistoryTitle: "지금 사도 괜찮은 가격일까?",
+  priceHistorySource:
+    "{site}가 Amazon.com에서 매일 확인해 기록한 가격만으로 판단합니다. Amazon의 '정가(list price)'는 쓰지 않습니다.",
+  verdictLowest: "최근 {days}일 중 가장 낮은 가격",
+  verdictBelow: "평소보다 낮은 가격",
+  verdictTypical: "평소와 비슷한 가격",
+  verdictAbove: "평소보다 높은 가격: 조금 기다려 볼 만해요",
+  verdictSteady: "최근 {days}일간 가격 변동 없음",
+  verdictTracking: "{date}부터 가격을 기록하고 있습니다",
+  verdictTrackingDetail: "매일 기록한 가격이 2주쯤 쌓이면 지금 가격이 좋은지 알려드릴게요.",
+  priceRangeDetail: "최근 {days}일 기준",
+  priceUsual: "평소",
+  priceLow: "최저",
+  priceHigh: "최고",
+  priceChartLabel: "{from}부터 {to}까지 가격 그래프",
   frontpageSections: "메인 섹션",
-  homeHeadline: "아마존 딜, 할인 & 추천 딜",
+  homeHeadline: "아마존에서 뭘 살지, 그리고 지금 사도 되는지",
   homeSupport:
-    "미국 쇼핑객을 위한 Amazon.com 큐레이션 딜 — 추천 딜, 명확한 가격, 덜 복잡한 목록.",
+    "직접 고른 상품과 구매 가이드에, 매일 확인하고 기록하는 가격을 더했습니다. 진짜 할인인지 평소 가격인지 바로 알 수 있어요.",
+  promiseDailyTitle: "가격 매일 확인",
+  promiseDailyBody: "매일 아침 모든 상품의 Amazon.com 가격을 다시 확인합니다.",
+  promiseHistoryTitle: "자체 가격 기록",
+  promiseHistoryBody: "줄 그어진 정가가 아니라, 저희가 실제로 기록한 평소 가격과 비교합니다.",
+  promisePickedTitle: "직접 고르고 설명",
+  promisePickedBody: "상품은 직접 고르고, 고른 이유는 구매 가이드에서 설명합니다.",
   homeIntro1:
-    "{site}는 홈·전자·아웃도어 등 카테고리의 아마존 딜과 할인을 모아, 미국 쇼핑객이 복잡한 마켓플레이스를 헤매지 않고 추천 딜을 비교할 수 있게 합니다.",
+    "{site}는 Amazon.com에서 쇼핑하는 미국 소비자를 위한 작은 독립 사이트입니다. 홈·주방·전자·아웃도어·생활 카테고리에서 상품을 직접 고르고, 고른 이유를 구매 가이드로 설명하며, 모든 가격을 매일 확인합니다.",
   homeIntro2:
-    "각 상품은 Amazon.com 현재 가격을 먼저 보여 주고, 평점 신호와 함께 추천 딜·인기 조회 순위에 오른 상품에는 짧은 편집 코멘트를 더합니다.",
+    "매일의 가격을 기록하기 때문에, 상품 페이지에서 지금 가격이 저희가 본 최저가인지, 평소 수준인지, 평소보다 비싼지 알려 드립니다. 지금 살지, 기다릴지 판단에 도움이 됩니다.",
   featuredMeta: "DealStoker 추천 · 최대 5개",
   topViewsMeta: "최근 7일 가장 많이 본 상품 페이지 · 상위 5개",
   latestMeta: "라이브 {count}개 · Amazon",
@@ -610,9 +673,9 @@ const ko: Messages = {
   latestGuides: "구매 가이드",
   latestGuidesMeta: "구매 전 확인할 점 · 큐레이션 팀 작성",
 
-  magazineHeadline: "아마존 구매 가이드 & 딜",
+  magazineHeadline: "아마존에서 뭘 살지, 그리고 지금 사도 되는지",
   magazineSupport:
-    "큐레이션 팀이 직접 쓴 구매 가이드와, 가이드마다 추천하는 Amazon.com 상품을 함께 보여드립니다.",
+    "직접 고른 상품과 구매 가이드에, 매일 확인하고 기록하는 가격을 더했습니다. 진짜 할인인지 평소 가격인지 바로 알 수 있어요.",
   storiesMeta: "에디터 추천 · 가이드별 추천 상품 포함",
   editorsPick: "에디터 추천",
   guidePicks: "이 가이드의 추천 상품",

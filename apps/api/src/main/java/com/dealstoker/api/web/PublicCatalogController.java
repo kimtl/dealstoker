@@ -2,6 +2,8 @@ package com.dealstoker.api.web;
 
 import com.dealstoker.api.service.CategoryService;
 import com.dealstoker.api.service.MagazineService;
+import com.dealstoker.api.service.PriceInsightService;
+import com.dealstoker.api.service.PriceInsightService.PriceHistory;
 import com.dealstoker.api.service.ProductService;
 import com.dealstoker.api.web.dto.CategoryDtos.CategoryResponse;
 import com.dealstoker.api.web.dto.MagazineDtos.MagazineResponse;
@@ -25,15 +27,18 @@ public class PublicCatalogController {
     private final CategoryService categoryService;
     private final ProductService productService;
     private final MagazineService magazineService;
+    private final PriceInsightService priceInsightService;
 
     public PublicCatalogController(
             CategoryService categoryService,
             ProductService productService,
-            MagazineService magazineService
+            MagazineService magazineService,
+            PriceInsightService priceInsightService
     ) {
         this.categoryService = categoryService;
         this.productService = productService;
         this.magazineService = magazineService;
+        this.priceInsightService = priceInsightService;
     }
 
     @GetMapping("/health")
@@ -89,6 +94,12 @@ public class PublicCatalogController {
     @GetMapping("/products/{slug}")
     public ProductDetail product(@PathVariable String slug) {
         return productService.getPublishedBySlug(slug);
+    }
+
+    /** Prices we recorded for this product (last 90 days) and whether today's is a good one. */
+    @GetMapping("/products/{slug}/price-history")
+    public PriceHistory priceHistory(@PathVariable String slug) {
+        return priceInsightService.forPublishedSlug(slug);
     }
 
     @GetMapping("/products/{slug}/related")

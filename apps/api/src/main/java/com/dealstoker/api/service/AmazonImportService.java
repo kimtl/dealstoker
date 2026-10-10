@@ -244,11 +244,15 @@ public class AmazonImportService {
                         : product.getDetailPageUrl(),
                 asin
         ));
-        // Only a page that actually showed a price confirms the price.
+        // Only a page that actually showed a price confirms the price (and enters the history).
         if (scraped.priceAmount() != null) {
             product.setLastSyncedAt(java.time.Instant.now());
         }
-        return ProductDetail.from(productRepository.save(product));
+        Product saved = productRepository.save(product);
+        if (scraped.priceAmount() != null) {
+            productRepository.recordPriceToday(saved.getId());
+        }
+        return ProductDetail.from(saved);
     }
 
     private static String normalizeMarketplace(String marketplace) {

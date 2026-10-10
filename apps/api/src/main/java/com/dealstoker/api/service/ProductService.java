@@ -206,15 +206,24 @@ public class ProductService {
     @Transactional
     public ProductDetail create(ProductRequest request) {
         Product product = new Product();
-        apply(product, request, true);
-        return ProductDetail.from(productRepository.save(product));
+        boolean priceChanged = apply(product, request, true);
+        return ProductDetail.from(saveAndRecordPrice(product, priceChanged));
     }
 
     @Transactional
     public ProductDetail update(Long id, ProductRequest request) {
         Product product = requireById(id);
-        apply(product, request, false);
-        return ProductDetail.from(productRepository.save(product));
+        boolean priceChanged = apply(product, request, false);
+        return ProductDetail.from(saveAndRecordPrice(product, priceChanged));
+    }
+
+    /** Saves the product and, when its price was just set, adds it to the price history. */
+    private Product saveAndRecordPrice(Product product, boolean priceChanged) {
+        Product saved = productRepository.save(product);
+        if (priceChanged && saved.getPriceAmount() != null) {
+            productRepository.recordPriceToday(saved.getId());
+        }
+        return saved;
     }
 
     @Transactional
@@ -309,7 +318,8 @@ public class ProductService {
         return productRepository.countByStatus(ProductStatus.PUBLISHED);
     }
 
-    private void apply(Product product, ProductRequest request, boolean creating) {
+    /** Copies the request onto the product; true when the price was (re)set and counts as checked now. */
+    private boolean apply(Product product, ProductRequest request, boolean creating) {
         String source = blankToDefault(request.source(), "AMAZON");
         String marketplace = blankToDefault(request.marketplace(), "www.amazon.com");
         String slug = (request.slug() == null || request.slug().isBlank())
@@ -343,9 +353,10 @@ public class ProductService {
             listPrice = null;
         }
         // A price typed in (or imported) now counts as checked now.
-        if (creating
+        boolean priceChanged = creating
                 || !sameAmount(product.getPriceAmount(), request.priceAmount())
-                || !sameAmount(product.getListPrice(), listPrice)) {
+                || !sameAmount(product.getListPrice(), listPrice);
+        if (priceChanged) {
             product.setLastSyncedAt(Instant.now());
         }
         product.setPriceAmount(request.priceAmount());
@@ -375,6 +386,7 @@ public class ProductService {
                 product.setPublishedAt(Instant.now());
             }
         }
+        return priceChanged;
     }
 
     private String uniqueSlug(String base, Long currentId) {

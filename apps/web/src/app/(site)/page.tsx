@@ -232,6 +232,20 @@ export default async function HomePage() {
               {t.allDeals}
             </Link>
           </div>
+          <ul className={styles.promises}>
+            <li>
+              <strong>{t.promiseDailyTitle}</strong>
+              <span>{t.promiseDailyBody}</span>
+            </li>
+            <li>
+              <strong>{t.promiseHistoryTitle}</strong>
+              <span>{t.promiseHistoryBody}</span>
+            </li>
+            <li>
+              <strong>{t.promisePickedTitle}</strong>
+              <span>{t.promisePickedBody}</span>
+            </li>
+          </ul>
         </div>
       </section>
 
